@@ -1,0 +1,46 @@
+PREFIX : <http://best_example_ever#>
+PREFIX http: <http://www.w3.org/2011/http#>
+PREFIX tmpl: <http://multimedialab.elis.ugent.be/organon/ontologies/tmpl#>
+PREFIX e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>
+PREFIX log: <http://www.w3.org/2000/10/swap/log#>
+PREFIX r: <http://www.w3.org/2000/10/swap/reason#>
+@prefix list: <http://www.w3.org/2000/10/swap/list#>.
+
+#This file will only output executable calls. It also keeps information about one call together
+
+{
+?x r:gives ?y. 
+
+#does ?y include an http-call?
+?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n.  ?z http:body ?body. }.
+
+_:r e:findall ( 
+{?body ?pr ?ob}  {?x r:gives ?y. 
+?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n.  ?z http:body ?body.?body ?pr ?ob }.}  ?list ).
+
+(({?z tmpl:requestURI ?a.} {?z http:methodName ?n.}  {?z http:body ?body.}) ?list) list:append ?list3.
+
+?list2 e:graphList ?list3. 
+
+
+#test: are there no existentials in the important positions of the call?
+#Is the URI sufficiently instanciated?
+?a e:notLabel ?aa.
+?a :testList ?pp.
+
+#get all objects in the body
+?z :bodyObjects ?olist.
+
+#Is every object in the body of the call gound?
+?olist :testList ?ppp.
+
+}=> ?list2.
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,58 @@
+###########################################################################################################3
+# new file: Goal
+############################################################################################################
+#goal
+#we have a general goal and two others
+@prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
+@prefix : <http://best_example_ever#>.
+@prefix log: <http://www.w3.org/2000/10/swap/log#>.
+
+
+
+{
+?x     a     :calibration.
+?x :calibrationState ?ok.
+#?ok e:label ?label.
+}=>{
+?x     a     :calibration.
+?x :calibrationState ?ok.
+}.
+
+{
+?x     a     :calibration.
+?x :calibrationState ?ok.
+?ok e:notLabel ?label.
+?ok log:equal "ok".
+}=>{
+?x     a     :calibration.
+?x :calibrationState ?ok.
+?x :is :completed.
+}.
+
+
+
+
+
+
+
+#start a new calibration-round
+{
+?x     a     :calibration.
+?x :calibrationState ?ok.
+?ok e:notLabel ?label.
+?ok log:notEqual "ok".
+?x     :part_number ?n.
+}=>{
+?x     a     :calibration.
+?x :calibrationState ?ok.
+?x :continuedAs _:new.
+_:new a :calibration.
+_:new :part_number ?n.
+}.
+
+
+#for testing
+#{?x :geometrical_dimension (?d1 ?d2).}=>{?x :geometrical_dimension (?d1 ?d2).}.
+
+
+ 

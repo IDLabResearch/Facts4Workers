@@ -1,0 +1,17 @@
+@prefix : <http://best_example_ever#>.
+@prefix http: <http://www.w3.org/2011/http#>.
+@prefix tmpl: <http://multimedialab.elis.ugent.be/organon/ontologies/tmpl#>.
+
+
+
+
+
+:c1     a     :calibration.
+:c1     :operator "Donald";
+    :part_number "37";
+    :machine_parameters (11 22 33 44);
+    :tolerances ((1 2) (1 2)).
+
+
+
+
