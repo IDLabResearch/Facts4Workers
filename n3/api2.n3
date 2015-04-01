@@ -47,7 +47,7 @@ _:request http:methodName "GET";
         :part_number ?n;
         :machine_parameters (?p1 ?p2 ?p3 ?p4);
         :tolerances ((?min1 ?max1) (?min2 ?max2));
-        :geometrical_dimension (?d1 ?d2)
+        :geometrical_dimension (?t1 ?t2)
         ];
         http:resp [
              http:body[     :id _:id;
