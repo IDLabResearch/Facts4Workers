@@ -15,10 +15,7 @@
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker" "doMeasurement");
               http:body [
-                  :info {
-                      ?x a :calibration;
-                         :part_number ?n.
-                  }
+                  :part_number ?n
               ];
               http:resp [
                   http:body [
