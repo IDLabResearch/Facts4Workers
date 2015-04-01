@@ -33,7 +33,7 @@
               http:body [ :TODO ?x ];
               http:resp [
                   http:body[
-                      :tolerances ((_:min1 _:max1) (_:min2 _:max2));
+                      :tolerances ( (_:min1 _:max1) (_:min2 _:max2));
                       :machine_parameters (_:p1 _:p2 _:p3 _:p4)
                   ]
               ].
