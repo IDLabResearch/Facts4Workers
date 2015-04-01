@@ -1,0 +1,42 @@
+@prefix : <http://f4w.restdesc.org/demo#>.
+@prefix http: <http://www.w3.org/2011/http#>.
+@prefix tmpl: <http://multimedialab.elis.ugent.be/organon/ontologies/tmpl#>.
+
+# API “worker” start
+{
+    ?x a :calibration.
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://askTheWorker" "start");
+              http:body [ :TODO ?x ];
+              http:resp [
+                  http:body[
+                      :part_number _:n;
+                      :operator _:o
+                  ]
+              ].
+    ?x :part_number _:n;
+       :operator _:o.
+}.
+
+# API 1
+{
+    ?x a :calibration;
+       :part_number ?n.
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://pacific-shore-4503.herokuapp.com/calibrations/" ?n);
+              http:body [ :TODO ?x ];
+              http:resp [
+                  http:body[
+                      :tolerances ((_:min1 _:max1) (_:min2 _:max2));
+                      :machine_parameters (_:p1 _:p2 _:p3 _:p4)
+                  ]
+              ].
+    ?x :tolerances ((_:min1 _:max1) (_:min2 _:max2));
+       :machine_parameters (_:p1 _:p2 _:p3 _:p4).
+}.
