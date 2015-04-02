@@ -21,6 +21,7 @@ function RESTdesc (input, goal)
     this.findall = fs.readFileSync('n3/findallcalls.n3');
 
     this.eye = new EYEHandler();
+    // TODO: store with all new triple information
 }
 
 RESTdesc.prototype.addInput = function (input)
@@ -62,6 +63,14 @@ RESTdesc.prototype._handleNext = function (next, callback)
             var root = apis[0].subject;
             self.converter = new RDF_JSONConverter(prefixes);
             var json = self.converter.RDFtoJSON(store, root);
+
+            // simplify JSON
+            // TODO: more generic (prefix dependent now)
+            if (json['tmpl:requestURI'])
+            {
+                json['http:requestURI'] = json['tmpl:requestURI'].join('');
+                delete json['tmpl:requestURI'];
+            }
             callback(json);
         }
     });

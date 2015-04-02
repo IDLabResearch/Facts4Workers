@@ -9,7 +9,7 @@
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://askTheWorker" "start");
+              tmpl:requestURI ("http://askTheWorker/" "start");
               :root ?x;
               http:body [ :message "Please input the starting information."; ];
               http:resp [

@@ -14,7 +14,7 @@
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://askTheWorker" "doMeasurement");
+              tmpl:requestURI ("http://askTheWorker/" "doMeasurement");
               :root ?x;
               http:body [
                   :message "Please measure a new part with the following settings.";
