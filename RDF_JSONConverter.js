@@ -2,7 +2,7 @@
  * Created by joachimvh on 31/03/2015.
  */
 
-var N3 = require('N3');
+var N3 = require('n3');
 var _ = require('lodash');
 
 function RDF_JSONConverter (prefixes)

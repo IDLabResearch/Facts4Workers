@@ -5,7 +5,7 @@
 var _ = require('lodash');
 var fs = require('fs');
 var EYEHandler = require('./EYEHandler');
-var N3 = require('N3');
+var N3 = require('n3');
 var RDF_JSONConverter = require('./RDF_JSONConverter');
 
 function RESTdesc (input, goal)
