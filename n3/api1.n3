@@ -10,7 +10,8 @@
 {
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker" "start");
-              http:body [ :TODO ?x ];
+              :root ?x;
+              http:body [ :message "Please input the starting information."; ];
               http:resp [
                   http:body[
                       :part_number _:n;
@@ -30,6 +31,7 @@
 {
     _:request http:methodName "GET";
               tmpl:requestURI ("http://pacific-shore-4503.herokuapp.com/calibrations/" ?n);
+              :root ?x;
               http:body [ :TODO ?x ];
               http:resp [
                   http:body[

@@ -10,15 +10,23 @@ function EYEHandler (serverURL)
     this.serverURL = serverURL || 'http://eye.restdesc.org/'
 }
 
-EYEHandler.prototype.call = function (data, query, proof, callback, errorCallback)
+// TODO: better way of passing all these parameters
+EYEHandler.prototype.call = function (data, query, proof, quickAnswer, newTriples, callback, errorCallback)
 {
     var self = this;
+
+    var form = { data : data};
+    if (!newTriples)
+        form['query'] = query;
+
+    quickAnswer = quickAnswer && !newTriples;
+
     request(
         {
             url: this.serverURL,
             method: 'POST',
-            qs: {nope: !proof, quickAnswer:true}, // TODO: probably not always quickAnswer (single-answer?)
-            form: { data: data, query: query}
+            qs: {nope: !proof, quickAnswer:quickAnswer, 'pass-only-new': newTriples}, // TODO: probably not always quickAnswer (single-answer?)
+            form: form
         },
         function (error, response, body)
         {

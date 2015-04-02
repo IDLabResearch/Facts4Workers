@@ -7,15 +7,15 @@
 
 
 
-:c1     a     :calibration.
-:c1     :operator "Donald";
-    :part_number "37";
-    :machine_parameters (11 22 33 44);
-    :tolerances ((1 2) (1 2)).
-:c1 :geometrical_dimension (10 20).
+:c1     a     :calibration. # currently needed
+#:c1     :operator "Donald";
+    #:part_number "37";
+    #:machine_parameters (11 22 33 44);
+    #:tolerances ((1 2) (1 2)).
+#:c1 :geometrical_dimension (10 20).
 
-:c1 :calibrationState "recalibrate";  
-    :suggested_parameters (55 66 77 88).
+#:c1 :calibrationState "recalibrate";  
+#    :suggested_parameters (55 66 77 88).
     
     
 {

@@ -15,7 +15,9 @@
 {
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker" "doMeasurement");
+              :root ?x;
               http:body [
+                  :message "Please measure a new part with the following settings.";
                   :part_number ?n;
                   :machine_parameters (?p1 ?p2 ?p3 ?p4)
               ];
@@ -37,12 +39,13 @@
        :tolerances ((?min1 ?max1) (?min2 ?max2));
        :geometrical_dimension (?t1 ?t2).
        
-    (?S ?SP) e:findall ( ?L { ?x :calibrationState ?L } ()).
+    (?S ?SP) e:findall ( ?L { ?x :calibrationState ?L } ()). # prevents this API from being called twice with the same calibration
 }
 =>
 {
     _:request http:methodName "POST";
               tmpl:requestURI ("http://pacific-shore-4503.herokuapp.com/calibrations");
+              :root ?x;
               http:body [
                   :operator ?o;
                   :part_number ?n;

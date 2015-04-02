@@ -9,6 +9,14 @@ var RDF_JSONConverter = require('./RDF_JSONConverter');
 var EYEHandler = require('./EYEHandler');
 var RESTdesc = require('./RESTdesc');
 
+var args = require('minimist')(process.argv.slice(2));
+if (!args.p || args.h || args.help)
+{
+    console.error('usage: node demo.js [-p port] [--help]');
+    return process.exit(1);
+}
+var port = args.p;
+
 var app = express();
 app.set('view engine', 'jade');
 app.set('views', process.cwd() + '/views');
@@ -27,7 +35,7 @@ var proof = fs.readFileSync('n3/proof.n3');
 
 var eye = new EYEHandler();
 var rest = new RESTdesc([api1, api2, input], goal);
-rest.next(function (data) { console.log(JSON.stringify(data, null, 4)); });
+//rest.next(function (data) { console.log(JSON.stringify(data, null, 4)); });
 
 app.get('/', function(req, res)
 {
@@ -49,49 +57,7 @@ app.get('/', function(req, res)
         }
     );*/
 
-    res.render('index', { title: 'Hey', message: 'Hello there!'});
+    res.render('index', { title: 'F4W demo', message: 'Hello there!'});
 });
 
-app.get('/eye', function (req,res)
-{
-    callEYE([proof, list], find, false, function (body)
-    {
-        var parser = N3.Parser();
-        //parser.parse(body, function (error, triple, prefixes)
-        //{
-        //    console.log(triple);
-        //    if (error) console.error(error);
-        //});
-        parseBody(body);
-        res.format({ text:function () { res.send(body); } });
-    },
-    console.log);
-});
-
-function callEYE (data, query, proof, callback, errorCallback)
-{
-    request(
-        {
-            url: 'http://eye.restdesc.org/',
-            method: 'POST',
-            qs: {nope: !proof},
-            form: { data: data, query: query}
-        },
-        function (error, response, body)
-        {
-            if (!error && response.statusCode == 200)
-                callback(body);
-            else
-                errorCallback && errorCallback(error, response);
-        }
-    );
-}
-
-//var converter = new RDF_JSONConverter('http://best_example_ever#');
-//var triples = converter.JSONtoRDF(json, ':calibration');
-//var store = new N3.Store();
-//store.addPrefixes(converter.prefixes);
-//store.addTriples(triples);
-//console.log(converter.RDFtoJSON(store, ':calibration'));
-
-//app.listen(3000);
+app.listen(port);

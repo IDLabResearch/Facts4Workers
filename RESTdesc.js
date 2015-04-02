@@ -16,7 +16,6 @@ function RESTdesc (input, goal)
     if (!_.isArray(this.input))
         this.input = [this.input];
 
-
     this.list = fs.readFileSync('n3/list.n3');
     this.find = fs.readFileSync('n3/find_executable_calls.n3');
     this.findall = fs.readFileSync('n3/findallcalls.n3');
@@ -32,13 +31,15 @@ RESTdesc.prototype.addInput = function (input)
 RESTdesc.prototype.next = function (callback)
 {
     var self = this;
-    this.eye.call(this.input, this.goal, true, function (proof) { self._handleProof(proof, callback); }, this._error);
+    this.eye.call(this.input, this.goal, true, true, false, function (proof) { self._handleProof(proof, callback); }, this._error);
+    // TODO: use the new info. Still more a fan of deleting old output though.
+    //this.eye.call(this.input, this.goal, false, false, true, function (proof) { console.log(proof); }, this._error, true);
 };
 
 RESTdesc.prototype._handleProof = function (proof, callback)
 {
     var self = this;
-    this.eye.call([proof, this.list], this.find, false, function (body) { self._handleNext(body, callback); }, this._error);
+    this.eye.call([proof, this.list], this.find, false, true, false, function (body) { self._handleNext(body, callback); }, this._error);
 };
 
 RESTdesc.prototype._handleNext = function (next, callback)
