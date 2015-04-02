@@ -2,7 +2,7 @@
  * Created by joachimvh on 1/04/2015.
  */
 
-var N3 = require('N3');
+var N3 = require('n3');
 var request = require('request');
 
 function EYEHandler (serverURL)
