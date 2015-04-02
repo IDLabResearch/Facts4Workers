@@ -9,12 +9,13 @@
 
 :c1     a     :calibration. # currently needed
 #:c1     :operator "Donald";
-    #:part_number "37";
+    #:id "1";
+    #:part_number "ABCD";
     #:machine_parameters (11 22 33 44);
     #:tolerances ((1 2) (1 2)).
 #:c1 :geometrical_dimension (10 20).
 
-#:c1 :calibrationState "recalibrate";  
+#:c1 :result "recalibrate";  
 #    :suggested_parameters (55 66 77 88).
     
     
@@ -23,9 +24,8 @@
 ?x :operator ?o;
    :part_number ?n;
    :suggested_parameters (?p1 ?p2 ?p3 ?p4);
-   :tolerances ((?min1 ?max1) (?min2 ?max2));
-   :geometrical_dimension (?t1 ?t2).
-?x :calibrationState "recalibrate".
+   :tolerances (?t1 ?t2).
+?x :result "recalibrate".
 (?S ?SP) e:findall ( ?L { ?x :completed ?L } ()).
 }
 =>
@@ -35,5 +35,5 @@ _:new a :calibration.
 _:new :operator ?o;
       :part_number ?n;
       :machine_parameters (?p1 ?p2 ?p3 ?p4);
-      :tolerances ((?min1 ?max1) (?min2 ?max2)).
+      :tolerances (?t1 ?t2).
 }.

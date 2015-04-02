@@ -17,6 +17,11 @@ RDF_JSONConverter.prototype.JSONtoRDF = function (json, root)
     return this._JSONtoRDFrecursive(json, this._extendPrefix(root));
 };
 
+RDF_JSONConverter.prototype.JSONtoRDFstring = function (json, root)
+{
+    return root + ' ' + this._JSONtoRDFstringRecursive(json, this._extendPrefix(root));
+};
+
 function flatten (arrays)
 {
     return [].concat.apply([], arrays);
@@ -71,6 +76,30 @@ RDF_JSONConverter.prototype._JSONtoRDFrecursive = function (json, subject, predi
     }
 };
 
+RDF_JSONConverter.prototype._JSONtoRDFstringRecursive = function (json, subject, predicate)
+{
+    var results = [];
+    var self = this;
+    var partial = {subject: subject, predicate: predicate};
+    if (_.isString(json))
+        return '"' + json + '"';
+    else if (_.isNumber(json))
+        return json;
+    else if (_.isArray(json))
+    {
+        return '( ' + json.map(function (element) { return self._JSONtoRDFstringRecursive(element, subject, predicate); }).join(' ') + ' )';
+    }
+    else
+    {
+        var keys = Object.keys(json);
+        var str = keys.map(function (key)
+        {
+            return ':' + key + ' ' + self._JSONtoRDFstringRecursive(json[key],  subject, self._extendPrefix(':' + key));
+        }).join('; ');
+        return str + '.';
+    }
+};
+
 RDF_JSONConverter.prototype.RDFtoJSON = function (store, root)
 {
     return this._RDFtoJSONrecursive(store, root);
@@ -96,7 +125,7 @@ RDF_JSONConverter.prototype._RDFtoJSONrecursive = function (store, root, graph)
         var object = matches[i].object;
         result[key] = self._RDFtoJSONrecursive(store, object, graph);
         if (key === 'tolerances' && _.isArray(result[key]) && result[key].length === 2 && _.isArray(result[key][0])) // TODO: should definitely also not be necessary
-            result[key] = [{min: result[key][0][0], max: result[key][0][1]}, {min: result[key][0][0], max: result[key][0][1]}];
+            result[key] = [{min: result[key][0][0], max: result[key][0][1]}, {min: result[key][1][0], max: result[key][1][1]}];
     }
 
     var graphEntries = store.find(null, null, null, root);

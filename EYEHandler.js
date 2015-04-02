@@ -25,7 +25,7 @@ EYEHandler.prototype.call = function (data, query, proof, quickAnswer, newTriple
         {
             url: this.serverURL,
             method: 'POST',
-            qs: {nope: !proof, quickAnswer:quickAnswer, 'pass-only-new': newTriples}, // TODO: probably not always quickAnswer (single-answer?)
+            qs: {nope: !proof, quickAnswer:quickAnswer, 'pass': newTriples}, // TODO: probably not always quickAnswer (single-answer?)
             form: form
         },
         function (error, response, body)

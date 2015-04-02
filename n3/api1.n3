@@ -14,18 +14,16 @@
               http:body [ :message "Please input the starting information."; ];
               http:resp [
                   http:body[
-                      :part_number _:n;
-                      :operator _:o
+                      :id _:n
                   ]
               ].
-    ?x :part_number _:n;
-       :operator _:o.
+    ?x :id _:n.
 }.
 
 # API 1
 {
     ?x a :calibration;
-       :part_number ?n.
+       :id ?n.
 }
 =>
 {
@@ -35,10 +33,14 @@
               http:body [ :TODO ?x ];
               http:resp [
                   http:body[
+                      :operator _:o;
+                      :part_number _:p;
                       :tolerances ( (_:min1 _:max1) (_:min2 _:max2));
                       :machine_parameters (_:p1 _:p2 _:p3 _:p4)
                   ]
               ].
-    ?x :tolerances ((_:min1 _:max1) (_:min2 _:max2));
+    ?x :operator _:o;
+       :part_number _:p;
+       :tolerances ((_:min1 _:max1) (_:min2 _:max2));
        :machine_parameters (_:p1 _:p2 _:p3 _:p4).
 }.

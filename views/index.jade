@@ -4,16 +4,100 @@ html
         title!= title
         script(type='text/javascript', src='scripts/jquery.min.js')
         script(type='text/javascript').
-            function call ()
+            var globalData = {};
+            $.fn.serializeObject = function ()
             {
-                $.get("eye", function (data)
+                var o = {};
+                var a = this.serializeArray();
+                $.each(a, function ()
                 {
-                    $('#test').val(data);
+                    if (o[this.name] !== undefined)
+                    {
+                        if (!o[this.name].push)
+                        {
+                            o[this.name] = [o[this.name]];
+                        }
+                        o[this.name].push(this.value || '');
+                    }
+                    else
+                    {
+                        o[this.name] = this.value || '';
+                    }
+                });
+                return o;
+            };
+
+            function start ()
+            {
+                //$.get("eye", function (data)
+                //{
+                //    alert('done');
+                //    $('#test').val(data);
+                //});
+                //$.get("start", '', function (data)
+                //{
+                //    $('#form').html(data);
+                //    $('#btn').show();
+                //});
+                $('#startBtn').hide();
+                $.post('next', function (data)
+                {
+                    handleResponse(data);
                 });
             }
-    body
+
+            function submit (json)
+            {
+                var nextData = {};
+                nextData.json = json;
+                nextData.root = globalData.root;
+                nextData.extra = globalData.extra;
+                $.ajax({
+                    type       :"POST",
+                    url        :"next",
+                    data       :JSON.stringify(nextData),
+                    contentType:"application/json; charset=utf-8",
+                    dataType   :"json",
+                    success    :function (data)
+                    {
+                        handleResponse(data);
+                    }
+                });
+            }
+
+            function handleResponse (data)
+            {
+                $.get('output', function (output)
+                {
+                    $('#text').val(output);
+                });
+
+                globalData = data;
+                if (data.status && data.status === 'DONE')
+                {
+                    $('#form').hide();
+                    $('#btn').hide();
+                    alert('DONE');
+                }
+                else
+                {
+                    var workerURL = data['http:requestURI'];
+                    workerURL = workerURL.replace('http://askTheWorker/', '');
+                    $.get(workerURL, function (html)
+                    {
+                        $('#form').html(html);
+                        $('#btn').show();
+                    });
+                }
+            }
+body
         h1!= message
-        button(class="btn", onClick="call();").
-            Configure machine
+        div#form
         div
-            textarea#test(style='width:100%;height:500px;')
+            button#btn(onClick="parse();", hidden="hidden").
+                Submit
+        div
+            button#startBtn(onClick="start();").
+                Configure machine
+        div
+            textarea#text(style='width:100%;height:500px;')

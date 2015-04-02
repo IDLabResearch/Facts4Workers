@@ -11,11 +11,11 @@
 
 {
 ?x     a     :calibration.
-?x :calibrationState "ok".
+?x :result "ok".
 #?ok e:label ?label.
 }=>{
 ?x     a     :calibration.
-?x :calibrationState "ok".
+?x :result "ok".
 }.
 
 

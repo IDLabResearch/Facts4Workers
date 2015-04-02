@@ -1,0 +1,18 @@
+//
+   Created by joachimvh on 2/04/2015.
+
+script(type='text/javascript').
+   function parse ()
+   {
+      var json = $("#form form").serializeObject();
+      json.id = parseInt(json.id);
+      submit(json);
+   }
+
+form
+   label.
+      Insert initial calibration ID.
+   div
+      label(for="id").
+         Calibration id:
+      input(id='id', type='text', value='1', name='id')

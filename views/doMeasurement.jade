@@ -1,0 +1,23 @@
+//
+   Created by joachimvh on 2/04/2015.
+
+script(type='text/javascript').
+   function parse ()
+   {
+      var json = $("#form form").serializeObject();
+      json.val1 = parseFloat(json.val1);
+      json.val2 = parseFloat(json.val2);
+      submit({geometrical_dimension:[json.val1, json.val2]});
+   }
+
+form
+   label.
+      Insert new measurements.
+   div
+      label(for="val1").
+         First Value:
+      input(id='val1', type='text', value='134.34', name='val1')
+   div
+      label(for="val2").
+         Second Value:
+      input(id='val2', type='text', value='0.37', name='val2')
