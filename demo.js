@@ -9,6 +9,7 @@ var _ = require('lodash');
 var RDF_JSONConverter = require('./RDF_JSONConverter');
 var EYEHandler = require('./EYEHandler');
 var RESTdesc = require('./RESTdesc');
+var serveIndex = require('serve-index');
 
 var args = require('minimist')(process.argv.slice(2));
 if (!args.p || args.h || args.help)
@@ -20,45 +21,32 @@ var port = args.p;
 
 var app = express();
 app.set('view engine', 'jade');
+
+// provide jquery file that can be used
 app.set('views', process.cwd() + '/views');
 app.use('/scripts/jquery.min.js', express.static(process.cwd() + '/node_modules/jquery/dist/jquery.min.js'));
-//app.use(express.static(process.cwd() + '/public'));
+
+// parse post data
 app.use(bodyParser.json());       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({   // to support URL-encoded bodies
     extended: true
 }));
 
+// allow acces to documentation pdf
+app.use('/demo/documentation.pdf', express.static(process.cwd() + "/documentation/documentation.pdf"));
+
+// create index page of all our n3 files
+app.use('/demo/n3', express.static(process.cwd() + "/n3"));
+app.use('/demo/n3', serveIndex(__dirname + '/n3', {icons: true, view: 'details'}));
+
 var api1 = fs.readFileSync('n3/api1.n3', 'utf-8');
 var api2 = fs.readFileSync('n3/api2.n3', 'utf-8');
 var input = fs.readFileSync('n3/in.n3', 'utf-8');
-var list = fs.readFileSync('n3/list.n3', 'utf-8');
 
 var goal = fs.readFileSync('n3/goal.n3', 'utf-8');
-var find = fs.readFileSync('n3/find_executable_calls.n3', 'utf-8');
-
-var eye = new EYEHandler();
-//rest.next(function (data) { console.log(JSON.stringify(data, null, 4)); });
 
 app.get('/demo', function (req, res)
 {
-    /*request.post
-    (
-        'http://eye.restdesc.org/',
-        { form: { data: 'http://eulersharp.sourceforge.net/2003/03swap/socrates.n3', query: 'http://eulersharp.sourceforge.net/2003/03swap/socratesF.n3' } },
-        function (error, response, body)
-        {
-            if (!error && response.statusCode == 200)
-                console.log(body);
-            res.sendfile('views/index.html');
-            res.header("Content-Type", "text/plain");
-            //res.format
-            //({
-            //    text:function () { res.send(body); } ,
-            //    'default': function() { res.status(406).send('Not Acceptable'); }
-            //});
-        }
-    );*/
-
     res.render('index', { title: 'F4W demo', message: 'F4W demo'});
 });
 
@@ -82,7 +70,6 @@ app.post('/demo/eye', function (req, res)
 
 app.post('/demo/next', function (req, res)
 {
-    var output = "";
     var rest = new RESTdesc([api1, api2, input], goal);
     if (req.body.extra)
     {
@@ -93,15 +80,16 @@ app.post('/demo/next', function (req, res)
     {
         rest.addJSON(req.body.json, req.body.root, function ()
         {
-            handleNext(rest, req, res, output);
+            handleNext(rest, req, res);
         });
     }
     else
-        handleNext(rest, req, res, output);
+        handleNext(rest, req, res);
 });
 
 function handleNext (rest, req, res, output, count)
 {
+    output = output || "";
     count = count || 0;
 
     // TODO this is simply a check to make sure there is a problem in the demo causing us to accidently DOS an API.
@@ -124,6 +112,7 @@ function handleNext (rest, req, res, output, count)
             // send data to client
             data.output = output;
             data.extra = rest.extra;
+            console.log(JSON.stringify(data, null, 4));
             res.format({ json:function () { res.send(data); } });
         }
         else

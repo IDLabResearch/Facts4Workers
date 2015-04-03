@@ -36,7 +36,7 @@
     ?x :operator ?o;
        :part_number ?n;
        :machine_parameters (?p1 ?p2 ?p3 ?p4);
-       :tolerances ((?min1 ?max1) (?min2 ?max2));
+       :tolerances ((?min1 ?max1) (?min2 ?max2)); # problem with nested objects
        :geometrical_dimension (?t1 ?t2).
        
     (?S ?SP) e:findall ( ?L { ?x :result ?L } ()). # prevents this API from being called twice with the same calibration

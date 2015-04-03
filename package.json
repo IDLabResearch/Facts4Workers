@@ -11,7 +11,8 @@
     "lodash": "^3.6.0",
     "minimist": "^1.1.1",
     "n3": "^0.4.2",
-    "request": "^2.54.0"
+    "request": "^2.54.0",
+    "serve-index": "^1.6.3"
   },
   "devDependencies": {},
   "scripts": {
