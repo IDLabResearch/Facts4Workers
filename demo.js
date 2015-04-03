@@ -39,8 +39,6 @@ var find = fs.readFileSync('n3/find_executable_calls.n3', 'utf-8');
 var eye = new EYEHandler();
 //rest.next(function (data) { console.log(JSON.stringify(data, null, 4)); });
 
-var output = "";
-
 app.get('/demo', function (req, res)
 {
     /*request.post
@@ -74,11 +72,6 @@ app.get('/demo/doMeasurement', function (req, res)
     res.render('doMeasurement');
 });
 
-app.get('/demo/output', function (req, res)
-{
-    res.send(output);
-});
-
 app.post('/demo/eye', function (req, res)
 {
     var input = req.body.input || "";
@@ -89,7 +82,7 @@ app.post('/demo/eye', function (req, res)
 
 app.post('/demo/next', function (req, res)
 {
-    output = "";
+    var output = "";
     var rest = new RESTdesc([api1, api2, input], goal);
     if (req.body.extra)
     {
@@ -100,34 +93,36 @@ app.post('/demo/next', function (req, res)
     {
         rest.addJSON(req.body.json, req.body.root, function ()
         {
-            handleNext(rest, req, res);
+            handleNext(rest, req, res, output);
         });
     }
     else
-        handleNext(rest, req, res);
+        handleNext(rest, req, res, output);
 });
 
-function handleNext (rest, req, res, count)
+function handleNext (rest, req, res, output, count)
 {
     count = count || 0;
+
+    // TODO this is simply a check to make sure there is a problem in the demo causing us to accidently DOS an API.
+    if (count >= 5)
+        return res.format({ json:function () { res.send({status:'Too many automated API calls in a row. Aborting to prevent infinte loop.'}); } });
+
     rest.next(function (data)
     {
         var url = data['http:requestURI'];
         var body = data['http:body'];
-
-        // TODO this is simply a check to make sure there is a problem in the demo causing us to accidently DOS an API.
-        if (count >= 5)
-            return res.format({ json:function () { res.send({status:'Too many automated API calls in a row. Aborting to prevent infinte loop.'}); } });
 
         output += 'Reasoner result: \n';
         output += JSON.stringify(data, null, 4);
         output += '\n';
 
         if (data === 'DONE')
-            res.format({ json:function () { res.send({status:'DONE'}); } });
+            res.format({ json:function () { res.send({status:'DONE', output:output}); } });
         else if (url.indexOf('http://askTheWorker') >= 0)
         {
             // send data to client
+            data.output = output;
             data.extra = rest.extra;
             res.format({ json:function () { res.send(data); } });
         }
@@ -200,7 +195,7 @@ function handleNext (rest, req, res, count)
                         rest.addJSON(json, data.root, function ()
                         {
                             //request.get('http://localhost:3000/next');
-                            handleNext(rest, req, res, count+1);
+                            handleNext(rest, req, res, output, count+1);
                         });
                     }
                     else

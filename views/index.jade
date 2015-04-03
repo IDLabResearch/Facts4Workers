@@ -67,10 +67,7 @@ html
 
             function handleResponse (data)
             {
-                $.get('demo/output', function (output)
-                {
-                    $('#text').val(output);
-                });
+                $('#text').val(data.output);
 
                 globalData = data;
                 if (data.status && data.status === 'DONE')
