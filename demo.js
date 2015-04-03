@@ -43,7 +43,7 @@ var eye = new EYEHandler();
 
 var output = "";
 
-app.get('/', function (req, res)
+app.get('/demo', function (req, res)
 {
     /*request.post
     (
@@ -66,21 +66,21 @@ app.get('/', function (req, res)
     res.render('index', { title: 'F4W demo', message: 'F4W demo'});
 });
 
-app.get('/start', function (req, res)
+app.get('/demo/start', function (req, res)
 {
     res.render('start');
 });
 
-app.get('/doMeasurement', function (req, res)
+app.get('/demo/doMeasurement', function (req, res)
 {
     res.render('doMeasurement');
 });
 
-app.get('/output', function (req, res) {
+app.get('/demo/output', function (req, res) {
     res.send(output);
 });
 
-app.post('/next', function (req, res)
+app.post('/demo/next', function (req, res)
 {
     output = "";
     var rest = new RESTdesc([api1, api2, input], goal);

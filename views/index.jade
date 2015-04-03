@@ -40,7 +40,7 @@ html
                 //    $('#btn').show();
                 //});
                 $('#startBtn').hide();
-                $.post('next', function (data)
+                $.post('demo/next', function (data)
                 {
                     handleResponse(data);
                 });
@@ -54,7 +54,7 @@ html
                 nextData.extra = globalData.extra;
                 $.ajax({
                     type       :"POST",
-                    url        :"next",
+                    url        :"demo/next",
                     data       :JSON.stringify(nextData),
                     contentType:"application/json; charset=utf-8",
                     dataType   :"json",
@@ -67,7 +67,7 @@ html
 
             function handleResponse (data)
             {
-                $.get('output', function (output)
+                $.get('demo/output', function (output)
                 {
                     $('#text').val(output);
                 });
@@ -83,7 +83,7 @@ html
                 {
                     var workerURL = data['http:requestURI'];
                     workerURL = workerURL.replace('http://askTheWorker/', '');
-                    $.get(workerURL, function (html)
+                    $.get('demo/' + workerURL, function (html)
                     {
                         $('#form').html(html);
                         $('#btn').show();
