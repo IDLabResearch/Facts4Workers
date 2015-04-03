@@ -36,8 +36,6 @@ var list = fs.readFileSync('n3/list.n3', 'utf-8');
 var goal = fs.readFileSync('n3/goal.n3', 'utf-8');
 var find = fs.readFileSync('n3/find_executable_calls.n3', 'utf-8');
 
-var proof = fs.readFileSync('n3/proof.n3', 'utf-8');
-
 var eye = new EYEHandler();
 //rest.next(function (data) { console.log(JSON.stringify(data, null, 4)); });
 
@@ -100,12 +98,16 @@ app.post('/demo/next', function (req, res)
         handleNext(rest, req, res);
 });
 
-function handleNext (rest, req, res)
+function handleNext (rest, req, res, prevURL)
 {
     rest.next(function (data)
     {
         var url = data['http:requestURI'];
         var body = data['http:body'];
+
+        // TODO this is simply a check to make sure there is a problem in the demo causing us to accidently DOS an API.
+        if (url === prevURL)
+            return res.format({ json:function () { res.send({status:'ERROR'}); } });
 
         output += 'Reasoner result: \n';
         output += JSON.stringify(data, null, 4);
@@ -188,7 +190,7 @@ function handleNext (rest, req, res)
                         rest.addJSON(json, data.root, function ()
                         {
                             //request.get('http://localhost:3000/next');
-                            handleNext(rest, req, res);
+                            handleNext(rest, req, res, url);
                         });
                     }
                     else
