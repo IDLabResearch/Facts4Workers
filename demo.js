@@ -108,7 +108,6 @@ function handleNext (rest, req, res, output, count)
             // send data to client
             data.output = output;
             data.extra = rest.extra;
-            console.log(JSON.stringify(data, null, 4));
             res.format({ json:function () { res.send(data); } });
         }
         else
