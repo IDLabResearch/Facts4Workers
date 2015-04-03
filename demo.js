@@ -3,11 +3,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var request = require('request');
 var fs = require('fs');
-var N3 = require('n3');
-var extend = require('util')._extend;
 var _ = require('lodash');
-var RDF_JSONConverter = require('./RDF_JSONConverter');
-var EYEHandler = require('./EYEHandler');
 var RESTdesc = require('./RESTdesc');
 var serveIndex = require('serve-index');
 
