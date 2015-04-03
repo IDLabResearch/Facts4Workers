@@ -74,8 +74,17 @@ app.get('/demo/doMeasurement', function (req, res)
     res.render('doMeasurement');
 });
 
-app.get('/demo/output', function (req, res) {
+app.get('/demo/output', function (req, res)
+{
     res.send(output);
+});
+
+app.post('/demo/eye', function (req, res)
+{
+    var input = req.body.input || "";
+    var goal = req.body.goal || "";
+    var rest = new RESTdesc(input, goal);
+    handleNext(rest, req, res);
 });
 
 app.post('/demo/next', function (req, res)
@@ -98,16 +107,17 @@ app.post('/demo/next', function (req, res)
         handleNext(rest, req, res);
 });
 
-function handleNext (rest, req, res, prevURL)
+function handleNext (rest, req, res, count)
 {
+    count = count || 0;
     rest.next(function (data)
     {
         var url = data['http:requestURI'];
         var body = data['http:body'];
 
         // TODO this is simply a check to make sure there is a problem in the demo causing us to accidently DOS an API.
-        if (url === prevURL)
-            return res.format({ json:function () { res.send({status:'ERROR'}); } });
+        if (count >= 5)
+            return res.format({ json:function () { res.send({status:'Too many automated API calls in a row. Aborting to prevent infinte loop.'}); } });
 
         output += 'Reasoner result: \n';
         output += JSON.stringify(data, null, 4);
@@ -190,7 +200,7 @@ function handleNext (rest, req, res, prevURL)
                         rest.addJSON(json, data.root, function ()
                         {
                             //request.get('http://localhost:3000/next');
-                            handleNext(rest, req, res, url);
+                            handleNext(rest, req, res, count+1);
                         });
                     }
                     else
