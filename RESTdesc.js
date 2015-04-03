@@ -49,7 +49,6 @@ function RESTdesc (input, goal)
 RESTdesc.prototype.addInput = function (input)
 {
     this.extra.push(input);
-    var parser = N3.Parser();
 };
 
 RESTdesc.prototype.addJSON = function (json, root, callback)

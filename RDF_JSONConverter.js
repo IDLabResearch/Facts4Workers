@@ -96,7 +96,10 @@ RDF_JSONConverter.prototype._JSONtoRDFstringRecursive = function (json, subject,
         {
             return ':' + key + ' ' + self._JSONtoRDFstringRecursive(json[key],  subject, self._extendPrefix(':' + key));
         }).join('; ');
-        return str + '.';
+        if (predicate)
+            return '[ ' + str + ' ]';
+        else
+            return str + '.';
     }
 };
 
