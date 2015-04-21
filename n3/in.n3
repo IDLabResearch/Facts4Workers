@@ -61,7 +61,7 @@
 ?new :operator ?o;
    :machine_parameters (?p1 ?p2 ?p3 ?p4);
    :tolerances (?t1 ?t2).
-?uri a :UTOcalibration.
+
 }.
 
 
