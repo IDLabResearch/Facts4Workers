@@ -12,16 +12,21 @@ PREFIX r: <http://www.w3.org/2000/10/swap/reason#>
 ?x r:gives ?y. 
 
 #does ?y include an http-call?
-?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n. ?z :root ?root. ?z http:body ?body. }.
+?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n. #?z :root ?root. 
+?z http:body ?body. }.
 
 _:r e:findall ( 
 {?body ?pr ?ob}  {?x r:gives ?y. 
-?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n.  ?z :root ?root. ?z http:body ?body.?body ?pr ?ob }.}  ?list ).
+?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n.  #?z :root ?root. 
+?z http:body ?body.?body ?pr ?ob }.}  ?list ).
 
-(({?z tmpl:requestURI ?a.} {?z http:methodName ?n.} {?z :root ?root.} {?z http:body ?body.}) ?list) list:append ?list3.
+##################################################################################################
+#This is for only getting the call information, not the expected response. 
+#(({?z tmpl:requestURI ?a.} {?z http:methodName ?n.} {?z :root ?root.} {?z http:body ?body.}) ?list) list:append ?list3.
 
-?list2 e:graphList ?list3. 
+#?list2 e:graphList ?list3. 
 
+#####################################################################################################
 
 #test: are there no existentials in the important positions of the call?
 #Is the URI sufficiently instanciated?
@@ -36,8 +41,23 @@ _:r e:findall (
 
 }=> ?y.
 
+#new rule: No body
+{
+?x r:gives ?y. 
+
+#does ?y include an http-call?
+?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n. #?z :root ?root. 
+ }.
+
+?y log:notIncludes {?z http:body ?body.}.
+
+#test: are there no existentials in the important positions of the call?
+#Is the URI sufficiently instanciated?
+?a e:notLabel ?aa.
+?a :testList ?pp.
 
 
+}=> ?y.
 
 
 

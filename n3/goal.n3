@@ -9,14 +9,40 @@
 
 
 
+#{
+#?x     a     :calibration.
+#?x :result "ok".
+#?ok e:label ?label.
+#}=>{
+#?x     a     :calibration.
+#?x :result "ok".
+#}.
+
+
+#This query is highly order dependent! Rule here: State the best solution first. We have to find another solution there.
+
 {
 ?x     a     :calibration.
 ?x :result "ok".
-#?ok e:label ?label.
 }=>{
 ?x     a     :calibration.
 ?x :result "ok".
+?x :is :completed.
 }.
+
+
+
+{
+?x     a     :calibration.
+?x :result ?ok.
+?ok e:label ?label.
+}=>{
+?x     a     :calibration.
+?x :result ?ok.
+}.
+
+
+
 
 
 
