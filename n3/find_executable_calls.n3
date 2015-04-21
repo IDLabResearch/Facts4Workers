@@ -34,7 +34,7 @@ _:r e:findall (
 #Is every object in the body of the call gound?
 ?olist :testList ?ppp.
 
-}=> ?list2.
+}=> ?y.
 
 
 
