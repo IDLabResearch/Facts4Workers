@@ -6,6 +6,8 @@ var fs = require('fs');
 var _ = require('lodash');
 var RESTdesc = require('./RESTdesc');
 var serveIndex = require('serve-index');
+var S = require('string');
+var N3 = require('n3');
 
 var args = require('minimist')(process.argv.slice(2));
 if (!args.p || args.h || args.help)
@@ -67,21 +69,46 @@ app.post('/demo/eye', function (req, res)
 app.post('/demo/next', function (req, res)
 {
     var rest = new RESTdesc([api1, api2, input], goal);
-    if (req.body.extra)
+    if (req.body.eye)
     {
-        for (var i = 0; i < req.body.extra.length; ++i)
-            rest.addInput(req.body.extra[i]);
+        if (req.body.json)
+            mapInput(req.body.json, req.body.eye);
+        if (req.body.eye.data)
+            for (var i = 0; i < req.body.eye.data.length; ++i)
+                rest.addInput(req.body.eye.data[i]);
     }
-    if (req.body.json && req.body.root)
-    {
-        rest.addJSON(req.body.json, req.body.root, function ()
-        {
-            handleNext(rest, req, res);
-        });
-    }
-    else
-        handleNext(rest, req, res);
+    handleNext(rest, req, res);
 });
+
+function mapInput (json, eye)
+{
+    if (!eye['http:resp'] || !eye['http:resp']['http:body'])
+        throw "Response body not found.";
+
+    var map = {};
+    var body = eye['http:resp']['http:body'];
+    mapInputRecurisve(json, body, map);
+
+    if (eye.data)
+        for (var i = 0; i < eye.data.length; ++i)
+            for (var key in map)
+                eye.data[i] = S(eye.data[i]).replaceAll(key, map[key]).toString();
+}
+
+function mapInputRecurisve (json, response, map)
+{
+    for (var key in json)
+    {
+        if (_.isString(json[key]))
+            map[response[key]] = '"' + json[key] + '"';
+        else if (_.isNumber(json[key]))
+            // TODO: handle decimals
+            //map[response[key]] = N3.Util.createLiteral(json[key], 'http://www.w3.org/2001/XMLSchema#decimal');
+            map[response[key]] = '"' + json[key] + '"';
+        else
+            mapInputRecurisve(json[key], response[key], map);
+    }
+}
 
 function handleNext (rest, req, res, output, count)
 {
@@ -107,7 +134,8 @@ function handleNext (rest, req, res, output, count)
         {
             // send data to client
             data.output = output;
-            data.extra = rest.extra;
+            // data contains a string representation of the EYE response, we want to add all the other known data to that
+            data.data = data.data.concat(rest.data);
             res.format({ json:function () { res.send(data); } });
         }
         else
@@ -176,11 +204,8 @@ function handleNext (rest, req, res, output, count)
                         //request.post('http://localhost:3000/next', {json:{root:data.root, json:json, extra:rest.extra}});
 
                         // do this so response gets handled correctly
-                        rest.addJSON(json, data.root, function ()
-                        {
-                            //request.get('http://localhost:3000/next');
-                            handleNext(rest, req, res, output, count+1);
-                        });
+                        // request.get('http://localhost:3000/next');
+                        handleNext(rest, req, res, output, count+1);
                     }
                     else
                         console.error(error, body);

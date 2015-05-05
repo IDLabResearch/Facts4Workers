@@ -11,7 +11,7 @@
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/" "start");
               #:root ?x;
-              http:body [ :message "Please input the starting information."; ];
+              http:body [ :message "Please input the starting information. 'id' corresponds to the calibration ID." ];
               http:resp [
                   http:body[
                       :id _:n

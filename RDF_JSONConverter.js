@@ -4,6 +4,7 @@
 
 var N3 = require('n3');
 var _ = require('lodash');
+var uuid = require('node-uuid');
 
 function RDF_JSONConverter (prefixes)
 {
@@ -103,6 +104,224 @@ RDF_JSONConverter.prototype._JSONtoRDFstringRecursive = function (json, subject,
     }
 };
 
+RDF_JSONConverter.prototype._RDFtoN3recursive = function (store)
+{
+    var i, key, triple, subject, predicate;
+    // TODO: no graph support or blank predicates
+    // TODO: maybe too much overlap with toJSON
+    // TODO: can be shorter with prefixes
+
+    var self = this;
+    var subjects = {};
+
+    var all = store.find();
+    for (i = 0; i < all.length; ++i)
+    {
+        triple = all[i];
+        if (!subjects[triple.subject])
+            subjects[triple.subject] = {};
+        subject = subjects[triple.subject];
+        if (!subject[triple.predicate])
+            subject[triple.predicate] = [];
+        predicate = subject[triple.predicate];
+        predicate.push(triple.object);
+    }
+
+    var done = false;
+    while (!done)
+    {
+        done = true;
+        for (key in subjects)
+        {
+            subject = subjects[key];
+            if (_.isArray(subject))
+                continue;
+
+            done = !handleElement(store, key);
+            if (!done)
+                break;
+        }
+    }
+
+    fillInTheBlanks();
+    convertURIs();
+
+    // TODO: hardcoded prefixes
+    var prefixes = ['', 'http', 'tmpl']
+
+    var output = '';
+    for (i = 0; i < prefixes.length; ++i)
+        output += '@prefix ' + prefixes[i] + ': <' + self.prefixes[prefixes[i]] + '>. '
+
+    for (key in subjects)
+        output += toString(subjects[key], key) + ' ';
+
+    return output;
+
+    function handleElement (store, subjectURI)
+    {
+        if (N3.Util.isLiteral(subjectURI))
+            return false;
+
+        if (handleArrayElement(store, subjectURI))
+            return true;
+
+        return handleBlankNodes(store, subjectURI);
+    }
+
+    function handleArrayElement (store, subjectURI)
+    {
+        var subject = subjects[subjectURI];
+        if (_.isArray(subject))
+            return false;
+        var firsts = subject['http://www.w3.org/1999/02/22-rdf-syntax-ns#first'];
+        if (!firsts)
+            return false;
+        if (firsts.length > 1)
+            throw "Invalid format: 2 rdf:first objects for 1 subject";
+
+        var array = [_.isString(subjects[firsts[0]]) && subjects[firsts[0]] ? handleElement(store, subjects[firsts[0]]) : firsts[0]];
+        var rests = subject['http://www.w3.org/1999/02/22-rdf-syntax-ns#rest'];
+        if (rests)
+        {
+            if (rests.length > 1)
+                throw "Invalid format: 2 rdf:rest objects for 1 subject";
+            if (rests.length > 0)
+            {
+                var rest = subjects[rests[0]];
+                if (rest)
+                {
+                    if (!_.isArray(rest))
+                    {
+                        handleArrayElement(store, rests[0]);
+                        rest = subjects[rests[0]];
+                    }
+                    array = array.concat(rest);
+                    delete subjects[rests[0]];
+                }
+            }
+        }
+        subjects[subjectURI] = array;
+        return true;
+    }
+
+    function handleBlankNodes (store, subjectURI)
+    {
+        var subject = subjects[subjectURI];
+
+        var changed = false;
+
+        for (var predicate in subject)
+        {
+            for (var i = 0; i < subject[predicate].length; ++i)
+            {
+                var object = subject[predicate][i];
+                // TODO: only change if object is an array currently since everything else needs to be ground
+                if (_.isString(object) && N3.Util.isBlank(object) && subjects[object] && store.find(null, null, object).length === 1 && _.isArray(subjects[object]))
+                {
+                    handleElement(store, object);
+                    subject[predicate][i] = subjects[object];
+                    delete subjects[object];
+                    changed = true;
+                }
+            }
+        }
+
+        return changed;
+    }
+
+    // any root nodes that are still blank need to be updated
+    function fillInTheBlanks ()
+    {
+        for (var key in subjects)
+        {
+            if (N3.Util.isBlank(key))
+                replaceRecursive(subjects, key, ':' + uuid.v4() + '_' + key.substring(2));
+        }
+        return subjects;
+    }
+
+    function replaceRecursive (thingy, old, replacement)
+    {
+        if (_.isString(thingy))
+            return (thingy === old) ? replacement : thingy;
+
+        if (_.isArray(thingy))
+            return thingy.map(function (subthingy) { return replaceRecursive(subthingy, old, replacement); });
+
+        for (var key in thingy)
+        {
+            thingy[key] = replaceRecursive(thingy[key], old, replacement);
+            if (key === old)
+            {
+                thingy[replacement] = thingy[key];
+                delete thingy[key];
+            }
+        }
+        return thingy;
+    }
+
+    function convertURIs (thingy)
+    {
+        thingy = thingy || subjects;
+        if (_.isString(thingy))
+            if (N3.Util.isIRI(thingy))
+                return self.convertElement(thingy, false);
+            else
+                return thingy;
+
+        if (_.isArray(thingy))
+            return thingy.map(function (subthingy) { return convertURIs(subthingy); });
+
+        for (var key in thingy)
+        {
+            var conversion = self.convertElement(key, false);
+            thingy[conversion] = convertURIs(thingy[key]);
+            if (conversion !== key)
+                delete thingy[key];
+        }
+
+        return thingy;
+    }
+
+    function toString (subject, uri)
+    {
+        if (_.isString(subject))
+            return subject;
+
+        if (_.isArray(subject))
+        {
+            for (var i = 0; i < subject.length; ++i)
+                subject[i] = toString(subject[i], null);
+            return '( ' + subject.join(' ') + ' )';
+        }
+
+        // TODO: pretty string
+        var strings = [];
+        for (var key in subject)
+        {
+            //strings.push(key + ' ' + toString(subject[key], null));
+            for (var j = 0; j < subject[key].length; ++j)
+                strings.push(key + ' ' + toString(subject[key][j], null) );
+        }
+
+        var output = strings.join('; ');
+        if (uri)
+            output = uri + ' ' + output + '.';
+        else
+            output = '[ ' + output + ' ]';
+
+        return output;
+    }
+};
+
+RDF_JSONConverter.prototype._removeFromStoreGeneric = function (store, subject, predicate, object, graph)
+{
+    var matches = store.find(subject, predicate, object, graph);
+    for (var i = 0; i < matches.length; ++i)
+        store.removeTriple(matches[i]);
+};
+
 RDF_JSONConverter.prototype.RDFtoJSON = function (store, root)
 {
     return this._RDFtoJSONrecursive(store, root);
@@ -111,7 +330,7 @@ RDF_JSONConverter.prototype.RDFtoJSON = function (store, root)
 RDF_JSONConverter.prototype._RDFtoJSONrecursive = function (store, root, graph)
 {
     if (N3.Util.isLiteral(root))
-        return this._convertElement(root);
+        return this.convertElement(root, true);
 
     var self = this;
     var arrayCheck = store.find(root, 'rdf:first', null, graph);
@@ -122,7 +341,7 @@ RDF_JSONConverter.prototype._RDFtoJSONrecursive = function (store, root, graph)
     var matches = store.find(root, null, null, graph);
     for (var i = 0; i < matches.length; ++i)
     {
-        var key = this._convertElement(matches[i].predicate);
+        var key = this.convertElement(matches[i].predicate, true);
         if (key === 'TODO') // TODO: should not be necessary
             return '';
         var object = matches[i].object;
@@ -137,12 +356,12 @@ RDF_JSONConverter.prototype._RDFtoJSONrecursive = function (store, root, graph)
     if (graphEntries.length > 0)
     {
         result = this._RDFtoJSONrecursive(store, graphEntries[0].subject, graphEntries[0].graph);
-        result['rdf:subject'] = this._convertElement(graphEntries[0].subject);
+        result['rdf:subject'] = this.convertElement(graphEntries[0].subject, true);
     }
 
     // simple URI without db entries
     if (Object.keys(result).length === 0)
-        return this._convertElement(root);
+        return this.convertElement(root, true);
 
     return result;
 };
@@ -157,7 +376,7 @@ RDF_JSONConverter.prototype._traverseArray = function (store, root)
     return results;
 };
 
-RDF_JSONConverter.prototype._convertElement = function (element)
+RDF_JSONConverter.prototype.convertElement = function (element, simplifyBase)
 {
     if (N3.Util.isIRI(element))
     {
@@ -166,7 +385,7 @@ RDF_JSONConverter.prototype._convertElement = function (element)
             if (element.indexOf(this.prefixes[prefix]) === 0)
             {
                 element = element.substring(this.prefixes[prefix].length);
-                if (prefix.length > 0)
+                if (prefix.length > 0 || !simplifyBase)
                     element = prefix + ':' + element;
             }
         }

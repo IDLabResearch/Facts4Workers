@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "FACTS4WORKERS RESTdesc demo",
   "main": "index.js",
-  "repository" :{
-    "type" : "git",
-    "url" : "git@git.mmlab.be:facts4workers/easter-demo.git"
+  "repository": {
+    "type": "git",
+    "url": "git@git.mmlab.be:facts4workers/easter-demo.git"
   },
   "dependencies": {
     "body-parser": "^1.12.2",
@@ -15,8 +15,10 @@
     "lodash": "^3.6.0",
     "minimist": "^1.1.1",
     "n3": "^0.4.2",
+    "node-uuid": "^1.4.3",
     "request": "^2.54.0",
-    "serve-index": "^1.6.3"
+    "serve-index": "^1.6.3",
+    "string": "^3.1.1"
   },
   "devDependencies": {},
   "scripts": {

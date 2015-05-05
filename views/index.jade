@@ -50,8 +50,7 @@ html
             {
                 var nextData = {};
                 nextData.json = json;
-                nextData.root = globalData.root;
-                nextData.extra = globalData.extra;
+                nextData.eye = globalData;
                 $.ajax({
                     type       :"POST",
                     url        :"demo/next",

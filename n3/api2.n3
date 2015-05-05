@@ -27,7 +27,7 @@
                   ]
               ].
     ?x :geometrical_dimension (_:d1 _:d2).
-?x a :calibration.
+    ?x a :calibration.
 }.
 
 
