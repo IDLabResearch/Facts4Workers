@@ -5,7 +5,7 @@
 # API “worker” start
 {
     	?x a :calibration.
-	?x :is :first.
+	?x :startedBy :worker.
 }
 =>
 {

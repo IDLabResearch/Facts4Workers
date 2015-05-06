@@ -8,7 +8,7 @@
 
 
 :c1     a     :calibration. 
-:c1 :is :first.
+:c1 :startedBy :worker.
 # currently needed
 #:c1     :operator "Donald";
     #:id "1";
