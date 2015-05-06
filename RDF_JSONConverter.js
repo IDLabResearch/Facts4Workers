@@ -147,7 +147,7 @@ RDF_JSONConverter.prototype._RDFtoN3recursive = function (store)
     convertURIs();
 
     // TODO: hardcoded prefixes
-    var prefixes = ['', 'http', 'tmpl']
+    var prefixes = ['', 'http', 'tmpl'];
 
     var output = '';
     for (i = 0; i < prefixes.length; ++i)
@@ -180,7 +180,12 @@ RDF_JSONConverter.prototype._RDFtoN3recursive = function (store)
         if (firsts.length > 1)
             throw "Invalid format: 2 rdf:first objects for 1 subject";
 
-        var array = [_.isString(subjects[firsts[0]]) && subjects[firsts[0]] ? handleElement(store, subjects[firsts[0]]) : firsts[0]];
+        if (subjects[firsts[0]])
+            handleElement(store, firsts[0]);
+        var array = [subjects[firsts[0]] || firsts[0]];
+        // TODO: wrong if a blank node appears in multiple arrays
+        if (!N3.Util.isIRI(firsts[0]))
+            delete subjects[firsts[0]];
         var rests = subject['http://www.w3.org/1999/02/22-rdf-syntax-ns#rest'];
         if (rests)
         {
@@ -216,7 +221,7 @@ RDF_JSONConverter.prototype._RDFtoN3recursive = function (store)
             for (var i = 0; i < subject[predicate].length; ++i)
             {
                 var object = subject[predicate][i];
-                // TODO: only change if object is an array currently since everything else needs to be ground
+                // TODO: only change if object is an array currently since everything else needs to be ground!!!
                 if (_.isString(object) && N3.Util.isBlank(object) && subjects[object] && store.find(null, null, object).length === 1 && _.isArray(subjects[object]))
                 {
                     handleElement(store, object);

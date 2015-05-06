@@ -89,6 +89,7 @@ function mapInput (json, eye)
     var body = eye['http:resp']['http:body'];
     mapInputRecurisve(json, body, map);
 
+    // TODO: I think it is guaranteed that the only changes will be in data[0]
     if (eye.data)
         for (var i = 0; i < eye.data.length; ++i)
             for (var key in map)
@@ -97,8 +98,10 @@ function mapInput (json, eye)
 
 function mapInputRecurisve (json, response, map)
 {
-    for (var key in json)
+    for (var key in response)
     {
+        if (json[key] === undefined)
+            throw "Missing JSON input key: " + key;
         if (_.isString(json[key]))
             map[response[key]] = '"' + json[key] + '"';
         else if (_.isNumber(json[key]))
@@ -128,14 +131,15 @@ function handleNext (rest, req, res, output, count)
         output += JSON.stringify(data, null, 4);
         output += '\n';
 
+        // data contains a string representation of the EYE response, we want to add all the other known data to that
+        data.data = (data.data || []).concat(rest.data);
+
         if (data === 'DONE')
             res.format({ json:function () { res.send({status:'DONE', output:output}); } });
         else if (url.indexOf('http://askTheWorker') >= 0)
         {
             // send data to client
             data.output = output;
-            // data contains a string representation of the EYE response, we want to add all the other known data to that
-            data.data = data.data.concat(rest.data);
             res.format({ json:function () { res.send(data); } });
         }
         else
@@ -188,23 +192,8 @@ function handleNext (rest, req, res, output, count)
                         output += JSON.stringify(json, null, 4);
                         output += '\n';
 
-                        // TODO: change so we just take the required params from the json
-                        if (requestParams.method === 'GET')
-                        {
-                            if (json.geometrical_dimension)
-                                delete json.geometrical_dimension;
-                            if (json.result)
-                                delete json.result;
-                            if (json.suggested_parameters)
-                                delete json.suggested_parameters;
-                        }
-                        if (json.tolerances)
-                            json.tolerances = [[json.tolerances[0].min, json.tolerances[0].max], [json.tolerances[1].min, json.tolerances[1].max]];
-
-                        //request.post('http://localhost:3000/next', {json:{root:data.root, json:json, extra:rest.extra}});
-
-                        // do this so response gets handled correctly
-                        // request.get('http://localhost:3000/next');
+                        mapInput(json, data);
+                        rest.setInput(data.data);
                         handleNext(rest, req, res, output, count+1);
                     }
                     else

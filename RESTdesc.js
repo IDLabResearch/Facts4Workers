@@ -51,14 +51,19 @@ RESTdesc.prototype.addInput = function (input)
     this.data.push(input);
 };
 
-RESTdesc.prototype.addJSON = function (json, root, callback)
+RESTdesc.prototype.setInput = function (input)
+{
+    this.data = [].concat(input);
+};
+
+RESTdesc.prototype.addJSON = function (json, body, callback)
 {
     var converter = new RDF_JSONConverter({'': this.prefix});
     // TODO: prefixes
     // TODO: find out why this exact syntax is necessary
     // TODO: colon
-    if (root[0] !== '_')
-        root = ':' + root;
+    //if (root[0] !== '_')
+    //    root = ':' + root;
     this.addInput('@prefix : <http://f4w.restdesc.org/demo#>.\n ' + converter.JSONtoRDFstring(json, root));
     callback();
     //var triples = converter.JSONtoRDF(json, ':' + root);
@@ -71,7 +76,7 @@ RESTdesc.prototype.addJSON = function (json, root, callback)
 RESTdesc.prototype.next = function (callback)
 {
     var self = this;
-    this.eye.call(this.input.concat(this.data), this.goal, true, true, false, function (proof) { console.log(proof); self._handleProof(proof, callback); }, this._error);
+    this.eye.call(this.input.concat(this.data), this.goal, true, true, false, function (proof) { self._handleProof(proof, callback); }, this._error);
     // TODO: use the new info. Still more a fan of deleting old output though.
     //this.eye.call(this.input, this.goal, false, false, true, function (proof) { console.log(proof); }, this._error, true);
 };
@@ -79,7 +84,7 @@ RESTdesc.prototype.next = function (callback)
 RESTdesc.prototype._handleProof = function (proof, callback)
 {
     var self = this;
-    this.eye.call([proof, this.list], this.find, false, true, false, function (body) { console.log(body); self._handleNext(body, callback); }, this._error);
+    this.eye.call([proof, this.list], this.find, false, true, false, function (body) { self._handleNext(body, callback); }, this._error);
 };
 
 RESTdesc.prototype._handleNext = function (next, callback)
@@ -102,6 +107,7 @@ RESTdesc.prototype._handleNext = function (next, callback)
             var root = apis[0].subject;
             self.converter = new RDF_JSONConverter(prefixes);
             var json = self.converter.RDFtoJSON(store, root);
+            // store an n3 version that can be used to send to EYE
             json.data = [self.converter._RDFtoN3recursive(store)];
 
             // simplify JSON
