@@ -40,6 +40,7 @@
 #      :tolerances (?t1 ?t2).
 #}.
 
+#TODO: we should have other files for this kind of logic
 #start a new calibration-round
 {
 ?x     a     :calibration.

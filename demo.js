@@ -31,7 +31,7 @@ app.use(bodyParser.urlencoded({   // to support URL-encoded bodies
 }));
 
 // allow acces to documentation pdf
-app.use('/demo/documentation.pdf', express.static(process.cwd() + "/documentation/documentation.pdf"));
+app.use('/demo/documentation', express.static(process.cwd() + "/documentation/"));
 
 // create index page of all our n3 files
 app.use('/demo/n3', express.static(process.cwd() + "/n3"));
