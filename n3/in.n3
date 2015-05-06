@@ -7,64 +7,32 @@
 
 
 
-:c1     a     :calibration. 
+:c1 a          :calibration.
 :c1 :startedBy :worker.
-# currently needed
-#:c1     :operator "Donald";
-    #:id "1";
-    #:part_number "ABCD";
-    #:machine_parameters (11 22 33 44);
-    #:tolerances ((1 2) (1 2)).
-#:c1 :geometrical_dimension (10 20).
 
-#:c1 :result "recalibrate";  
-#    :suggested_parameters (55 66 77 88).
-    
-    
-#{
-#?x a :calibration.
-#?x :operator ?o;
-#   :part_number ?n;
-#   :suggested_parameters (?p1 ?p2 ?p3 ?p4);
-#   :tolerances (?t1 ?t2).
-#?x :result "recalibrate".
-#(?S ?SP) e:findall ( ?L { ?x :completed ?L } ()).
-#}
-#=>
-#{
-#?x :completed :true.
-#_:new a :calibration.
-#_:new :operator ?o;
-#      :part_number ?n;
-#      :machine_parameters (?p1 ?p2 ?p3 ?p4);
-#      :tolerances (?t1 ?t2).
-#}.
-
-#TODO: we should have other files for this kind of logic
+#TODO: we should have separate files for this kind of logic
 #start a new calibration-round
 {
-?x     a     :calibration.
-?x :result ?ok.
-?ok e:notLabel ?label.
-?ok log:notEqualTo "ok".
-?x     :part_number ?n.
-?x :operator ?o;
-   :suggested_parameters (?p1 ?p2 ?p3 ?p4);
-   :tolerances (?t1 ?t2).
-?x log:uri ?uri.
-(?uri "_rec") string:concatenation ?conc.
-?new log:uri ?conc.
+    ?x a :calibration.
+    ?x :part_number ?n;
+       :operator ?o;
+       :suggested_parameters (?p1 ?p2 ?p3 ?p4);
+       :tolerances (?t1 ?t2).
 
+    ?x :result ?ok.
+    ?ok e:notLabel ?label.
+    ?ok log:notEqualTo "ok".
+
+    ?x log:uri ?uri.
+    (?uri "_rec") string:concatenation ?conc.
+    ?new log:uri ?conc.
 }=>{
-?x     a     :calibration.
-?x :result ?ok.
-?x :continuedAs ?new.
-?new a :calibration.
-?new :part_number ?n.
-?new :operator ?o;
-   :machine_parameters (?p1 ?p2 ?p3 ?p4);
-   :tolerances (?t1 ?t2).
-
+    ?x :continuedAs ?new.
+    ?new a :calibration.
+    ?new :part_number ?n;
+         :operator ?o;
+         :machine_parameters (?p1 ?p2 ?p3 ?p4);
+         :tolerances (?t1 ?t2).
 }.
 
 

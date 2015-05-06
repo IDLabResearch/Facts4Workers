@@ -4,14 +4,13 @@
 
 # API “worker” start
 {
-    	?x a :calibration.
-	?x :startedBy :worker.
+    ?x a :calibration.
+    ?x :startedBy :worker.
 }
 =>
 {
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/" "start");
-              #:root ?x;
               http:body [ :message "Please input the starting information. 'id' corresponds to the calibration ID." ];
               http:resp [
                   http:body[
@@ -30,8 +29,6 @@
 {
     _:request http:methodName "GET";
               tmpl:requestURI ("http://pacific-shore-4503.herokuapp.com/calibrations/" ?n);
-              #:root ?x;
-              #http:body [ :TODO ?x ];
               http:resp [
                   http:body[
                       :operator _:o;
