@@ -7,7 +7,9 @@
 
 
 
-:c1     a     :calibration. # currently needed
+:c1     a     :calibration. 
+:c1 :is :first.
+# currently needed
 #:c1     :operator "Donald";
     #:id "1";
     #:part_number "ABCD";

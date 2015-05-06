@@ -4,7 +4,8 @@
 
 # API “worker” start
 {
-    ?x a :calibration.
+    	?x a :calibration.
+	?x :is :first.
 }
 =>
 {
