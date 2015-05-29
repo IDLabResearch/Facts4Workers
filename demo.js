@@ -135,11 +135,12 @@ function handleNext (rest, req, res, output, count)
         data.data = (data.data || []).concat(rest.data);
 
         if (data === 'DONE')
-            res.format({ json:function () { res.send({status:'DONE', output:output}); } });
+            res.format({ json:function () { res.send({status: 'DONE', output: output, proofs: rest.proofs}); } });
         else if (url.indexOf('http://askTheWorker') >= 0)
         {
             // send data to client
             data.output = output;
+            data.proofs = rest.proofs;
             res.format({ json:function () { res.send(data); } });
         }
         else

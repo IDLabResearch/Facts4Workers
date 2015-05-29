@@ -50,7 +50,10 @@ html
             {
                 var nextData = {};
                 nextData.json = json;
-                nextData.eye = globalData;
+                nextData.eye = jQuery.extend({}, globalData);
+                // prevent sending superfluous data
+                delete nextData.eye.output;
+                delete nextData.eye.proofs;
                 $.ajax({
                     type       :"POST",
                     url        :"/demo/next",
@@ -66,9 +69,21 @@ html
 
             function handleResponse (data)
             {
+                globalData = data;
                 $('#text').val(data.output);
 
-                globalData = data;
+                $('#output').show();
+
+                $('.proof').remove();
+
+                if (data.proofs)
+                {
+                    var buttons = $('#buttons');
+                    for (var i = 0; i < data.proofs.length; ++i)
+                        buttons.append($('<button />', { 'class':'proof', text: 'Proof ' + (i+1), onClick: 'proof(' + i + ');'}));
+                }
+
+
                 if (data.status && data.status === 'DONE')
                 {
                     $('#form').hide();
@@ -86,12 +101,26 @@ html
                     });
                 }
             }
+
+            function output ()
+            {
+                $('#text').val(globalData.output);
+            }
+
+            function proof (i)
+            {
+                $('#text').val(globalData.proofs[i]);
+            }
+
 body
         h1!= message
         div#form
         div
             button#btn(onClick="parse();", hidden="hidden").
                 Submit
+        div#buttons
+            button#output(onClick="output();", hidden="hidden").
+                Output
         div
             button#startBtn(onClick="start();").
                 Configure machine

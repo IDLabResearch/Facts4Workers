@@ -30,6 +30,7 @@ function RESTdesc (input, goal)
     // TODO: prettify
     this.data = [];
 
+    this.proofs = [];
 
     //var parser = new N3.Parser();
     //var writer = new N3.Writer();
@@ -84,6 +85,7 @@ RESTdesc.prototype.next = function (callback)
 RESTdesc.prototype._handleProof = function (proof, callback)
 {
     var self = this;
+    this.proofs.push(proof);
     this.eye.call([proof, this.list], this.find, false, true, false, function (body) { self._handleNext(body, callback); }, this._error);
 };
 
