@@ -97,8 +97,8 @@ RESTdesc.prototype._handleNext = function (next, callback)
         var store = new N3.Store();
         store.addPrefixes(prefixes);
         store.addTriples(triples);
-        var apis = store.find(null, 'tmpl:requestURI', null);
-        if (apis.length === 0)
+        var methods = store.find(null, 'http:methodName', null);
+        if (methods.length === 0)
         {
             // TODO: done? what do?
             callback('DONE');
@@ -106,7 +106,7 @@ RESTdesc.prototype._handleNext = function (next, callback)
         else
         {
             // TODO: more than 1 api possible? what do?
-            var root = apis[0].subject;
+            var root = methods[0].subject;
             self.converter = new RDF_JSONConverter(prefixes);
             var json = self.converter.RDFtoJSON(store, root);
             // store an n3 version that can be used to send to EYE
@@ -114,16 +114,34 @@ RESTdesc.prototype._handleNext = function (next, callback)
 
             // simplify JSON
             // TODO: more generic (prefix dependent now)
-            if (json['tmpl:requestURI'])
-            {
-                json['http:requestURI'] = json['tmpl:requestURI'].join('');
-                delete json['tmpl:requestURI'];
-            }
-            if (json['http:body'] === '')
-                delete json['http:body'];
+            self._simplifyURIs(json);
+            // TODO: don't remove this (and check for other missing fields)
+            // TODO: http:methodName, http:requestURI, http:body, http:resp (http:body),
+            var template = {'http:methodName': 'GET', 'http:requestURI': '', 'http:body': {}, 'http:resp': {'http:body': {}}};
+            json = _.assign(template, json);
             callback(json);
         }
     });
+};
+
+// TODO: I think I'm being inconsistent here, is this the first time I actually edit the JSON in place instead of generating a new one?
+RESTdesc.prototype._simplifyURIs = function (json) {
+    var self = this;
+    // TODO: this is the 15th time I use these 3 checks (and do similar things with them), should generalize this
+    if (_.isString(json))
+        return json;
+
+    if (_.isArray(json))
+        return json.forEach(function (subjson) { self._simplifyURIs(subjson); });
+
+    if (json['tmpl:requestURI'])
+    {
+        json['http:requestURI'] = json['tmpl:requestURI'].join('');
+        delete json['tmpl:requestURI'];
+    }
+
+    for (var key in json)
+        self._simplifyURIs(json[key]);
 };
 
 
