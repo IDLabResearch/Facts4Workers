@@ -43,6 +43,11 @@ var input = fs.readFileSync('n3/in.n3', 'utf-8');
 
 var goal = fs.readFileSync('n3/goal.n3', 'utf-8');
 
+app.get('/', function (req, res)
+{
+    res.redirect('/demo');
+});
+
 app.get('/demo', function (req, res)
 {
     res.render('index', { title: 'F4W demo', message: 'F4W demo'});
@@ -136,8 +141,9 @@ function handleNext (rest, req, res, output, count)
 
         if (data === 'DONE')
             res.format({ json:function () { res.send({status: 'DONE', output: output, proofs: rest.proofs}); } });
-        else if (url.indexOf('http://askTheWorker') >= 0)
+        else if (url.indexOf('http://askTheWorker/') >= 0)
         {
+            data['http:requestURI'] = url.substring('http://askTheWorker/'.length);
             // send data to client
             data.output = output;
             data.proofs = rest.proofs;
