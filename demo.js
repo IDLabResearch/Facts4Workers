@@ -150,7 +150,14 @@ function handleNext (rest, req, res, output, count)
             res.format({ json:function () { res.send({status: 'DONE', output: output, proofs: rest.proofs}); } });
         else if (url.indexOf('http://askTheWorker/') >= 0)
         {
+            // remove pre part of URI
             data['http:requestURI'] = url.substring('http://askTheWorker/'.length);
+
+            // TODO: really ugly hardcoded fix for now
+            // TODO: please don't judge me, I'm sorry
+            if (body && body['partList'])
+                body['partList'] = JSON.parse(body['partList'].replace(/'/g, '"'));
+
             // send data to client
             data.output = output;
             data.proofs = rest.proofs;
