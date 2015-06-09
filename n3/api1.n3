@@ -2,35 +2,35 @@
 @prefix http: <http://www.w3.org/2011/http#>.
 @prefix tmpl: <http://multimedialab.elis.ugent.be/organon/ontologies/tmpl#>.
 
-#START (API0)
+# API 0 (get all parts)
 {
-?x a :calibration.
-?x :startedBy :worker.
+    ?x a :calibration;
+       :startedBy :worker.
 }
 =>
 {
-_:request http:methodName "GET";
+    _:request http:methodName "GET";
               tmpl:requestURI ("https://dummy-demo-repository.herokuapp.com/parts");
-		http:resp [
+              http:resp [
                   http:body _:list
               ].
-?x :partList _:list.
+    ?x :partList _:list.
 }.
 
-# API “worker” start
+# API “worker” start (request part ID)
 {
-    	?x a :calibration.
-	?x :startedBy :worker.
-	?x :partList ?list.
+    ?x a :calibration;
+       :startedBy :worker;
+       :partList ?list.
 }
 =>
 {
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/" "start");
-
-             http:body [ :message "Please input the starting information. 'id' corresponds to the part ID.";
-			:partList ?list
-		 ];
+              http:body [
+                  :message "Please input the starting information. 'id' corresponds to the part ID.";
+                  :partList ?list
+              ];
               http:resp [
                   http:body [
                       :id _:n
@@ -39,7 +39,7 @@ _:request http:methodName "GET";
     ?x :part_number _:n.
 }.
 
-# API 1
+# API 1 (request part information)
 {
     ?x a :calibration;
        :part_number ?n.
