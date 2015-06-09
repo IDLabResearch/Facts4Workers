@@ -9,7 +9,8 @@
 {
     ?x a :calibration;
        :part_number ?n;
-       :machine_parameters (?p1 ?p2 ?p3 ?p4).
+       :machine_parameters (?p1 ?p2 ?p3 ?p4);
+       :tolerances ((?min1 ?max1) (?min2 ?max2)).
 }
 =>
 {
@@ -18,7 +19,8 @@
               http:body [
                   :message "Please measure a new part with the following settings.";
                   :part_number ?n;
-                  :machine_parameters (?p1 ?p2 ?p3 ?p4)
+                  :machine_parameters (?p1 ?p2 ?p3 ?p4);
+                  :tolerances ((?min1 ?max1) (?min2 ?max2))
               ];
               http:resp [
                   http:body[
