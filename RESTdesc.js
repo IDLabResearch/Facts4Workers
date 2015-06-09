@@ -136,7 +136,7 @@ RESTdesc.prototype._simplifyURIs = function (json) {
 
     if (json['tmpl:requestURI'])
     {
-        json['http:requestURI'] = json['tmpl:requestURI'].join('');
+        json['http:requestURI'] = _.isArray(json['tmpl:requestURI']) ? json['tmpl:requestURI'].join('') : json['tmpl:requestURI'];
         delete json['tmpl:requestURI'];
     }
 

@@ -5,6 +5,7 @@
 var N3 = require('n3');
 var request = require('request');
 
+// TODO: use direct EYE call instead of HTTP interface
 function EYEHandler (serverURL)
 {
     this.serverURL = serverURL || 'http://eye.restdesc.org/'
