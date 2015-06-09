@@ -33,8 +33,7 @@
 # API2
 {
     ?x a :calibration.
-    ?x :operator ?o;
-       :part_number ?n;
+    ?x :part_number ?n;
        :machine_parameters (?p1 ?p2 ?p3 ?p4);
        :tolerances ((?min1 ?max1) (?min2 ?max2)); # problem with nested objects
        :geometrical_dimension (?d1 ?d2).
@@ -44,7 +43,7 @@
     _:request http:methodName "POST";
               tmpl:requestURI ("http://pacific-shore-4503.herokuapp.com/calibrations");
               http:body [
-                  :operator ?o;
+                  :operator "Arnold";
                   :part_number ?n;
                   :machine_parameters (?p1 ?p2 ?p3 ?p4);
                   :tolerances ((?min1 ?max1) (?min2 ?max2));

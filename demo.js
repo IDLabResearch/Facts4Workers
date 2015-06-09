@@ -103,6 +103,13 @@ function mapInput (json, eye)
 
 function mapInputRecurisve (json, response, map)
 {
+    // TODO: look into this later
+    if (_.isString(response))
+    {
+        // TODO: really hardcoded here, should generalize (again)
+        return map[response] = '"' + json.replace(/"/g, "'") + '"';
+    }
+
     for (var key in response)
     {
         if (json[key] === undefined)
@@ -189,11 +196,16 @@ function handleNext (rest, req, res, output, count)
             request(requestParams,
                 function (error, response, body)
                 {
+                    // TODO: error handling
                     if (!error && response.statusCode == 200)
                     {
                         var json = body;
                         if (_.isString(body))
                             json = JSON.parse(body);
+
+                        // TODO: hardcoded
+                        if (_.isArray(json))
+                            json = JSON.stringify(json);
 
                         output += 'Response: \n';
                         output += JSON.stringify(json, null, 4);
