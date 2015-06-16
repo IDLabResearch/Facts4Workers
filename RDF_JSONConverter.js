@@ -364,7 +364,12 @@ RDF_JSONConverter.prototype.convertElement = function (element, simplifyBase)
         }
     }
     if (N3.Util.isLiteral(element))
+    {
+        // TODO: better way to compare datatype uri
+        if (N3.Util.getLiteralType(element) === '<http://www.w3.org/2001/XMLSchema#integer>' || N3.Util.getLiteralType(element) === '<http://www.w3.org/2001/XMLSchema#decimal>')
+            return parseFloat(N3.Util.getLiteralValue(element));
         return N3.Util.getLiteralValue(element);
+    }
     return element;
 };
 

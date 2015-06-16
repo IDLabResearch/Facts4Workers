@@ -120,8 +120,8 @@ function mapInputRecurisve (json, response, map)
             map[response[key]] = '"' + json[key] + '"';
         else if (_.isNumber(json[key]))
             // TODO: handle decimals
-            //map[response[key]] = N3.Util.createLiteral(json[key], 'http://www.w3.org/2001/XMLSchema#decimal');
-            map[response[key]] = '"' + json[key] + '"';
+            //map[response[key]] = N3.Util.createLiteral(json[key], '<http://www.w3.org/2001/XMLSchema#decimal>');
+            map[response[key]] = json[key];
         else
             mapInputRecurisve(json[key], response[key], map);
     }

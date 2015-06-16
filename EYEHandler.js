@@ -14,8 +14,6 @@ function EYEHandler (serverURL)
 // TODO: better way of passing all these parameters
 EYEHandler.prototype.call = function (data, query, proof, quickAnswer, newTriples, callback, errorCallback)
 {
-    var self = this;
-
     var form = { data : data};
     if (!newTriples)
         form['query'] = query;
@@ -26,7 +24,7 @@ EYEHandler.prototype.call = function (data, query, proof, quickAnswer, newTriple
         {
             url: this.serverURL,
             method: 'POST',
-            qs: {nope: !proof, quickAnswer:quickAnswer, 'pass': newTriples}, // TODO: probably not always quickAnswer (single-answer?)
+            qs: {nope: !proof, quickAnswer: quickAnswer, 'pass': newTriples}, // TODO: probably not always quickAnswer (single-answer?)
             form: form
         },
         function (error, response, body)
@@ -77,7 +75,16 @@ EYEHandler.prototype.parseBody = function (body, callback)
             // TODO: fix for N3 parser removing quote escapes
             // TODO: is wrong with language tags
             if (triple.object[0] === '"')
-                triple.object = '"' + triple.object.slice(1, -1).replace(/"/g, '\\"') + '"';
+            {
+                var last = triple.object.lastIndexOf('"');
+                triple.object = '"' + triple.object.substring(1, last).replace(/"/g, '\\"') + triple.object.substring(last);
+            }
+
+            // TODO: another hotfix, should be removed when we switch parser/writer to an extension of N3.js
+            if (N3.Util.isLiteral(triple.object) && N3.Util.getLiteralType(triple.object) === 'http://www.w3.org/2001/XMLSchema#integer')
+                triple.object = '"' + N3.Util.getLiteralValue(triple.object) + '"' + '^^<http://www.w3.org/2001/XMLSchema#integer>';
+            if (N3.Util.isLiteral(triple.object) && N3.Util.getLiteralType(triple.object) === 'http://www.w3.org/2001/XMLSchema#decimal')
+                triple.object = '"' + N3.Util.getLiteralValue(triple.object) + '"' + '^^<http://www.w3.org/2001/XMLSchema#decimal>';
             triples.push(triple);
         }
         else
