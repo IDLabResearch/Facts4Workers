@@ -18,11 +18,6 @@ RDF_JSONConverter.prototype.JSONtoRDF = function (json, root)
     return this._JSONtoRDFrecursive(json, this._extendPrefix(root));
 };
 
-RDF_JSONConverter.prototype.JSONtoRDFstring = function (json, root)
-{
-    return root + ' ' + this._JSONtoRDFstringRecursive(json, this._extendPrefix(root));
-};
-
 function flatten (arrays)
 {
     return [].concat.apply([], arrays);
@@ -74,33 +69,6 @@ RDF_JSONConverter.prototype._JSONtoRDFrecursive = function (json, subject, predi
         {
             return self._JSONtoRDFrecursive(json[key],  subject, self._extendPrefix(':' + key));
         })));
-    }
-};
-
-RDF_JSONConverter.prototype._JSONtoRDFstringRecursive = function (json, subject, predicate)
-{
-    var results = [];
-    var self = this;
-    var partial = {subject: subject, predicate: predicate};
-    if (_.isString(json))
-        return '"' + json + '"';
-    else if (_.isNumber(json))
-        return json;
-    else if (_.isArray(json))
-    {
-        return '( ' + json.map(function (element) { return self._JSONtoRDFstringRecursive(element, subject, predicate); }).join(' ') + ' )';
-    }
-    else
-    {
-        var keys = Object.keys(json);
-        var str = keys.map(function (key)
-        {
-            return ':' + key + ' ' + self._JSONtoRDFstringRecursive(json[key],  subject, self._extendPrefix(':' + key));
-        }).join('; ');
-        if (predicate)
-            return '[ ' + str + ' ]';
-        else
-            return str + '.';
     }
 };
 

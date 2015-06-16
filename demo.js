@@ -103,11 +103,13 @@ function mapInput (json, eye)
 
 function mapInputRecurisve (json, response, map)
 {
+    // TODO: should replace json values with n3 representation
+
     // TODO: look into this later
     if (_.isString(response))
     {
         // TODO: really hardcoded here, should generalize (again)
-        return map[response] = '"' + json.replace(/"/g, "'") + '"';
+        return map[response] = '"' + json.replace(/"/g, '\\"') + '"';
     }
 
     for (var key in response)
@@ -156,7 +158,7 @@ function handleNext (rest, req, res, output, count)
             // TODO: really ugly hardcoded fix for now
             // TODO: please don't judge me, I'm sorry
             if (body && body['partList'])
-                body['partList'] = JSON.parse(body['partList'].replace(/'/g, '"'));
+                body['partList'] = JSON.parse(body['partList'].replace(/\\"/g, '"'));
 
             // send data to client
             data.output = output;

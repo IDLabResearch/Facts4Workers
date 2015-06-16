@@ -57,23 +57,6 @@ RESTdesc.prototype.setInput = function (input)
     this.data = [].concat(input);
 };
 
-RESTdesc.prototype.addJSON = function (json, body, callback)
-{
-    var converter = new RDF_JSONConverter({'': this.prefix});
-    // TODO: prefixes
-    // TODO: find out why this exact syntax is necessary
-    // TODO: colon
-    //if (root[0] !== '_')
-    //    root = ':' + root;
-    this.addInput('@prefix : <http://f4w.restdesc.org/demo#>.\n ' + converter.JSONtoRDFstring(json, root));
-    callback();
-    //var triples = converter.JSONtoRDF(json, ':' + root);
-    //var writer = N3.Writer({ prefixes: converter.prefixes, format: 'N-Triples' });
-    //writer.addTriples(triples);
-    //var self = this;
-    //writer.end(function (error, result) { self.addInput(result); callback(); });
-};
-
 RESTdesc.prototype.next = function (callback)
 {
     var self = this;
@@ -119,6 +102,7 @@ RESTdesc.prototype._handleNext = function (next, callback)
             // TODO: http:methodName, http:requestURI, http:body, http:resp (http:body),
             var template = {'http:methodName': 'GET', 'http:requestURI': '', 'http:body': {}, 'http:resp': {'http:body': {}}};
             json = _.assign(template, json);
+
             callback(json);
         }
     });

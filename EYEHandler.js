@@ -73,7 +73,13 @@ EYEHandler.prototype.parseBody = function (body, callback)
     parser.parse(body, function (error, triple, prefixes)
     {
         if (triple)
+        {
+            // TODO: fix for N3 parser removing quote escapes
+            // TODO: is wrong with language tags
+            if (triple.object[0] === '"')
+                triple.object = '"' + triple.object.slice(1, -1).replace(/"/g, '\\"') + '"';
             triples.push(triple);
+        }
         else
             callback(triples, prefixes);
         if (error) console.error(error);
