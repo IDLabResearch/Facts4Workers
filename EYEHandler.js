@@ -4,37 +4,73 @@
 
 var N3 = require('n3');
 var request = require('request');
+var spawn = require('child_process').spawn;
+var ResourceCache = require('resourcecache');
+var _ = require('lodash');
 
-// TODO: use direct EYE call instead of HTTP interface
-function EYEHandler (serverURL)
+function EYEHandler ()
 {
-    this.serverURL = serverURL || 'http://eye.restdesc.org/'
+    this.cache = new ResourceCache();
 }
 
-// TODO: better way of passing all these parameters
-EYEHandler.prototype.call = function (data, query, proof, quickAnswer, newTriples, callback, errorCallback)
+EYEHandler.prototype.destroy = function ()
 {
-    var form = { data : data};
-    if (!newTriples)
-        form['query'] = query;
+    this.cache.destroy();
+};
 
-    quickAnswer = quickAnswer && !newTriples;
-
-    request(
+// TODO: better way of passing all these parameters?
+EYEHandler.prototype.call = function (data, query, proof, singleAnswer, newTriples, callback, errorCallback)
+{
+    var fileNames = [];
+    var args = [];
+    var queryName = null;
+    var self = this;
+    var delayed = _.after(data.length + 1, function ()
+    {
+        args.push('--query');
+        args.push(queryName);
+        if (singleAnswer)
         {
-            url: this.serverURL,
-            method: 'POST',
-            qs: {nope: !proof, quickAnswer: quickAnswer, 'pass': newTriples}, // TODO: probably not always quickAnswer (single-answer?)
-            form: form
-        },
-        function (error, response, body)
-        {
-            if (!error && response.statusCode == 200)
-                callback(body);
-            else
-                errorCallback && errorCallback(error, response);
+            args.push('--tactic');
+            args.push('single-answer');
         }
-    );
+
+        if (!proof)
+            args.push('--nope');
+
+        // blame windows npm implementation
+        // http://stackoverflow.com/questions/17516772/using-nodejss-spawn-causes-unknown-option-and-error-spawn-enoent-err
+        var proc = spawn(process.platform === "win32" ? "eye.cmd" : "eye", args);
+        var output = "";
+        proc.stdout.on('data', function (data) {
+            output += data;
+        });
+        proc.stderr.on('data', function (data) {
+            // TODO: do we need to log this somewhere?
+        });
+        proc.on('close', function (code) {
+            // TODO: check exit code?
+            for (var i = 0; i < fileNames.length; ++i)
+                self.cache.release(fileNames[i]);
+            callback(output);
+        });
+    });
+
+    // TODO: error handling
+    for (var i = 0; i < data.length; ++i){
+        this.cache.cacheFromString(data[i], function (error, fileName)
+        {
+            args.push(fileName);
+            fileNames.push(fileName);
+            delayed();
+        });
+    }
+    this.cache.cacheFromString(query, function (error, fileName)
+    {
+        queryName = fileName;
+        fileNames.push(fileName);
+        delayed();
+    });
 };
 
 // N3 to TriG
