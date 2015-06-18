@@ -82,8 +82,10 @@ RESTdesc.prototype._handleNext = function (next, callback)
             var root = methods[0].subject;
             self.converter = new RDF_JSONConverter(prefixes);
             var json = self.converter.RDFtoJSON(store, root);
-            // store an n3 version that can be used to send to EYE
+            // TODO: might be 'clearer' to convert the json back to N3 instead?
+            // store an n3 version that can be used to send to EYE, not using 'next' because we need skolemization
             json.data = [self.converter._RDFtoN3recursive(store)];
+            //json.data = [next];
 
             // simplify JSON
             // TODO: more generic (prefix dependent now)
