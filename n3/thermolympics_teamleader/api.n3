@@ -1,0 +1,77 @@
+@prefix : <http://f4w.restdesc.org/demo#>.
+@prefix http: <http://www.w3.org/2011/http#>.
+@prefix tmpl: <http://multimedialab.elis.ugent.be/organon/ontologies/tmpl#>.
+
+# TODO: use API namespaces for predicates
+# TODO: same list problem as previous use case
+
+# API 1 (get all open reports)
+{
+    # TODO: put something here
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://thermolympic-demo.herokuapp.com/reports?open=true");
+              http:resp [
+                  http:body _:list
+              ].
+    _:list a :reportList.
+}.
+
+# API USER 1 (send all reports and ask for which defect he wants to look at)
+{
+    ?list a :reportList
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://askTheWorker/getDefect");
+              http:body [
+                  :message "Please provide the report ID you want to investigate.";
+                  :reportList ?list
+              ];
+              http:resp [
+                  http:body [
+                      :id _:n
+                  ]
+              ].
+    _:report a :report;
+             :id _:n
+}.
+
+# API 2 (get the full report information)
+{
+    ?report a :report;
+            :id ?n.
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://thermolympic-demo.herokuapp.com/reports/" ?n);
+              http:resp [
+                  http:body [
+                      :defect_id _:d;
+                      :operator _:o
+                      :status _:s
+                  ]
+              ].
+    ?report :defect_id _:d;
+            :operator _:o;
+            :status _:s.
+}.
+
+# API 3 (get all solutions for a defect)
+{
+    ?report a :report;
+            defect_id ?d.
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://thermolympic-demo.herokuapp.com/solutions?defect_id=" ?d);
+              http:resp [
+                  http:body _:list
+              ].
+    ?report :solutionList _:list.
+}.

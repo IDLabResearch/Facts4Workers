@@ -154,6 +154,8 @@ function handleNext (rest, req, res, output, count)
         output += JSON.stringify(data, null, 4);
         output += '\n';
 
+        // TODO: work with 'session' id's and store the data in a database (redis?) to prevent data overload
+        // TODO: maybe we can also store all steps in the database if a user wants to go back to a previous step?
         // data contains a string representation of the EYE response, we want to add all the other known data to that
         data.data = (data.data || []).concat(rest.data);
 
