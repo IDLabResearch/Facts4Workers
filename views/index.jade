@@ -49,6 +49,7 @@ html
             function submit (json)
             {
                 var nextData = {};
+                nextData.goal = "#{goal}";
                 nextData.json = json;
                 nextData.eye = jQuery.extend({}, globalData);
                 // prevent sending superfluous data

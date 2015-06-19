@@ -41,16 +41,18 @@ var api1 = fs.readFileSync('n3/api1.n3', 'utf-8');
 var api2 = fs.readFileSync('n3/api2.n3', 'utf-8');
 var input = fs.readFileSync('n3/in.n3', 'utf-8');
 
-var goal = fs.readFileSync('n3/goal.n3', 'utf-8');
+var goals = {
+    'calibration': fs.readFileSync('n3/goal.n3', 'utf-8')
+};
 
 app.get('/', function (req, res)
 {
-    res.redirect('/demo');
+    res.render('goals');
 });
 
 app.get('/demo', function (req, res)
 {
-    res.render('index', { title: 'F4W demo', message: 'F4W demo'});
+    res.render('index', { title: 'F4W demo', message: 'F4W demo', goal: 'calibration'});
 });
 
 app.get('/demo/start', function (req, res)
@@ -73,6 +75,13 @@ app.post('/demo/eye', function (req, res)
 
 app.post('/demo/next', function (req, res)
 {
+    var goal = goals['calibration'];
+    if (req.body && req.body.goal)
+    {
+        goal = goals[req.body.goal];
+        if (!goal)
+            return res.status(400).json({ error: 'Unknown goal ' + req.body.goal });
+    }
     var rest = new RESTdesc([api1, api2, input], goal);
     if (req.body.eye)
     {
