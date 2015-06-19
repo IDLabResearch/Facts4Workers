@@ -37,12 +37,12 @@ app.use('/demo/documentation', express.static(process.cwd() + "/documentation/")
 app.use('/demo/n3', express.static(process.cwd() + "/n3"));
 app.use('/demo/n3', serveIndex(__dirname + '/n3', {icons: true, view: 'details'}));
 
-var api1 = fs.readFileSync('n3/api1.n3', 'utf-8');
-var api2 = fs.readFileSync('n3/api2.n3', 'utf-8');
-var input = fs.readFileSync('n3/in.n3', 'utf-8');
+var api1 = fs.readFileSync('n3/calibration/api1.n3', 'utf-8');
+var api2 = fs.readFileSync('n3/calibration/api2.n3', 'utf-8');
+var input = fs.readFileSync('n3/calibration/in.n3', 'utf-8');
 
 var goals = {
-    'calibration': fs.readFileSync('n3/goal.n3', 'utf-8')
+    'calibration': fs.readFileSync('n3/calibration/goal.n3', 'utf-8')
 };
 
 app.get('/', function (req, res)
