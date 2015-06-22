@@ -58,7 +58,8 @@
                       :suggested_parameters (_:pp1 _:pp2 _:pp3 _:pp4)
                   ]         
               ].
-    ?x :result ?ok;  
+    ?x :result ?ok;
+       :operator "Arnold";
        :suggested_parameters (_:pp1 _:pp2 _:pp3 _:pp4).
 }.
 

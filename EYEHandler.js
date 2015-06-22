@@ -4,39 +4,73 @@
 
 var N3 = require('n3');
 var request = require('request');
+var spawn = require('child_process').spawn;
+var ResourceCache = require('resourcecache');
+var _ = require('lodash');
 
-// TODO: use direct EYE call instead of HTTP interface
-function EYEHandler (serverURL)
+function EYEHandler ()
 {
-    this.serverURL = serverURL || 'http://eye.restdesc.org/'
+    this.cache = new ResourceCache();
 }
 
-// TODO: better way of passing all these parameters
-EYEHandler.prototype.call = function (data, query, proof, quickAnswer, newTriples, callback, errorCallback)
+EYEHandler.prototype.destroy = function ()
 {
+    this.cache.destroy();
+};
+
+// TODO: better way of passing all these parameters?
+EYEHandler.prototype.call = function (data, query, proof, singleAnswer, newTriples, callback, errorCallback)
+{
+    var fileNames = [];
+    var args = [];
+    var queryName = null;
     var self = this;
-
-    var form = { data : data};
-    if (!newTriples)
-        form['query'] = query;
-
-    quickAnswer = quickAnswer && !newTriples;
-
-    request(
+    var delayed = _.after(data.length + 1, function ()
+    {
+        args.push('--query');
+        args.push(queryName);
+        if (singleAnswer)
         {
-            url: this.serverURL,
-            method: 'POST',
-            qs: {nope: !proof, quickAnswer:quickAnswer, 'pass': newTriples}, // TODO: probably not always quickAnswer (single-answer?)
-            form: form
-        },
-        function (error, response, body)
-        {
-            if (!error && response.statusCode == 200)
-                callback(body);
-            else
-                errorCallback && errorCallback(error, response);
+            args.push('--tactic');
+            args.push('single-answer');
         }
-    );
+
+        if (!proof)
+            args.push('--nope');
+
+        // blame windows npm implementation
+        // http://stackoverflow.com/questions/17516772/using-nodejss-spawn-causes-unknown-option-and-error-spawn-enoent-err
+        var proc = spawn(process.platform === "win32" ? "eye.cmd" : "eye", args);
+        var output = "";
+        proc.stdout.on('data', function (data) {
+            output += data;
+        });
+        proc.stderr.on('data', function (data) {
+            // TODO: do we need to log this somewhere?
+        });
+        proc.on('close', function (code) {
+            // TODO: check exit code?
+            for (var i = 0; i < fileNames.length; ++i)
+                self.cache.release(fileNames[i]);
+            callback(output);
+        });
+    });
+
+    // TODO: error handling
+    for (var i = 0; i < data.length; ++i){
+        this.cache.cacheFromString(data[i], function (error, fileName)
+        {
+            args.push(fileName);
+            fileNames.push(fileName);
+            delayed();
+        });
+    }
+    this.cache.cacheFromString(query, function (error, fileName)
+    {
+        queryName = fileName;
+        fileNames.push(fileName);
+        delayed();
+    });
 };
 
 // N3 to TriG
@@ -73,7 +107,22 @@ EYEHandler.prototype.parseBody = function (body, callback)
     parser.parse(body, function (error, triple, prefixes)
     {
         if (triple)
+        {
+            // TODO: fix for N3 parser removing quote escapes
+            // TODO: is wrong with language tags
+            if (triple.object[0] === '"')
+            {
+                var last = triple.object.lastIndexOf('"');
+                triple.object = '"' + triple.object.substring(1, last).replace(/"/g, '\\"') + triple.object.substring(last);
+            }
+
+            // TODO: another hotfix, should be removed when we switch parser/writer to an extension of N3.js
+            if (N3.Util.isLiteral(triple.object) && N3.Util.getLiteralType(triple.object) === 'http://www.w3.org/2001/XMLSchema#integer')
+                triple.object = '"' + N3.Util.getLiteralValue(triple.object) + '"' + '^^<http://www.w3.org/2001/XMLSchema#integer>';
+            if (N3.Util.isLiteral(triple.object) && N3.Util.getLiteralType(triple.object) === 'http://www.w3.org/2001/XMLSchema#decimal')
+                triple.object = '"' + N3.Util.getLiteralValue(triple.object) + '"' + '^^<http://www.w3.org/2001/XMLSchema#decimal>';
             triples.push(triple);
+        }
         else
             callback(triples, prefixes);
         if (error) console.error(error);

@@ -37,20 +37,22 @@ app.use('/demo/documentation', express.static(process.cwd() + "/documentation/")
 app.use('/demo/n3', express.static(process.cwd() + "/n3"));
 app.use('/demo/n3', serveIndex(__dirname + '/n3', {icons: true, view: 'details'}));
 
-var api1 = fs.readFileSync('n3/api1.n3', 'utf-8');
-var api2 = fs.readFileSync('n3/api2.n3', 'utf-8');
-var input = fs.readFileSync('n3/in.n3', 'utf-8');
+var api1 = fs.readFileSync('n3/calibration/api1.n3', 'utf-8');
+var api2 = fs.readFileSync('n3/calibration/api2.n3', 'utf-8');
+var input = fs.readFileSync('n3/calibration/in.n3', 'utf-8');
 
-var goal = fs.readFileSync('n3/goal.n3', 'utf-8');
+var goals = {
+    'calibration': fs.readFileSync('n3/calibration/goal.n3', 'utf-8')
+};
 
 app.get('/', function (req, res)
 {
-    res.redirect('/demo');
+    res.render('goals');
 });
 
 app.get('/demo', function (req, res)
 {
-    res.render('index', { title: 'F4W demo', message: 'F4W demo'});
+    res.render('index', { title: 'F4W demo', message: 'F4W demo', goal: 'calibration'});
 });
 
 app.get('/demo/start', function (req, res)
@@ -73,6 +75,13 @@ app.post('/demo/eye', function (req, res)
 
 app.post('/demo/next', function (req, res)
 {
+    var goal = goals['calibration'];
+    if (req.body && req.body.goal)
+    {
+        goal = goals[req.body.goal];
+        if (!goal)
+            return res.status(400).json({ error: 'Unknown goal ' + req.body.goal });
+    }
     var rest = new RESTdesc([api1, api2, input], goal);
     if (req.body.eye)
     {
@@ -103,11 +112,13 @@ function mapInput (json, eye)
 
 function mapInputRecurisve (json, response, map)
 {
+    // TODO: should replace json values with n3 representation
+
     // TODO: look into this later
     if (_.isString(response))
     {
         // TODO: really hardcoded here, should generalize (again)
-        return map[response] = '"' + json.replace(/"/g, "'") + '"';
+        return map[response] = '"' + json.replace(/"/g, '\\"') + '"';
     }
 
     for (var key in response)
@@ -118,8 +129,8 @@ function mapInputRecurisve (json, response, map)
             map[response[key]] = '"' + json[key] + '"';
         else if (_.isNumber(json[key]))
             // TODO: handle decimals
-            //map[response[key]] = N3.Util.createLiteral(json[key], 'http://www.w3.org/2001/XMLSchema#decimal');
-            map[response[key]] = '"' + json[key] + '"';
+            //map[response[key]] = N3.Util.createLiteral(json[key], '<http://www.w3.org/2001/XMLSchema#decimal>');
+            map[response[key]] = json[key];
         else
             mapInputRecurisve(json[key], response[key], map);
     }
@@ -143,6 +154,8 @@ function handleNext (rest, req, res, output, count)
         output += JSON.stringify(data, null, 4);
         output += '\n';
 
+        // TODO: work with 'session' id's and store the data in a database (redis?) to prevent data overload
+        // TODO: maybe we can also store all steps in the database if a user wants to go back to a previous step?
         // data contains a string representation of the EYE response, we want to add all the other known data to that
         data.data = (data.data || []).concat(rest.data);
 
@@ -156,7 +169,7 @@ function handleNext (rest, req, res, output, count)
             // TODO: really ugly hardcoded fix for now
             // TODO: please don't judge me, I'm sorry
             if (body && body['partList'])
-                body['partList'] = JSON.parse(body['partList'].replace(/'/g, '"'));
+                body['partList'] = JSON.parse(body['partList'].replace(/\\"/g, '"'));
 
             // send data to client
             data.output = output;
