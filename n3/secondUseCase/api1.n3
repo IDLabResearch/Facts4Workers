@@ -1,0 +1,162 @@
+@prefix : <http://f4w.restdesc.org/demo#>.
+@prefix http: <http://www.w3.org/2011/http#>.
+@prefix tmpl: <http://multimedialab.elis.ugent.be/organon/ontologies/tmpl#>.
+@prefix log: <http://www.w3.org/2000/10/swap/log#>.
+@prefix string: <http://www.w3.org/2000/10/swap/string#>.
+@prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
+
+#new problem, the :p has to be different for every new poblem.
+:p a :problem.
+
+#we declare every problem which is not marked as "closed" as open.
+{?p a :problem.
+_:x e:findall (?p {?p :status "closed".} ()).
+}
+=>
+{?p :status "open"}.
+
+#ask worker for part-id
+{
+    ?p a :problem.
+}=>
+{
+    _:request http:methodName "GET";
+             tmpl:requestURI ("http://askTheWorker/" "problemPartId");
+              http:body {
+#the first blank node is a problem. Is it possible to use one uri? Maybe :jsonKV?
+                 _:jsonKV :message "Please enter the id of the part where the problem occurred'. 'id' corresponds to the part ID."              
+                  };
+              http:response [
+                   http:body _:rb
+                   ].
+ _:rb :contains { _:jsonKV :part_id _:pid}.
+    ?p :onPart _:pid.
+    _:pid a :partId.
+}.
+
+#get all possible defects for that part
+{
+?pid a :partId.
+}=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://thermolympic-demo.herokuapp.com/defects?part_id=" ?pid);
+              http:resp [
+                  http:body _:body
+              ].
+    ?pid :defects _:body.
+}.
+
+
+#ask the worker to specify the problem
+{
+?p a :problem.
+?p :onPart ?pid.
+?pid :defects ?body.
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://askTheWorker/" "specifyProblem");
+              http:body {
+                  _:jsonKV :message "Please specify the problem'. 'id' corresponds to the defect id on the list. If the list does not contain the present defect, use a new id. Please also provide your name under 'name'";  
+		  :defectList ?body.	            
+                   };
+              http:response [
+                   http:body _:body
+			
+                   ].
+_:body :contains { _:jsonKV2 :defect_id _:did. _:jsonKV2 :name _:name}.
+    ?p :defect _:did.
+    ?p :operatorName ?name.
+}.
+
+
+
+
+
+#If no entry, ask the worker to create one
+{
+?p a :problem.
+?p :onPart ?pid.
+?pid :defects ?body.
+?p :defect ?did.
+
+?did e:whenGround ?gdid.
+?body e:whenGround ?gbody.
+
+#Json representation has to be adapted
+?gbody log:notIncludes { ?jsonKV :id ?gdid }.
+
+#this should work, I don't like it logic-wise, to be fixed... 
+("Please create a new defect entry for id" ?gdid "on part" ?pid ". Specify 'name' and 'description'. Optional: 'picture', 'comment' and occurence ") string:concatenation ?conc.
+
+}=>{
+ _:request http:methodName "GET";
+              tmpl:requestURI ("http://askTheWorker/" "createEntry");
+              http:body {
+                  _:jsonKV :message ?conc;  	            
+                   };
+              http:response [
+                   http:body _:body
+			
+                   ].
+_:body :contains { _:jsonKV2 :name _:name; :description _:desc. }.
+?did :defectEntry _:body.
+
+}.
+
+#API post new defect entry
+{
+?p a :problem.
+?p :onPart ?pid.
+?p :defect ?did.
+?did :defectEntry ?body.
+?body e:whenGround ?gBody.
+?gBody log:includes {?s :name ?name}.
+?json e:graphList (?gBody {?s :part_id ?pid. ?s :part ?did}).
+}
+=>
+{
+  _:request http:methodName "POST";
+              tmpl:requestURI ("http://thermolympic-demo.herokuapp.com/defects");
+	      http:body ?body;
+              http:response [
+                   http:body _:body
+                   ].
+?did :is :listed.
+
+}.
+
+#rule: did known, it is on purpose that we don't use "whenKnown" here. Our API-call step-count should always use the worst case.
+{
+?p a :problem.
+?p :onPart ?pid.
+?pid :defects ?body.
+?p :defect ?did.
+?body log:includes { ?jsonKV :id ?did }.
+}
+=>
+{?did :is :listed.}.
+
+#API: report defect
+{
+?p a :problem.
+?p :status "open".
+?p :defect ?did.
+#?did :is :listed.
+#?p :operatorName ?name.
+}
+=>
+{
+  _:request http:methodName "POST";
+              tmpl:requestURI ("http://thermolympic-demo.herokuapp.com/reports");
+	      http:body {_:jsonKV :defect_id ?did; :operator ?name; :status "open". };
+              http:response [
+                   http:body _:body
+                   ].
+?p :reported ?did.
+
+}.
+
+
