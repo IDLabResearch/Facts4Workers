@@ -5,11 +5,13 @@
 @prefix string: <http://www.w3.org/2000/10/swap/string#>.
 
 {
-?p a :problem;
-:status "open";
-:reported ?report.
-}=>{
-?p :reported ?report.
+    ?p a :problem;
+    :status "open";
+    :reported ?report.
+}
+=>
+{
+    ?p :reported ?report.
 }.
 
 
