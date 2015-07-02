@@ -7,6 +7,8 @@ var fs = require('fs');
 var EYEHandler = require('./EYEHandler');
 var N3 = require('n3');
 var RDF_JSONConverter = require('./RDF_JSONConverter');
+var N3Parser = require('./N3Parser');
+var JSONLDParser = require('./JSONLDParser');
 
 function RESTdesc (input, goal)
 {
@@ -62,6 +64,18 @@ RESTdesc.prototype._handleProof = function (proof, callback)
 
 RESTdesc.prototype._handleNext = function (next, callback)
 {
+    var n3Parser = new N3Parser();
+    var jsonldParser = new JSONLDParser();
+    var jsonld = n3Parser.parse(next);
+    var json = this._JSONLDtoJSON(jsonld);
+    json = _.find(json, 'http:methodName');
+    if (json && json['tmpl:requestURI'])
+    {
+        json['http:requestURI'] = json['tmpl:requestURI'].join('');
+        delete json['tmpl:requestURI'];
+    }
+    // TODO: skolemize JSONLD
+
     var self = this;
     this.eye.parseBody(next, function (triples, prefixes)
     {
@@ -101,7 +115,8 @@ RESTdesc.prototype._handleNext = function (next, callback)
 };
 
 // TODO: I think I'm being inconsistent here, is this the first time I actually edit the JSON in place instead of generating a new one?
-RESTdesc.prototype._simplifyURIs = function (json) {
+RESTdesc.prototype._simplifyURIs = function (json)
+{
     var self = this;
     // TODO: this is the 15th time I use these 3 checks (and do similar things with them), should generalize this
     if (_.isString(json))
@@ -118,6 +133,38 @@ RESTdesc.prototype._simplifyURIs = function (json) {
 
     for (var key in json)
         self._simplifyURIs(json[key]);
+};
+
+RESTdesc.prototype._JSONLDtoJSON = function (jsonld, baseURI)
+{
+    // TODO: what about lang/datatype?
+    if (_.isString(jsonld) || _.isNumber(jsonld))
+        return jsonld;
+
+    if (_.isArray(jsonld))
+        return jsonld.map(function (child) { return this._JSONLDtoJSON(child, baseURI); }, this);
+
+    // TODO: another vocab dependency
+    if (jsonld['@context'] && jsonld['@context']['@vocab'])
+        baseURI = jsonld['@context']['@vocab'];
+
+    var json = {};
+    var keys = _.without(Object.keys(jsonld), '@context');
+    for (var key in jsonld)
+    {
+        if (key === '@context')
+            continue;
+
+        // TODO: special cases where graph/array/@id are subject
+        if ((key === '@list' || key === '@graph' || key === '@id') && keys.length === 1)
+            return this._JSONLDtoJSON(jsonld[key], baseURI);
+
+        var val = this._JSONLDtoJSON(jsonld[key], baseURI);
+        if (baseURI && _.startsWith(key, baseURI))
+            key = key.substr(baseURI.length);
+        json[key] = val;
+    }
+    return json;
 };
 
 

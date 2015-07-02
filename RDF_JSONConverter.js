@@ -13,64 +13,64 @@ function RDF_JSONConverter (prefixes)
     this.blankidx = 1;
 }
 
-RDF_JSONConverter.prototype.JSONtoRDF = function (json, root)
-{
-    return this._JSONtoRDFrecursive(json, this._extendPrefix(root));
-};
+//RDF_JSONConverter.prototype.JSONtoRDF = function (json, root)
+//{
+//    return this._JSONtoRDFrecursive(json, this._extendPrefix(root));
+//};
 
-function flatten (arrays)
-{
-    return [].concat.apply([], arrays);
-}
+//function flatten (arrays)
+//{
+//    return [].concat.apply([], arrays);
+//}
 
-RDF_JSONConverter.prototype._extendPrefix = function (element)
-{
-    return N3.Util.expandPrefixedName(element, this.prefixes);
-};
+//RDF_JSONConverter.prototype._extendPrefix = function (element)
+//{
+//    return N3.Util.expandPrefixedName(element, this.prefixes);
+//};
 
-RDF_JSONConverter.prototype._JSONtoRDFrecursive = function (json, subject, predicate)
-{
-    var results = [];
-    var partial = {subject: subject, predicate: predicate};
-    if (_.isString(json) || _.isNumber(json))
-    {
-        // TODO: predicate === null error
-        partial.object = N3.Util.createLiteral(json);
-        return [partial];
-    }
-    else if (_.isArray(json))
-    {
-        var blankList = '_:blank' + this.blankidx++;
-        if (predicate)
-        {
-            partial.object = blankList;
-            results.push(partial);
-        }
-        if (json.length <= 1)
-            results.push({subject: blankList, predicate: this._extendPrefix('rdf:rest'), object: this._extendPrefix('rdf:nil')});
-        if (json.length > 0)
-            results.push(this._JSONtoRDFrecursive(json.shift(), blankList, this._extendPrefix('rdf:first')));
-        // size-1 due to shift ^
-        if (json.length > 0)
-            results.push(this._JSONtoRDFrecursive(json, blankList, this._extendPrefix('rdf:rest')));
-        return flatten(results);
-    }
-    else
-    {
-        if (predicate)
-        {
-            subject = '_:blank' + this.blankidx++;
-            partial.object = subject;
-            results.push(partial);
-        }
-        var keys = Object.keys(json);
-        var self = this;
-        return results.concat(flatten(keys.map(function (key)
-        {
-            return self._JSONtoRDFrecursive(json[key],  subject, self._extendPrefix(':' + key));
-        })));
-    }
-};
+//RDF_JSONConverter.prototype._JSONtoRDFrecursive = function (json, subject, predicate)
+//{
+//    var results = [];
+//    var partial = {subject: subject, predicate: predicate};
+//    if (_.isString(json) || _.isNumber(json))
+//    {
+//        // TODO: predicate === null error
+//        partial.object = N3.Util.createLiteral(json);
+//        return [partial];
+//    }
+//    else if (_.isArray(json))
+//    {
+//        var blankList = '_:blank' + this.blankidx++;
+//        if (predicate)
+//        {
+//            partial.object = blankList;
+//            results.push(partial);
+//        }
+//        if (json.length <= 1)
+//            results.push({subject: blankList, predicate: this._extendPrefix('rdf:rest'), object: this._extendPrefix('rdf:nil')});
+//        if (json.length > 0)
+//            results.push(this._JSONtoRDFrecursive(json.shift(), blankList, this._extendPrefix('rdf:first')));
+//        // size-1 due to shift ^
+//        if (json.length > 0)
+//            results.push(this._JSONtoRDFrecursive(json, blankList, this._extendPrefix('rdf:rest')));
+//        return flatten(results);
+//    }
+//    else
+//    {
+//        if (predicate)
+//        {
+//            subject = '_:blank' + this.blankidx++;
+//            partial.object = subject;
+//            results.push(partial);
+//        }
+//        var keys = Object.keys(json);
+//        var self = this;
+//        return results.concat(flatten(keys.map(function (key)
+//        {
+//            return self._JSONtoRDFrecursive(json[key],  subject, self._extendPrefix(':' + key));
+//        })));
+//    }
+//};
 
 RDF_JSONConverter.prototype._RDFtoN3recursive = function (store)
 {
