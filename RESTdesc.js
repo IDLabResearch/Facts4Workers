@@ -9,6 +9,7 @@ var N3 = require('n3');
 var RDF_JSONConverter = require('./RDF_JSONConverter');
 var N3Parser = require('./N3Parser');
 var JSONLDParser = require('./JSONLDParser');
+var uuid = require('node-uuid');
 
 function RESTdesc (input, goal)
 {
@@ -64,8 +65,8 @@ RESTdesc.prototype._handleProof = function (proof, callback)
 
 RESTdesc.prototype._handleNext = function (next, callback)
 {
+    // TODO: strip unused prefixes?
     var n3Parser = new N3Parser();
-    var jsonldParser = new JSONLDParser();
     var jsonld = n3Parser.parse(next);
     var json = this._JSONLDtoJSON(jsonld);
     json = _.find(json, 'http:methodName');
@@ -74,44 +75,55 @@ RESTdesc.prototype._handleNext = function (next, callback)
         json['http:requestURI'] = json['tmpl:requestURI'].join('');
         delete json['tmpl:requestURI'];
     }
-    // TODO: skolemize JSONLD
-
-    var self = this;
-    this.eye.parseBody(next, function (triples, prefixes)
+    if (!json || !json['http:requestURI'])
+        callback('DONE');
+    else
     {
-        self.eye.destroy(); // clean up cache
+        jsonld = this._skolemizeJSONLD(jsonld);
+        var jsonldParser = new JSONLDParser();
+        var n3 = jsonldParser.parse(jsonld);
+        json.data = [n3];
+        var template = {'http:methodName':'GET', 'http:requestURI':'', 'http:body':{}, 'http:resp':{'http:body':{}}};
+        json = _.assign(template, json);
+        callback(json);
+    }
 
-        var store = new N3.Store();
-        store.addPrefixes(prefixes);
-        store.addTriples(triples);
-        var methods = store.find(null, 'http:methodName', null);
-        if (methods.length === 0)
-        {
-            // TODO: done? what do?
-            callback('DONE');
-        }
-        else
-        {
-            // TODO: more than 1 api possible? what do?
-            var root = methods[0].subject;
-            self.converter = new RDF_JSONConverter(prefixes);
-            var json = self.converter.RDFtoJSON(store, root);
-            // TODO: might be 'clearer' to convert the json back to N3 instead?
-            // store an n3 version that can be used to send to EYE, not using 'next' because we need skolemization
-            json.data = [self.converter._RDFtoN3recursive(store)];
-            //json.data = [next];
-
-            // simplify JSON
-            // TODO: more generic (prefix dependent now)
-            self._simplifyURIs(json);
-            // TODO: don't remove this (and check for other missing fields)
-            // TODO: http:methodName, http:requestURI, http:body, http:resp (http:body),
-            var template = {'http:methodName': 'GET', 'http:requestURI': '', 'http:body': {}, 'http:resp': {'http:body': {}}};
-            json = _.assign(template, json);
-
-            callback(json);
-        }
-    });
+    //var self = this;
+    //this.eye.parseBody(next, function (triples, prefixes)
+    //{
+    //    self.eye.destroy(); // clean up cache
+    //
+    //    var store = new N3.Store();
+    //    store.addPrefixes(prefixes);
+    //    store.addTriples(triples);
+    //    var methods = store.find(null, 'http:methodName', null);
+    //    if (methods.length === 0)
+    //    {
+    //        // TODO: done? what do?
+    //        callback('DONE');
+    //    }
+    //    else
+    //    {
+    //        // TODO: more than 1 api possible? what do?
+    //        var root = methods[0].subject;
+    //        self.converter = new RDF_JSONConverter(prefixes);
+    //        var json = self.converter.RDFtoJSON(store, root);
+    //        // TODO: might be 'clearer' to convert the json back to N3 instead?
+    //        // store an n3 version that can be used to send to EYE, not using 'next' because we need skolemization
+    //        json.data = [self.converter._RDFtoN3recursive(store)];
+    //        //json.data = [next];
+    //
+    //        // simplify JSON
+    //        // TODO: more generic (prefix dependent now)
+    //        self._simplifyURIs(json);
+    //        // TODO: don't remove this (and check for other missing fields)
+    //        // TODO: http:methodName, http:requestURI, http:body, http:resp (http:body),
+    //        var template = {'http:methodName': 'GET', 'http:requestURI': '', 'http:body': {}, 'http:resp': {'http:body': {}}};
+    //        json = _.assign(template, json);
+    //
+    //        callback(json);
+    //    }
+    //});
 };
 
 // TODO: I think I'm being inconsistent here, is this the first time I actually edit the JSON in place instead of generating a new one?
@@ -141,6 +153,7 @@ RESTdesc.prototype._JSONLDtoJSON = function (jsonld, baseURI)
     if (_.isString(jsonld) || _.isNumber(jsonld))
         return jsonld;
 
+    // TODO: find out how to write this with bind and partialright
     if (_.isArray(jsonld))
         return jsonld.map(function (child) { return this._JSONLDtoJSON(child, baseURI); }, this);
 
@@ -162,9 +175,40 @@ RESTdesc.prototype._JSONLDtoJSON = function (jsonld, baseURI)
         var val = this._JSONLDtoJSON(jsonld[key], baseURI);
         if (baseURI && _.startsWith(key, baseURI))
             key = key.substr(baseURI.length);
+
+        if (key === 'tolerances' && _.isArray(val) && val.length === 2 && _.isArray(val[0])) // TODO: should definitely also not be necessary
+            val = [{min: val[0][0], max: val[0][1]}, {min: val[1][0], max: val[1][1]}];
+
         json[key] = val;
     }
     return json;
+};
+
+// this is only partial skolemization since we don't want to convert the nodes the user has to fill in.
+RESTdesc.prototype._skolemizeJSONLD = function (jsonld)
+{
+    if (_.isString(jsonld) || _.isNumber(jsonld))
+        return jsonld;
+
+    if (_.isArray(jsonld))
+        return jsonld.map(function (child) { return this._skolemizeJSONLD(child); }, this);
+
+    var result = {};
+    // TODO: skolemize predicates
+    for (var key in jsonld)
+    {
+        // don't skolemize in the context
+        if (key === '@context')
+            result[key] = jsonld[key];
+        else
+            result[key] = this._skolemizeJSONLD(jsonld[key]);
+    }
+
+    // all these don't need to be skolemized for eye/n3
+    if (!result['@id'] && !result['@graph'] && !result['@value'] && !result['@list'])
+        result['@id'] = this.prefix + uuid.v4();
+
+    return result;
 };
 
 
