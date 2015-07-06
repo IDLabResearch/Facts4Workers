@@ -8,19 +8,12 @@ var spawn = require('child_process').spawn;
 var ResourceCache = require('resourcecache');
 var _ = require('lodash');
 
-function EYEHandler ()
-{
-    this.cache = new ResourceCache();
-}
-
-EYEHandler.prototype.destroy = function ()
-{
-    this.cache.destroy();
-};
+function EYEHandler () {}
 
 // TODO: better way of passing all these parameters?
 EYEHandler.prototype.call = function (data, query, proof, singleAnswer, newTriples, callback, errorCallback)
 {
+    var cache = new ResourceCache();
     var fileNames = [];
     var args = [];
     var queryName = null;
@@ -50,22 +43,24 @@ EYEHandler.prototype.call = function (data, query, proof, singleAnswer, newTripl
         });
         proc.on('close', function (code) {
             // TODO: check exit code?
-            for (var i = 0; i < fileNames.length; ++i)
-                self.cache.release(fileNames[i]);
+            // already gets unlinked in destroy step
+            //for (var i = 0; i < fileNames.length; ++i)
+            //    self.cache.release(fileNames[i]);
+            cache.destroy();
             callback(output);
         });
     });
 
     // TODO: error handling
     for (var i = 0; i < data.length; ++i){
-        this.cache.cacheFromString(data[i], function (error, fileName)
+        cache.cacheFromString(data[i], function (error, fileName)
         {
             args.push(fileName);
             fileNames.push(fileName);
             delayed();
         });
     }
-    this.cache.cacheFromString(query, function (error, fileName)
+    cache.cacheFromString(query, function (error, fileName)
     {
         queryName = fileName;
         fileNames.push(fileName);

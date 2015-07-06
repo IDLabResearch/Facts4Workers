@@ -10,11 +10,15 @@ var RDF_JSONConverter = require('./RDF_JSONConverter');
 var N3Parser = require('./N3Parser');
 var JSONLDParser = require('./JSONLDParser');
 var uuid = require('node-uuid');
+var Cache = require('./Cache');
+var S = require('string');
 
-function RESTdesc (input, goal)
+function RESTdesc (input, goal, cacheKey)
 {
     this.input = input;
     this.goal = goal;
+    this.cacheKey = cacheKey || uuid.v4();
+    this.cache = new Cache(this.cacheKey);
 
     if (!_.isArray(this.input))
         this.input = [this.input];
@@ -30,37 +34,43 @@ function RESTdesc (input, goal)
     // TODO: generalize
     this.prefix = 'http://f4w.restdesc.org/demo#';
 
-    // TODO: prettify
-    this.data = [];
-
     this.proofs = [];
 }
 
 RESTdesc.prototype.addInput = function (input)
 {
-    this.data.push(input);
+    this.cache.push(input);
 };
 
-RESTdesc.prototype.setInput = function (input)
+// TODO: we can cache the cache in a list ...
+// keys of map are blank nodes, values are their replacements
+RESTdesc.prototype.fillInBlanks = function (map, callback)
 {
-    this.data = [].concat(input);
+    if (!map)
+        return callback();
+
+    this.cache.pop(function (err, val)
+    {
+        for (var key in map)
+            val = S(val).replaceAll(key, map[key]).toString();
+        this.cache.push(val, callback); // it's really important to execute the callback after the push is finished or there is a race condition
+    }.bind(this));
 };
 
 RESTdesc.prototype.next = function (callback)
 {
-    // create new eye handler every time so we know when to call destroy function
-    this.eye = new EYEHandler();
-    var self = this;
-    this.eye.call(this.input.concat(this.data), this.goal, true, true, false, function (proof) { self._handleProof(proof, callback); }, this._error);
-    // TODO: use the new info. Still more a fan of deleting old output though.
-    //this.eye.call(this.input, this.goal, false, false, true, function (proof) { console.log(proof); }, this._error, true);
+    this.cache.list(function (err, data)
+    {
+        // create new eye handler every time so we know when to call destroy function
+        this.eye = new EYEHandler();
+        this.eye.call(this.input.concat(data), this.goal, true, true, false, function (proof) { this._handleProof(proof, callback); }.bind(this), this._error);
+    }.bind(this));
 };
 
 RESTdesc.prototype._handleProof = function (proof, callback)
 {
-    var self = this;
     this.proofs.push(proof);
-    this.eye.call([proof, this.list], this.find, false, true, false, function (body) { self._handleNext(body, callback); }, this._error);
+    this.eye.call([proof, this.list], this.find, false, true, false, function (body) { this._handleNext(body, callback); }.bind(this), this._error);
 };
 
 RESTdesc.prototype._handleNext = function (next, callback)
@@ -81,49 +91,12 @@ RESTdesc.prototype._handleNext = function (next, callback)
     {
         jsonld = this._skolemizeJSONLD(jsonld);
         var jsonldParser = new JSONLDParser();
-        var n3 = jsonldParser.parse(jsonld);
-        json.data = [n3];
+        var n3 = jsonldParser.parse(jsonld); // don'y use 'next' since we need skolemization
+        this.cache.push(n3);
         var template = {'http:methodName':'GET', 'http:requestURI':'', 'http:body':{}, 'http:resp':{'http:body':{}}};
         json = _.assign(template, json);
         callback(json);
     }
-
-    //var self = this;
-    //this.eye.parseBody(next, function (triples, prefixes)
-    //{
-    //    self.eye.destroy(); // clean up cache
-    //
-    //    var store = new N3.Store();
-    //    store.addPrefixes(prefixes);
-    //    store.addTriples(triples);
-    //    var methods = store.find(null, 'http:methodName', null);
-    //    if (methods.length === 0)
-    //    {
-    //        // TODO: done? what do?
-    //        callback('DONE');
-    //    }
-    //    else
-    //    {
-    //        // TODO: more than 1 api possible? what do?
-    //        var root = methods[0].subject;
-    //        self.converter = new RDF_JSONConverter(prefixes);
-    //        var json = self.converter.RDFtoJSON(store, root);
-    //        // TODO: might be 'clearer' to convert the json back to N3 instead?
-    //        // store an n3 version that can be used to send to EYE, not using 'next' because we need skolemization
-    //        json.data = [self.converter._RDFtoN3recursive(store)];
-    //        //json.data = [next];
-    //
-    //        // simplify JSON
-    //        // TODO: more generic (prefix dependent now)
-    //        self._simplifyURIs(json);
-    //        // TODO: don't remove this (and check for other missing fields)
-    //        // TODO: http:methodName, http:requestURI, http:body, http:resp (http:body),
-    //        var template = {'http:methodName': 'GET', 'http:requestURI': '', 'http:body': {}, 'http:resp': {'http:body': {}}};
-    //        json = _.assign(template, json);
-    //
-    //        callback(json);
-    //    }
-    //});
 };
 
 // TODO: I think I'm being inconsistent here, is this the first time I actually edit the JSON in place instead of generating a new one?

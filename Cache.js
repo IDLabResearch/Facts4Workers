@@ -6,27 +6,29 @@ var redis = require("redis");
 
 var EXPIRATION = 24 * 60 * 60; // seconds
 
+// TODO: fallback if there is no running redis instance? (for debugging?)
+
 function Cache (key)
 {
     this.key = key;
 }
 
 
-Cache.prototype.open = function ()
+Cache.prototype.open = function (callback)
 {
     if (!this.client)
     {
         this.client = redis.createClient();
-        // REALLY REALLY IMPORTANT, DO NOT FORGET OR GITLAB GETS DESTROYED
-        this.client.select(4);
+        // REALLY REALLY IMPORTANT, DO NOT FORGET OR GITLAB GETS DESTROYED WHEN THIS GETS DEPLOYED ON RESTDESC
+        this.client.select(4, callback);
     }
 };
 
-Cache.prototype.close = function ()
+Cache.prototype.close = function (callback)
 {
     if (this.client)
     {
-        this.client.quit();
+        this.client.quit(callback);
         this.client = null;
     }
 };
@@ -49,16 +51,23 @@ Cache.prototype.clear = function ()
     this._handleCall('del', this.key);
 };
 
-Cache.prototype.add = function (val)
+Cache.prototype.push = function (val, callback)
 {
     this.open();
-    this._handleCall('sadd', this.key, val);
-    this._handleCall('expire', this.key, EXPIRATION); // reset expiration value if new data is added
+    this._handleCall('lpush', this.key, val);
+    this._handleCall('expire', this.key, EXPIRATION, callback); // reset expiration value if new data is added
     this.close();
+};
+
+Cache.prototype.pop = function (callback)
+{
+    this._handleCall('lpop', this.key, callback);
 };
 
 // callback: function (error, response)
 Cache.prototype.list = function (callback)
 {
-    this._handleCall('smembers', this.key, callback);
+    this._handleCall('lrange', this.key, 0, -1, callback);
 };
+
+module.exports = Cache;

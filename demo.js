@@ -6,7 +6,6 @@ var fs = require('fs');
 var _ = require('lodash');
 var RESTdesc = require('./RESTdesc');
 var serveIndex = require('serve-index');
-var S = require('string');
 var N3 = require('n3');
 
 var args = require('minimist')(process.argv.slice(2));
@@ -82,16 +81,20 @@ app.post('/demo/next', function (req, res)
         if (!goal)
             return res.status(400).json({ error: 'Unknown goal ' + req.body.goal });
     }
-    var rest = new RESTdesc([api1, api2, input], goal);
+    var cacheKey = null;
+    var map = null;
     if (req.body.eye)
     {
         if (req.body.json)
-            mapInput(req.body.json, req.body.eye);
-        if (req.body.eye.data)
-            for (var i = 0; i < req.body.eye.data.length; ++i)
-                rest.addInput(req.body.eye.data[i]);
+            map = mapInput(req.body.json, req.body.eye);
+        cacheKey = req.body.eye.data;
+        //if (req.body.eye.data)
+        //    for (var i = 0; i < req.body.eye.data.length; ++i)
+        //        rest.addInput(req.body.eye.data[i]);
     }
-    handleNext(rest, req, res);
+    var rest = new RESTdesc([api1, api2, input], goal, cacheKey);
+    rest.fillInBlanks(map, function () { handleNext(rest, req, res); });
+
 });
 
 function mapInput (json, eye)
@@ -103,11 +106,7 @@ function mapInput (json, eye)
     var body = eye['http:resp']['http:body'];
     mapInputRecurisve(json, body, map);
 
-    // TODO: I think it is guaranteed that the only changes will be in data[0]
-    if (eye.data)
-        for (var i = 0; i < eye.data.length; ++i)
-            for (var key in map)
-                eye.data[i] = S(eye.data[i]).replaceAll(key, map[key]).toString();
+    return map;
 }
 
 function mapInputRecurisve (json, response, map)
@@ -121,6 +120,7 @@ function mapInputRecurisve (json, response, map)
         return map[response] = '"' + json.replace(/"/g, '\\"') + '"';
     }
 
+    // TODO: update this to use cache, means replacing!
     for (var key in response)
     {
         if (json[key] === undefined)
@@ -157,7 +157,7 @@ function handleNext (rest, req, res, output, count)
         // TODO: work with 'session' id's and store the data in a database (redis?) to prevent data overload
         // TODO: maybe we can also store all steps in the database if a user wants to go back to a previous step?
         // data contains a string representation of the EYE response, we want to add all the other known data to that
-        data.data = (data.data || []).concat(rest.data);
+        data.data = rest.cacheKey;
 
         if (data === 'DONE')
             res.format({ json:function () { res.send({status: 'DONE', output: output, proofs: rest.proofs}); } });
@@ -231,9 +231,9 @@ function handleNext (rest, req, res, output, count)
                         output += JSON.stringify(json, null, 4);
                         output += '\n';
 
-                        mapInput(json, data);
-                        rest.setInput(data.data);
-                        handleNext(rest, req, res, output, count+1);
+                        // TODO: duplication
+                        var map = mapInput(json, data);
+                        rest.fillInBlanks(map, function () { handleNext(rest, req, res, output, count+1); });
                     }
                     else
                         console.error(error, body);
