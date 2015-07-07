@@ -32,7 +32,7 @@ PREFIX var: <http://eulersharp.sourceforge.net/.well-known/genid/795705629272063
               tmpl:requestURI ("http://askTheWorker/" "problemPartId");
               http:body {
                   #the first blank node is a problem. Is it possible to use one uri? Maybe :jsonKV?
-                  :jsonKV :message "Please enter the id of the part where the problem occurred'. 'id' corresponds to the part ID."
+                  _:jsonKV :message "Please enter the id of the part where the problem occurred'. 'id' corresponds to the part ID."
               };
               http:response [
                    http:body _:rb
@@ -80,10 +80,10 @@ PREFIX var: <http://eulersharp.sourceforge.net/.well-known/genid/795705629272063
               ].
 #TODO  Find better solution than universals
     _:body :contains {
-        _:jsonKV2 :defect_id var:did;
+        _:jsonKV2 :defect_id ?did;
                   :name ?name
     }.
-    ?p :defect var:did;
+    ?p :defect ?did;
        :operatorName ?name.
 }.
 
