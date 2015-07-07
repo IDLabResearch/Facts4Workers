@@ -21,7 +21,9 @@ Cache.prototype.open = function (callback)
         this.client = redis.createClient();
         // REALLY REALLY IMPORTANT, DO NOT FORGET OR GITLAB GETS DESTROYED WHEN THIS GETS DEPLOYED ON RESTDESC
         this.client.select(4, callback);
+        return true;
     }
+    return false;
 };
 
 Cache.prototype.close = function (callback)
@@ -36,8 +38,7 @@ Cache.prototype.close = function (callback)
 // handles the open/close for a single call if the connection doesn't need to be kept open
 Cache.prototype._handleCall = function (/*f, args*/)
 {
-    var close = !this.client;
-    this.open();
+    var close = this.open();
 
     var f = arguments[0];
     this.client[f].apply(this.client, Array.prototype.slice.call(arguments, 1));
@@ -53,8 +54,7 @@ Cache.prototype.clear = function ()
 
 Cache.prototype.push = function (val, callback)
 {
-    var close = !this.client;
-    this.open();
+    var close = this.open();
     this._handleCall('lpush', this.key, val);
     this._handleCall('expire', this.key, EXPIRATION, callback); // reset expiration value if new data is added
     if (close)

@@ -5,8 +5,6 @@
 var _ = require('lodash');
 var fs = require('fs');
 var EYEHandler = require('./EYEHandler');
-var N3 = require('n3');
-var RDF_JSONConverter = require('./RDF_JSONConverter');
 var N3Parser = require('./N3Parser');
 var JSONLDParser = require('./JSONLDParser');
 var uuid = require('node-uuid');
@@ -28,8 +26,6 @@ function RESTdesc (input, goal, cacheKey)
     this.findall = fs.readFileSync('n3/findallcalls.n3', 'utf-8');
 
     this.eye = null;
-    // TODO: store with all new triple information
-    //this.store = new N3.store();
 
     // TODO: generalize
     this.prefix = 'http://f4w.restdesc.org/demo#';
@@ -82,6 +78,7 @@ RESTdesc.prototype._handleNext = function (next, callback)
         json['http:requestURI'] = json['tmpl:requestURI'].join('');
         delete json['tmpl:requestURI'];
     }
+
     if (!json || !json['http:requestURI'])
     {
         this.cache.clear();
@@ -97,27 +94,6 @@ RESTdesc.prototype._handleNext = function (next, callback)
         json = _.assign(template, json);
         callback(json);
     }
-};
-
-// TODO: I think I'm being inconsistent here, is this the first time I actually edit the JSON in place instead of generating a new one?
-RESTdesc.prototype._simplifyURIs = function (json)
-{
-    var self = this;
-    // TODO: this is the 15th time I use these 3 checks (and do similar things with them), should generalize this
-    if (_.isString(json))
-        return json;
-
-    if (_.isArray(json))
-        return json.forEach(function (subjson) { self._simplifyURIs(subjson); });
-
-    if (json['tmpl:requestURI'])
-    {
-        json['http:requestURI'] = _.isArray(json['tmpl:requestURI']) ? json['tmpl:requestURI'].join('') : json['tmpl:requestURI'];
-        delete json['tmpl:requestURI'];
-    }
-
-    for (var key in json)
-        self._simplifyURIs(json[key]);
 };
 
 RESTdesc.prototype._JSONLDtoJSON = function (jsonld, baseURI)
