@@ -108,28 +108,24 @@ function mapInput (json, eye)
 
 function mapInputRecurisve (json, response, map)
 {
-    // TODO: should replace json values with n3 representation
-
-    // TODO: look into this later
     if (_.isString(response))
+        map[response] = json;
+    else if (_.isArray(response))
     {
-        // TODO: really hardcoded here, should generalize (again)
-        return map[response] = json;//'"' + json.replace(/"/g, '\\"') + '"';
-    }
+        if (!_.isArray(json) || json.length !== response.length)
+            throw 'Expecting array of length ' + response.length + ', got ' + JSON.stringify(json) + ' instead.';
 
-    // TODO: update this to use cache, means replacing!
-    for (var key in response)
+        for (var i = 0; i < response.length; ++i)
+            mapInputRecurisve(json[i], response[i], map);
+    }
+    else
     {
-        if (json[key] === undefined)
-            throw "Missing JSON input key: " + key;
-        if (_.isString(json[key]))
-            map[response[key]] = json[key]; // '"' + json[key] + '"';
-        else if (_.isNumber(json[key]))
-            // TODO: handle decimals
-            //map[response[key]] = N3.Util.createLiteral(json[key], '<http://www.w3.org/2001/XMLSchema#decimal>');
-            map[response[key]] = json[key];
-        else
+        for (var key in response)
+        {
+            if (json[key] === undefined)
+                throw "Missing JSON input key: " + key;
             mapInputRecurisve(json[key], response[key], map);
+        }
     }
 }
 
