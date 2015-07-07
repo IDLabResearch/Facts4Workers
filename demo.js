@@ -114,7 +114,7 @@ function mapInputRecurisve (json, response, map)
     if (_.isString(response))
     {
         // TODO: really hardcoded here, should generalize (again)
-        return map[response] = '"' + json.replace(/"/g, '\\"') + '"';
+        return map[response] = json.replace(/"/g, '\\"');//'"' + json.replace(/"/g, '\\"') + '"';
     }
 
     // TODO: update this to use cache, means replacing!
@@ -123,7 +123,7 @@ function mapInputRecurisve (json, response, map)
         if (json[key] === undefined)
             throw "Missing JSON input key: " + key;
         if (_.isString(json[key]))
-            map[response[key]] = '"' + json[key] + '"';
+            map[response[key]] = json[key]; // '"' + json[key] + '"';
         else if (_.isNumber(json[key]))
             // TODO: handle decimals
             //map[response[key]] = N3.Util.createLiteral(json[key], '<http://www.w3.org/2001/XMLSchema#decimal>');

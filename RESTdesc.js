@@ -43,7 +43,7 @@ RESTdesc.prototype.fillInBlanks = function (map, callback)
     this.cache.open();
     this.cache.pop(function (err, val)
     {
-        var parser = new JSONLDParser();
+        //var parser = new JSONLDParser();
         //for (var key in map)
         //{
         //    var jsonld = this._skolemizeJSONLD(this._JSONtoJSONLD(map[key]), {});
@@ -54,8 +54,9 @@ RESTdesc.prototype.fillInBlanks = function (map, callback)
         //    console.log(n3);
         //    val = S(val).replaceAll(key, n3).toString();
         //}
+        // TODO: obviously should look in JSONLD object and not do string replacements
         for (var key in map)
-            val = S(val).replaceAll(key, map[key]).toString();
+            val = S(val).replaceAll('"@id":"' + key, '"@value":"' + map[key]).toString();
         this.cache.push(val);
         this.cache.close(callback); // it's really important to execute the callback after the push is finished or there is a race condition
     }.bind(this));
@@ -65,6 +66,9 @@ RESTdesc.prototype.next = function (callback)
 {
     this.cache.list(function (err, data)
     {
+        // TODO: how big of a performance hit is it to always convert the jsonld?
+        var parser = new JSONLDParser();
+        data = data.map(function (str) { return parser.parse(JSON.parse(str)); });
         // create new eye handler every time so we know when to call destroy function
         this.eye = new EYEHandler();
         this.eye.call(this.input.concat(data), this.goal, true, true, false, function (proof) { this._handleProof(proof, callback); }.bind(this), this._error);
@@ -99,8 +103,8 @@ RESTdesc.prototype._handleNext = function (next, callback)
     {
         jsonld = this._skolemizeJSONLD(jsonld);
         var jsonldParser = new JSONLDParser();
-        var n3 = jsonldParser.parse(jsonld); // don'y use 'next' since we need skolemization
-        this.cache.push(n3);
+        //var n3 = jsonldParser.parse(jsonld); // don'y use 'next' since we need skolemization
+        this.cache.push(JSON.stringify(jsonld));
         var template = {'http:methodName':'GET', 'http:requestURI':'', 'http:body':{}, 'http:resp':{'http:body':{}}};
         json = _.assign(template, json);
         callback(json);
