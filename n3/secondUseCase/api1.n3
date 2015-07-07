@@ -4,6 +4,7 @@
 @prefix log: <http://www.w3.org/2000/10/swap/log#>.
 @prefix string: <http://www.w3.org/2000/10/swap/string#>.
 @prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
+PREFIX var: <http://eulersharp.sourceforge.net/.well-known/genid/7957056292720637629065621273742128#>
 
 #new problem, the :p has to be different for every new poblem.
 :p a :problem.
@@ -18,6 +19,9 @@
     ?p :status "open"
 }.
 
+#missing step: get all part ids
+
+
 #ask worker for part-id
 {
     ?p a :problem.
@@ -28,16 +32,18 @@
               tmpl:requestURI ("http://askTheWorker/" "problemPartId");
               http:body {
                   #the first blank node is a problem. Is it possible to use one uri? Maybe :jsonKV?
-                  _:jsonKV :message "Please enter the id of the part where the problem occurred'. 'id' corresponds to the part ID."
+                  :jsonKV :message "Please enter the id of the part where the problem occurred'. 'id' corresponds to the part ID."
               };
               http:response [
                    http:body _:rb
               ].
     _:rb :contains {
-        _:jsonKV :part_id _:pid
+#Problem here: the skolem variable! No Euler path detection! "Dirty fix: use universals!
+#TODO Find a real solution!
+        _:jsonKV :part_id ?pid
     }.
-    ?p :onPart _:pid.
-    _:pid a :partId.
+    ?p :onPart ?pid.
+    ?pid a :partId.
 }.
 
 #get all possible defects for that part
@@ -72,11 +78,12 @@
               http:response [
                    http:body _:body
               ].
+#TODO  Find better solution than universals
     _:body :contains {
-        _:jsonKV2 :defect_id _:did;
-                  :name _:name
+        _:jsonKV2 :defect_id var:did;
+                  :name ?name
     }.
-    ?p :defect _:did;
+    ?p :defect var:did;
        :operatorName ?name.
 }.
 
@@ -91,14 +98,15 @@
        :defect ?did.
     ?pid :defects ?body.
 
-    ?did e:whenGround ?gdid.
-    ?body e:whenGround ?gbody.
+  #  ?did e:whenGround ?gdid.
+  #  ?body e:whenGround ?gbody.
 
     #Json representation has to be adapted
-    ?gbody log:notIncludes { ?jsonKV :id ?gdid }.
-
-    #this should work, I don't like it logic-wise, to be fixed...
-    ("Please create a new defect entry for id " ?gdid " on part " ?pid ". Specify 'name' and 'description'. Optional: 'picture', 'comment' and occurence ") string:concatenation ?conc.
+#PROBLEM: notIncludes!!!!!!!!!!!!
+    ?body log:notIncludes { ?jsonKV :id ?did }.
+	
+    #question: Do we need that string?
+  ("Please create a new defect entry for id " ?did " on part " ?pid ". Specify 'name' and 'description'. Optional: 'picture', 'comment' and occurence ") string:concatenation ?conc.
 
 }
 =>
@@ -107,10 +115,13 @@
               tmpl:requestURI ("http://askTheWorker/" "createEntry");
               http:body {
                   _:jsonKV :message ?conc;
+                      :part_id ?pid;
+                      :defect_id ?did.
               };
               http:response [
                   http:body _:body
               ].
+#this has to be checked!
     _:body :contains {
         _:jsonKV2 :name _:name;
                   :description _:desc.
@@ -120,26 +131,27 @@
 
 #API post new defect entry
 {
-    ?p a :problem;
+    ?p a :problem; #;
        :onPart ?pid;
        :defect ?did.
     ?did :defectEntry ?body.
     ?body e:whenGround ?gBody.
     ?gBody log:includes {?s :name ?name}.
-    ?json e:graphList (?gBody {?s :part_id ?pid. ?s :part ?did}).
+     (?gBody {?s :part_id ?pid. ?s :part ?did}) log:conjunction ?json.
 }
 =>
 {
     _:request http:methodName "POST";
               tmpl:requestURI ("http://thermolympic-demo.herokuapp.com/defects");
-              http:body ?body;
+	      :check ?body;
+              http:body ?json;
               http:response [
                   http:body _:body
               ].
-    ?did :is :listed.
+    ?did :is ?listed. 
 }.
 
-#rule: did known, it is on purpose that we don't use "whenKnown" here. Our API-call step-count should always use the worst case.
+#rule: did known, it is on purpose that we don't use "whenGround" here. Our API-call step-count should always use the worst case.
 {
     ?p a :problem;
        :onPart ?pid;
@@ -157,13 +169,14 @@
     ?p a :problem;
        :status "open";
        :defect ?did.
-    #?did :is :listed.
-    #?p :operatorName ?name.
+    ?did :is ?listed. 
+    ?p :operatorName ?name.
 }
 =>
 {
     _:request http:methodName "POST";
               tmpl:requestURI ("http://thermolympic-demo.herokuapp.com/reports");
+	      :check ?listed;
               http:body {
                   _:jsonKV :defect_id ?did;
                            :operator ?name; :status "open".

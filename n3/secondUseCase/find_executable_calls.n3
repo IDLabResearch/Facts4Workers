@@ -10,48 +10,62 @@ PREFIX r: <http://www.w3.org/2000/10/swap/reason#>
 # This file is not finished!
 # Has to be fixed  for response graph
 ###################################################################
-
-
-
 #This file will only output executable calls. It also keeps information about one call together
 
 {
 ?x r:gives ?y. 
 
+?y :checked :ok.
+
 #does ?y include an http-call?
 ?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n. #?z :root ?root. 
 ?z http:body ?body. }.
 
-_:r e:findall ( 
-{?body ?pr ?ob}  {?x r:gives ?y. 
-?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n.  #?z :root ?root. 
-?z http:body ?body. }.}  ?list ).
 
-##################################################################################################
-#This is for only getting the call information, not the expected response. 
-#(({?z tmpl:requestURI ?a.} {?z http:methodName ?n.} {?z :root ?root.} {?z http:body ?body.}) ?list) list:append ?list3.
 
-#?list2 e:graphList ?list3. 
 
-#####################################################################################################
-
-#test: are there no existentials in the important positions of the call?
-#Is the URI sufficiently instanciated?
+#is this all ground?
 ?a e:notLabel ?aa.
 ?a :testList ?pp.
 
+?n e:notLabel ?m.
+?n :testList ?mm.
+
+#is the body ground?
+?body e:notLabel ?bodylabel.
+
+#Are all objects in the body ground?
+
+_:r e:findall ( ?o {?body log:includes {?s ?p ?o}} ?os).
+
+?os :testList ?oos.
+
+#_:r e:findall ( 
+#{?body ?pr ?ob}  {?x r:gives ?y. 
+#?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n.  #?z :root ?root. 
+#?z http:body ?body. }.}  ?list ).
+
+
+#?a e:notLabel ?aa.
+#?a :testList ?pp.
+
 #get all objects in the body
-?z :bodyObjects ?olist.
+#?z :bodyObjects ?olist.
 
 #Is every object in the body of the call gound?
-?olist :testList ?ppp.
+#?olist :testList ?ppp.
 
-}=> ?y.
+}=> ?y. #{ ?os :the ?body}.
+
+#?y.
+
+
+
 
 #new rule: No body
 {
 ?x r:gives ?y. 
-
+?y :checked :ok.
 #does ?y include an http-call?
 ?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n. #?z :root ?root. 
  }.
