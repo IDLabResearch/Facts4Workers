@@ -114,7 +114,7 @@ function mapInputRecurisve (json, response, map)
     if (_.isString(response))
     {
         // TODO: really hardcoded here, should generalize (again)
-        return map[response] = json.replace(/"/g, '\\"');//'"' + json.replace(/"/g, '\\"') + '"';
+        return map[response] = json;//'"' + json.replace(/"/g, '\\"') + '"';
     }
 
     // TODO: update this to use cache, means replacing!

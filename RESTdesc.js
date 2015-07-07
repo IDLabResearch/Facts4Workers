@@ -9,7 +9,6 @@ var N3Parser = require('./N3Parser');
 var JSONLDParser = require('./JSONLDParser');
 var uuid = require('node-uuid');
 var Cache = require('./Cache');
-var S = require('string');
 
 function RESTdesc (input, goal, cacheKey)
 {
@@ -43,23 +42,29 @@ RESTdesc.prototype.fillInBlanks = function (map, callback)
     this.cache.open();
     this.cache.pop(function (err, val)
     {
-        //var parser = new JSONLDParser();
-        //for (var key in map)
-        //{
-        //    var jsonld = this._skolemizeJSONLD(this._JSONtoJSONLD(map[key]), {});
-        //    var n3 = parser.parse(jsonld);
-        //    console.log('JSONLD');
-        //    console.log(JSON.stringify(jsonld, null, 4));
-        //    console.log('N3');
-        //    console.log(n3);
-        //    val = S(val).replaceAll(key, n3).toString();
-        //}
-        // TODO: obviously should look in JSONLD object and not do string replacements
-        for (var key in map)
-            val = S(val).replaceAll('"@id":"' + key, '"@value":"' + map[key]).toString();
-        this.cache.push(val);
+        var jsonld = this._replaceJSONLDblanks(JSON.parse(val), map);
+        this.cache.push(JSON.stringify(jsonld));
         this.cache.close(callback); // it's really important to execute the callback after the push is finished or there is a race condition
     }.bind(this));
+};
+
+RESTdesc.prototype._replaceJSONLDblanks = function (jsonld, map)
+{
+    if (_.isString(jsonld) || _.isNumber(jsonld))
+        return jsonld;
+
+    if (_.isArray(jsonld))
+        return jsonld.map(function (thingy) { return this._replaceJSONLDblanks(thingy, map); }.bind(this));
+
+    // TODO: might have more complicated situations where this is incorrect
+    if (jsonld['@id'] && map[jsonld['@id']])
+        return map[jsonld['@id']];
+
+    // TODO: technically keys should also be checked;
+    var result = {};
+    for (var key in jsonld)
+        result[key] = this._replaceJSONLDblanks(jsonld[key], map)
+    return result;
 };
 
 RESTdesc.prototype.next = function (callback)
