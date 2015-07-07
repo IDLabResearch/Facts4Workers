@@ -43,6 +43,17 @@ RESTdesc.prototype.fillInBlanks = function (map, callback)
     this.cache.open();
     this.cache.pop(function (err, val)
     {
+        var parser = new JSONLDParser();
+        //for (var key in map)
+        //{
+        //    var jsonld = this._skolemizeJSONLD(this._JSONtoJSONLD(map[key]), {});
+        //    var n3 = parser.parse(jsonld);
+        //    console.log('JSONLD');
+        //    console.log(JSON.stringify(jsonld, null, 4));
+        //    console.log('N3');
+        //    console.log(n3);
+        //    val = S(val).replaceAll(key, n3).toString();
+        //}
         for (var key in map)
             val = S(val).replaceAll(key, map[key]).toString();
         this.cache.push(val);
@@ -121,6 +132,7 @@ RESTdesc.prototype._JSONLDtoJSON = function (jsonld, baseURI)
         if ((key === '@list' || key === '@graph' || key === '@id') && keys.length === 1)
             return this._JSONLDtoJSON(jsonld[key], baseURI);
 
+        // TODO: what if uri still contains colons? maybe this isn't necessary anyway
         var val = this._JSONLDtoJSON(jsonld[key], baseURI);
         if (baseURI && _.startsWith(key, baseURI))
             key = key.substr(baseURI.length);
@@ -134,13 +146,25 @@ RESTdesc.prototype._JSONLDtoJSON = function (jsonld, baseURI)
 };
 
 // this is only partial skolemization since we don't want to convert the nodes the user has to fill in.
-RESTdesc.prototype._skolemizeJSONLD = function (jsonld)
+RESTdesc.prototype._skolemizeJSONLD = function (jsonld, blankMap)
 {
-    if (_.isString(jsonld) || _.isNumber(jsonld))
+    if (_.isNumber(jsonld))
         return jsonld;
 
+    if (_.isString(jsonld))
+    {
+        // TODO: funny thing, what if we have a string literal that starts with _: ? need to know object key...
+        if (blankMap && _.startsWith(jsonld, '_:'))
+        {
+            if (!blankMap[jsonld])
+                blankMap[jsonld] = this.prefix + uuid.v4();
+            return blankMap[jsonld];
+        }
+        return jsonld;
+    }
+
     if (_.isArray(jsonld))
-        return jsonld.map(function (child) { return this._skolemizeJSONLD(child); }, this);
+        return jsonld.map(function (child) { return this._skolemizeJSONLD(child, blankMap); }, this);
 
     var result = {};
     // TODO: skolemize predicates
@@ -150,7 +174,7 @@ RESTdesc.prototype._skolemizeJSONLD = function (jsonld)
         if (key === '@context')
             result[key] = jsonld[key];
         else
-            result[key] = this._skolemizeJSONLD(jsonld[key]);
+            result[key] = this._skolemizeJSONLD(jsonld[key], blankMap);
     }
 
     // all these don't need to be skolemized for eye/n3
@@ -160,6 +184,27 @@ RESTdesc.prototype._skolemizeJSONLD = function (jsonld)
     return result;
 };
 
+// TODO: needs same changes as JSONLDtoJSON
+// TODO: do note that this function will only be used for API/user input?
+RESTdesc.prototype._JSONtoJSONLD = function (json)
+{
+    if (_.isString(json) || _.isNumber(json))
+        return json;
+
+    // TODO: how to know if it is a listor multiple objects for the same predicate?
+    if (_.isArray(json))
+        return { '@list': jsonld.map(function (child) { return this._JSONtoJSONLD(child, baseURI); }, this) };
+
+    var jsonld = {};
+
+    for (var key in jsonld)
+        jsonld[key] = this._JSONtoJSONLD(json[key]);
+
+    // TODO: how do we know we have subgraphs?
+    // TODO: etc. (will depend on rules used)
+
+    return jsonld;
+};
 
 RESTdesc.prototype._error = function (error, content)
 {

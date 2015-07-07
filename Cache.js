@@ -7,6 +7,7 @@ var redis = require("redis");
 var EXPIRATION = 24 * 60 * 60; // seconds
 
 // TODO: fallback if there is no running redis instance? (for debugging?)
+// TODO: use hash containing jsonld and link to list? (would make the whole skolemization thingy more consistent also)
 
 function Cache (key)
 {
