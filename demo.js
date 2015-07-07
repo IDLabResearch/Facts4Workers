@@ -88,9 +88,6 @@ app.post('/demo/next', function (req, res)
         if (req.body.json)
             map = mapInput(req.body.json, req.body.eye);
         cacheKey = req.body.eye.data;
-        //if (req.body.eye.data)
-        //    for (var i = 0; i < req.body.eye.data.length; ++i)
-        //        rest.addInput(req.body.eye.data[i]);
     }
     var rest = new RESTdesc([api1, api2, input], goal, cacheKey);
     rest.fillInBlanks(map, function () { handleNext(rest, req, res); });

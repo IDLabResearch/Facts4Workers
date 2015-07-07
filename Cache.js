@@ -53,10 +53,12 @@ Cache.prototype.clear = function ()
 
 Cache.prototype.push = function (val, callback)
 {
+    var close = !this.client;
     this.open();
     this._handleCall('lpush', this.key, val);
     this._handleCall('expire', this.key, EXPIRATION, callback); // reset expiration value if new data is added
-    this.close();
+    if (close)
+        this.close();
 };
 
 Cache.prototype.pop = function (callback)

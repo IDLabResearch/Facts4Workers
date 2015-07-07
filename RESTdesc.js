@@ -37,11 +37,6 @@ function RESTdesc (input, goal, cacheKey)
     this.proofs = [];
 }
 
-RESTdesc.prototype.addInput = function (input)
-{
-    this.cache.push(input);
-};
-
 // TODO: we can cache the cache in a list ...
 // keys of map are blank nodes, values are their replacements
 RESTdesc.prototype.fillInBlanks = function (map, callback)
@@ -49,11 +44,13 @@ RESTdesc.prototype.fillInBlanks = function (map, callback)
     if (!map)
         return callback();
 
+    this.cache.open();
     this.cache.pop(function (err, val)
     {
         for (var key in map)
             val = S(val).replaceAll(key, map[key]).toString();
-        this.cache.push(val, callback); // it's really important to execute the callback after the push is finished or there is a race condition
+        this.cache.push(val);
+        this.cache.close(callback); // it's really important to execute the callback after the push is finished or there is a race condition
     }.bind(this));
 };
 
@@ -86,7 +83,10 @@ RESTdesc.prototype._handleNext = function (next, callback)
         delete json['tmpl:requestURI'];
     }
     if (!json || !json['http:requestURI'])
+    {
+        this.cache.clear();
         callback('DONE');
+    }
     else
     {
         jsonld = this._skolemizeJSONLD(jsonld);
