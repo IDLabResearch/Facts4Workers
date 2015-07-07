@@ -5,16 +5,17 @@
 var _ = require('lodash');
 var fs = require('fs');
 var EYEHandler = require('./EYEHandler');
-var N3 = require('n3');
-var RDF_JSONConverter = require('./RDF_JSONConverter');
 var N3Parser = require('./N3Parser');
 var JSONLDParser = require('./JSONLDParser');
 var uuid = require('node-uuid');
+var Cache = require('./Cache');
 
-function RESTdesc (input, goal)
+function RESTdesc (input, goal, cacheKey)
 {
     this.input = input;
     this.goal = goal;
+    this.cacheKey = cacheKey || uuid.v4();
+    this.cache = new Cache(this.cacheKey);
 
     if (!_.isArray(this.input))
         this.input = [this.input];
@@ -24,43 +25,65 @@ function RESTdesc (input, goal)
     this.findall = fs.readFileSync('n3/findallcalls.n3', 'utf-8');
 
     this.eye = null;
-    // TODO: store with all new triple information
-    //this.store = new N3.store();
 
     // TODO: generalize
     this.prefix = 'http://f4w.restdesc.org/demo#';
 
-    // TODO: prettify
-    this.data = [];
-
     this.proofs = [];
 }
 
-RESTdesc.prototype.addInput = function (input)
+// TODO: we can cache the cache in a list ...
+// keys of map are blank nodes, values are their replacements
+RESTdesc.prototype.fillInBlanks = function (map, callback)
 {
-    this.data.push(input);
+    if (!map)
+        return callback();
+
+    this.cache.open();
+    this.cache.pop(function (err, val)
+    {
+        var jsonld = this._replaceJSONLDblanks(JSON.parse(val), map);
+        this.cache.push(JSON.stringify(jsonld));
+        this.cache.close(callback); // it's really important to execute the callback after the push is finished or there is a race condition
+    }.bind(this));
 };
 
-RESTdesc.prototype.setInput = function (input)
+RESTdesc.prototype._replaceJSONLDblanks = function (jsonld, map)
 {
-    this.data = [].concat(input);
+    if (_.isString(jsonld) || _.isNumber(jsonld))
+        return jsonld;
+
+    if (_.isArray(jsonld))
+        return jsonld.map(function (thingy) { return this._replaceJSONLDblanks(thingy, map); }.bind(this));
+
+    // TODO: might have more complicated situations where this is incorrect
+    if (jsonld['@id'] && map[jsonld['@id']])
+        return map[jsonld['@id']];
+
+    // TODO: technically keys should also be checked;
+    var result = {};
+    for (var key in jsonld)
+        result[key] = this._replaceJSONLDblanks(jsonld[key], map)
+    return result;
 };
 
 RESTdesc.prototype.next = function (callback)
 {
-    // create new eye handler every time so we know when to call destroy function
-    this.eye = new EYEHandler();
-    var self = this;
-    this.eye.call(this.input.concat(this.data), this.goal, true, true, false, function (proof) { self._handleProof(proof, callback); }, this._error);
-    // TODO: use the new info. Still more a fan of deleting old output though.
-    //this.eye.call(this.input, this.goal, false, false, true, function (proof) { console.log(proof); }, this._error, true);
+    this.cache.list(function (err, data)
+    {
+        // TODO: how big of a performance hit is it to always convert the jsonld?
+        var parser = new JSONLDParser();
+        data = data.map(function (str) { return parser.parse(JSON.parse(str)); });
+        // create new eye handler every time so we know when to call destroy function
+        this.eye = new EYEHandler();
+        this.eye.call(this.input.concat(data), this.goal, true, true, false, function (proof) { this._handleProof(proof, callback); }.bind(this), this._error);
+    }.bind(this));
 };
 
 RESTdesc.prototype._handleProof = function (proof, callback)
 {
-    var self = this;
     this.proofs.push(proof);
-    this.eye.call([proof, this.list], this.find, false, true, false, function (body) { self._handleNext(body, callback); }, this._error);
+    this.eye.call([proof, this.list], this.find, false, true, false, function (body) { this._handleNext(body, callback); }.bind(this), this._error);
 };
 
 RESTdesc.prototype._handleNext = function (next, callback)
@@ -75,76 +98,22 @@ RESTdesc.prototype._handleNext = function (next, callback)
         json['http:requestURI'] = json['tmpl:requestURI'].join('');
         delete json['tmpl:requestURI'];
     }
+
     if (!json || !json['http:requestURI'])
+    {
+        this.cache.clear();
         callback('DONE');
+    }
     else
     {
         jsonld = this._skolemizeJSONLD(jsonld);
         var jsonldParser = new JSONLDParser();
-        var n3 = jsonldParser.parse(jsonld);
-        json.data = [n3];
+        //var n3 = jsonldParser.parse(jsonld); // don'y use 'next' since we need skolemization
+        this.cache.push(JSON.stringify(jsonld));
         var template = {'http:methodName':'GET', 'http:requestURI':'', 'http:body':{}, 'http:resp':{'http:body':{}}};
         json = _.assign(template, json);
         callback(json);
     }
-
-    //var self = this;
-    //this.eye.parseBody(next, function (triples, prefixes)
-    //{
-    //    self.eye.destroy(); // clean up cache
-    //
-    //    var store = new N3.Store();
-    //    store.addPrefixes(prefixes);
-    //    store.addTriples(triples);
-    //    var methods = store.find(null, 'http:methodName', null);
-    //    if (methods.length === 0)
-    //    {
-    //        // TODO: done? what do?
-    //        callback('DONE');
-    //    }
-    //    else
-    //    {
-    //        // TODO: more than 1 api possible? what do?
-    //        var root = methods[0].subject;
-    //        self.converter = new RDF_JSONConverter(prefixes);
-    //        var json = self.converter.RDFtoJSON(store, root);
-    //        // TODO: might be 'clearer' to convert the json back to N3 instead?
-    //        // store an n3 version that can be used to send to EYE, not using 'next' because we need skolemization
-    //        json.data = [self.converter._RDFtoN3recursive(store)];
-    //        //json.data = [next];
-    //
-    //        // simplify JSON
-    //        // TODO: more generic (prefix dependent now)
-    //        self._simplifyURIs(json);
-    //        // TODO: don't remove this (and check for other missing fields)
-    //        // TODO: http:methodName, http:requestURI, http:body, http:resp (http:body),
-    //        var template = {'http:methodName': 'GET', 'http:requestURI': '', 'http:body': {}, 'http:resp': {'http:body': {}}};
-    //        json = _.assign(template, json);
-    //
-    //        callback(json);
-    //    }
-    //});
-};
-
-// TODO: I think I'm being inconsistent here, is this the first time I actually edit the JSON in place instead of generating a new one?
-RESTdesc.prototype._simplifyURIs = function (json)
-{
-    var self = this;
-    // TODO: this is the 15th time I use these 3 checks (and do similar things with them), should generalize this
-    if (_.isString(json))
-        return json;
-
-    if (_.isArray(json))
-        return json.forEach(function (subjson) { self._simplifyURIs(subjson); });
-
-    if (json['tmpl:requestURI'])
-    {
-        json['http:requestURI'] = _.isArray(json['tmpl:requestURI']) ? json['tmpl:requestURI'].join('') : json['tmpl:requestURI'];
-        delete json['tmpl:requestURI'];
-    }
-
-    for (var key in json)
-        self._simplifyURIs(json[key]);
 };
 
 RESTdesc.prototype._JSONLDtoJSON = function (jsonld, baseURI)
@@ -172,6 +141,7 @@ RESTdesc.prototype._JSONLDtoJSON = function (jsonld, baseURI)
         if ((key === '@list' || key === '@graph' || key === '@id') && keys.length === 1)
             return this._JSONLDtoJSON(jsonld[key], baseURI);
 
+        // TODO: what if uri still contains colons? maybe this isn't necessary anyway
         var val = this._JSONLDtoJSON(jsonld[key], baseURI);
         if (baseURI && _.startsWith(key, baseURI))
             key = key.substr(baseURI.length);
@@ -185,13 +155,25 @@ RESTdesc.prototype._JSONLDtoJSON = function (jsonld, baseURI)
 };
 
 // this is only partial skolemization since we don't want to convert the nodes the user has to fill in.
-RESTdesc.prototype._skolemizeJSONLD = function (jsonld)
+RESTdesc.prototype._skolemizeJSONLD = function (jsonld, blankMap)
 {
-    if (_.isString(jsonld) || _.isNumber(jsonld))
+    if (_.isNumber(jsonld))
         return jsonld;
 
+    if (_.isString(jsonld))
+    {
+        // TODO: funny thing, what if we have a string literal that starts with _: ? need to know object key...
+        if (blankMap && _.startsWith(jsonld, '_:'))
+        {
+            if (!blankMap[jsonld])
+                blankMap[jsonld] = this.prefix + uuid.v4();
+            return blankMap[jsonld];
+        }
+        return jsonld;
+    }
+
     if (_.isArray(jsonld))
-        return jsonld.map(function (child) { return this._skolemizeJSONLD(child); }, this);
+        return jsonld.map(function (child) { return this._skolemizeJSONLD(child, blankMap); }, this);
 
     var result = {};
     // TODO: skolemize predicates
@@ -201,7 +183,7 @@ RESTdesc.prototype._skolemizeJSONLD = function (jsonld)
         if (key === '@context')
             result[key] = jsonld[key];
         else
-            result[key] = this._skolemizeJSONLD(jsonld[key]);
+            result[key] = this._skolemizeJSONLD(jsonld[key], blankMap);
     }
 
     // all these don't need to be skolemized for eye/n3
@@ -211,6 +193,27 @@ RESTdesc.prototype._skolemizeJSONLD = function (jsonld)
     return result;
 };
 
+// TODO: needs same changes as JSONLDtoJSON
+// TODO: do note that this function will only be used for API/user input?
+RESTdesc.prototype._JSONtoJSONLD = function (json)
+{
+    if (_.isString(json) || _.isNumber(json))
+        return json;
+
+    // TODO: how to know if it is a listor multiple objects for the same predicate?
+    if (_.isArray(json))
+        return { '@list': jsonld.map(function (child) { return this._JSONtoJSONLD(child, baseURI); }, this) };
+
+    var jsonld = {};
+
+    for (var key in jsonld)
+        jsonld[key] = this._JSONtoJSONLD(json[key]);
+
+    // TODO: how do we know we have subgraphs?
+    // TODO: etc. (will depend on rules used)
+
+    return jsonld;
+};
 
 RESTdesc.prototype._error = function (error, content)
 {

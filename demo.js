@@ -6,7 +6,6 @@ var fs = require('fs');
 var _ = require('lodash');
 var RESTdesc = require('./RESTdesc');
 var serveIndex = require('serve-index');
-var S = require('string');
 var N3 = require('n3');
 
 var args = require('minimist')(process.argv.slice(2));
@@ -82,16 +81,17 @@ app.post('/demo/next', function (req, res)
         if (!goal)
             return res.status(400).json({ error: 'Unknown goal ' + req.body.goal });
     }
-    var rest = new RESTdesc([api1, api2, input], goal);
+    var cacheKey = null;
+    var map = null;
     if (req.body.eye)
     {
         if (req.body.json)
-            mapInput(req.body.json, req.body.eye);
-        if (req.body.eye.data)
-            for (var i = 0; i < req.body.eye.data.length; ++i)
-                rest.addInput(req.body.eye.data[i]);
+            map = mapInput(req.body.json, req.body.eye);
+        cacheKey = req.body.eye.data;
     }
-    handleNext(rest, req, res);
+    var rest = new RESTdesc([api1, api2, input], goal, cacheKey);
+    rest.fillInBlanks(map, function () { handleNext(rest, req, res); });
+
 });
 
 function mapInput (json, eye)
@@ -103,36 +103,29 @@ function mapInput (json, eye)
     var body = eye['http:resp']['http:body'];
     mapInputRecurisve(json, body, map);
 
-    // TODO: I think it is guaranteed that the only changes will be in data[0]
-    if (eye.data)
-        for (var i = 0; i < eye.data.length; ++i)
-            for (var key in map)
-                eye.data[i] = S(eye.data[i]).replaceAll(key, map[key]).toString();
+    return map;
 }
 
 function mapInputRecurisve (json, response, map)
 {
-    // TODO: should replace json values with n3 representation
-
-    // TODO: look into this later
     if (_.isString(response))
+        map[response] = json;
+    else if (_.isArray(response))
     {
-        // TODO: really hardcoded here, should generalize (again)
-        return map[response] = '"' + json.replace(/"/g, '\\"') + '"';
-    }
+        if (!_.isArray(json) || json.length !== response.length)
+            throw 'Expecting array of length ' + response.length + ', got ' + JSON.stringify(json) + ' instead.';
 
-    for (var key in response)
+        for (var i = 0; i < response.length; ++i)
+            mapInputRecurisve(json[i], response[i], map);
+    }
+    else
     {
-        if (json[key] === undefined)
-            throw "Missing JSON input key: " + key;
-        if (_.isString(json[key]))
-            map[response[key]] = '"' + json[key] + '"';
-        else if (_.isNumber(json[key]))
-            // TODO: handle decimals
-            //map[response[key]] = N3.Util.createLiteral(json[key], '<http://www.w3.org/2001/XMLSchema#decimal>');
-            map[response[key]] = json[key];
-        else
+        for (var key in response)
+        {
+            if (json[key] === undefined)
+                throw "Missing JSON input key: " + key;
             mapInputRecurisve(json[key], response[key], map);
+        }
     }
 }
 
@@ -154,10 +147,8 @@ function handleNext (rest, req, res, output, count)
         output += JSON.stringify(data, null, 4);
         output += '\n';
 
-        // TODO: work with 'session' id's and store the data in a database (redis?) to prevent data overload
-        // TODO: maybe we can also store all steps in the database if a user wants to go back to a previous step?
-        // data contains a string representation of the EYE response, we want to add all the other known data to that
-        data.data = (data.data || []).concat(rest.data);
+        // give cacheKey to user so they can send it back in the next step
+        data.data = rest.cacheKey;
 
         if (data === 'DONE')
             res.format({ json:function () { res.send({status: 'DONE', output: output, proofs: rest.proofs}); } });
@@ -231,9 +222,9 @@ function handleNext (rest, req, res, output, count)
                         output += JSON.stringify(json, null, 4);
                         output += '\n';
 
-                        mapInput(json, data);
-                        rest.setInput(data.data);
-                        handleNext(rest, req, res, output, count+1);
+                        // TODO: duplication
+                        var map = mapInput(json, data);
+                        rest.fillInBlanks(map, function () { handleNext(rest, req, res, output, count+1); });
                     }
                     else
                         console.error(error, body);
