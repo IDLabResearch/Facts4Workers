@@ -49,8 +49,10 @@ RESTdesc.prototype.fillInBlanks = function (map, callback)
     }.bind(this));
 };
 
-RESTdesc.prototype._replaceJSONLDblanks = function (jsonld, map)
+// TODO: if we replace blank nodes we still have to make sure they get the correct URI during skolemization
+RESTdesc.prototype._replaceJSONLDblanks = function (jsonld, map, idMap)
 {
+    idMap = idMap || {};
     if (_.isString(jsonld) || _.isNumber(jsonld))
         return jsonld;
 
@@ -59,7 +61,13 @@ RESTdesc.prototype._replaceJSONLDblanks = function (jsonld, map)
 
     // TODO: might have more complicated situations where this is incorrect
     if (jsonld['@id'] && map[jsonld['@id']])
-        return this._JSONtoJSONLD(map[jsonld['@id']]);
+    {
+        var id = jsonld['@id'];
+        if (idMap[id])
+            return idMap[id];
+        idMap[id] = this._JSONtoJSONLD(map[id]); // TODO: need to do skolemization here to keep ids consistent
+        return idMap[id];
+    }
 
     // TODO: technically keys should also be checked;
     var result = {};

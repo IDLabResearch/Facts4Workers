@@ -198,7 +198,6 @@ function handleNext (rest, req, res, output, count)
                 }
             }
 
-            // TODO: currently hardcoded on JSON
             if (body)
                 requestParams.json = body;
 
