@@ -146,9 +146,24 @@ RESTdesc.prototype._JSONLDtoJSON = function (jsonld, baseURI)
         if (key === '@context')
             continue;
 
+        if (key === '@graph')
+        {
+            var result = this._JSONLDtoJSON(jsonld[key], baseURI);
+            // will always be a list, but often with only 1 element
+            if (result.length === 0)
+                return {};
+            if (result.length === 1)
+                return result[0];
+            return result;
+        }
+
         // TODO: special cases where graph/array/@id are subject
         if ((key === '@list' || key === '@graph' || key === '@id') && keys.length === 1)
             return this._JSONLDtoJSON(jsonld[key], baseURI);
+
+        // ignore URIs for now
+        if (key === '@id')
+            continue;
 
         // TODO: what if uri still contains colons? maybe this isn't necessary anyway
         var val = this._JSONLDtoJSON(jsonld[key], baseURI);
@@ -215,7 +230,8 @@ RESTdesc.prototype._JSONtoJSONLD = function (json)
     for (var key in json)
         jsonld[this.prefix + key] = this._JSONtoJSONLD(json[key]);
 
-    return jsonld;
+    // represent all json objects as graphs ('@graph' always expects a list as value)
+    return {'@graph': [jsonld]};
 };
 
 RESTdesc.prototype._error = function (error, content)
