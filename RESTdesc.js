@@ -42,7 +42,8 @@ RESTdesc.prototype.fillInBlanks = function (map, callback)
     this.cache.open();
     this.cache.pop(function (err, val)
     {
-        var jsonld = this._replaceJSONLDblanks(JSON.parse(val), map);
+        // skolemization possibly needed for new json data
+        var jsonld = this._skolemizeJSONLD(this._replaceJSONLDblanks(JSON.parse(val), map));
         this.cache.push(JSON.stringify(jsonld));
         this.cache.close(callback); // it's really important to execute the callback after the push is finished or there is a race condition
     }.bind(this));
@@ -58,12 +59,12 @@ RESTdesc.prototype._replaceJSONLDblanks = function (jsonld, map)
 
     // TODO: might have more complicated situations where this is incorrect
     if (jsonld['@id'] && map[jsonld['@id']])
-        return map[jsonld['@id']];
+        return this._JSONtoJSONLD(map[jsonld['@id']]);
 
     // TODO: technically keys should also be checked;
     var result = {};
     for (var key in jsonld)
-        result[key] = this._replaceJSONLDblanks(jsonld[key], map)
+        result[key] = this._replaceJSONLDblanks(jsonld[key], map);
     return result;
 };
 
@@ -193,24 +194,18 @@ RESTdesc.prototype._skolemizeJSONLD = function (jsonld, blankMap)
     return result;
 };
 
-// TODO: needs same changes as JSONLDtoJSON
-// TODO: do note that this function will only be used for API/user input?
 RESTdesc.prototype._JSONtoJSONLD = function (json)
 {
     if (_.isString(json) || _.isNumber(json))
         return json;
 
-    // TODO: how to know if it is a listor multiple objects for the same predicate?
     if (_.isArray(json))
-        return { '@list': jsonld.map(function (child) { return this._JSONtoJSONLD(child, baseURI); }, this) };
+        return { '@list': json.map(function (thingy) { return this._JSONtoJSONLD(thingy); }.bind(this)) };
 
+    // TODO: might want to use different prefix for different APIs?
     var jsonld = {};
-
-    for (var key in jsonld)
-        jsonld[key] = this._JSONtoJSONLD(json[key]);
-
-    // TODO: how do we know we have subgraphs?
-    // TODO: etc. (will depend on rules used)
+    for (var key in json)
+        jsonld[this.prefix + key] = this._JSONtoJSONLD(json[key]);
 
     return jsonld;
 };
