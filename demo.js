@@ -157,11 +157,6 @@ function handleNext (rest, req, res, output, count)
             // remove pre part of URI
             data['http:requestURI'] = url.substring('http://askTheWorker/'.length);
 
-            // TODO: really ugly hardcoded fix for now
-            // TODO: please don't judge me, I'm sorry
-            if (body && body['partList'])
-                body['partList'] = JSON.parse(body['partList'].replace(/\\"/g, '"'));
-
             // send data to client
             data.output = output;
             data.proofs = rest.proofs;
@@ -198,7 +193,6 @@ function handleNext (rest, req, res, output, count)
                 }
             }
 
-            // TODO: currently hardcoded on JSON
             if (body)
                 requestParams.json = body;
 
@@ -213,10 +207,6 @@ function handleNext (rest, req, res, output, count)
                         var json = body;
                         if (_.isString(body))
                             json = JSON.parse(body);
-
-                        // TODO: hardcoded
-                        if (_.isArray(json))
-                            json = JSON.stringify(json);
 
                         output += 'Response: \n';
                         output += JSON.stringify(json, null, 4);
