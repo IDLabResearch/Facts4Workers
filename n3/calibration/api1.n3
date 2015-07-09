@@ -3,6 +3,7 @@
 @prefix tmpl: <http://multimedialab.elis.ugent.be/organon/ontologies/tmpl#>.
 
 # API 0 (get all parts)
+#LIST HERE!
 {
     ?x a :calibration;
        :startedBy :worker.
@@ -21,22 +22,24 @@
 {
     ?x a :calibration;
        :startedBy :worker;
-       :partList ?list.
+       :partIdList ?list.
 }
 =>
 {
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/" "start");
-              http:body [
+              http:body { [
                   :message "Please input the starting information. 'id' corresponds to the part ID.";
-                  :partList ?list
-              ];
+                  :partIdList ?list
+              ].};
               http:resp [
-                  http:body [
-                      :id _:n
-                  ]
+#TODO n should not be universal!
+                  http:body _:body 
               ].
-    ?x :part_number _:n.
+_:body :contains { [
+                      :id ?n
+                  ] }.
+    ?x :part_number ?n.
 }.
 
 # API 1 (request part information)
@@ -49,11 +52,23 @@
     _:request http:methodName "GET";
               tmpl:requestURI ("https://dummy-demo-repository.herokuapp.com/parts/" ?n);
               http:resp [
-                  http:body[
-                      :tolerances ( (_:min1 _:max1) (_:min2 _:max2));
-                      :machine_parameters (_:p1 _:p2 _:p3 _:p4)
-                  ]
+                  http:body _:body
               ].
-    ?x :tolerances ((_:min1 _:max1) (_:min2 _:max2));
-       :machine_parameters (_:p1 _:p2 _:p3 _:p4).
+#TODO universals ?min1 ?max1 ?min2 ?max2 ?p1 ?p2 ?p3 ?p4
+_:body :contains {[
+                      :tolerances ( {[ :min ?min1; :max ?max1]} {[:min ?min2; :max ?max2 ]});
+                     :machine_parameters (?p1 ?p2 ?p3 ?p4)
+                  ]}.
+    ?x :tolerances ( ( ?min1 ?max1) ( ?min2 ?max2 ));
+                      :machine_parameters ( ?p1 ?p2 ?p3 ?p4).
 }.
+
+
+
+
+
+
+
+
+
+

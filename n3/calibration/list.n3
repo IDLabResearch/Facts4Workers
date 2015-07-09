@@ -1,0 +1,96 @@
+# This file is to find out whether a list contains existentials.
+PREFIX : <http://f4w.restdesc.org/demo#>
+PREFIX log: <http://www.w3.org/2000/10/swap/log#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix list: <http://www.w3.org/2000/10/swap/list#>.
+@prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
+PREFIX r: <http://www.w3.org/2000/10/swap/reason#>
+PREFIX tmpl: <http://multimedialab.elis.ugent.be/organon/ontologies/tmpl#>
+PREFIX http: <http://www.w3.org/2011/http#>
+
+#no list, no problem!
+{?a :testList ?p.} <= {
+?a log:rawType ?p. ?p log:notEqualTo rdf:List. 
+}.
+
+
+#test list elements
+{?a :testList ?p.}<={
+?a log:rawType ?p. ?p log:equalTo rdf:List.
+#is the list ground?
+?a :groundlist ?l2
+}.
+
+
+{?x r:gives ?y. ?y log:includes {?z tmpl:requestURI ?a.} . 
+?a log:rawType ?p. ?p log:equalTo rdf:List.
+}=>{
+ (?a ()) :transpair ?a.
+}.
+
+{?z :bodyObjects ?olist}=>{
+ (?olist ()) :transpair ?olist.
+}.
+
+{?x r:gives ?y. ?y log:includes {?z http:body ?body} . 
+_:r e:findall ( ?o {?body log:includes {?s ?p ?o}} ?os).
+}=>{
+ (?os ()) :transpair ?os.
+}.
+
+
+{(?list1 ?list2) :transpair ?firstlist.  
+?list1 rdf:first ?a. ?a :ground ?al. ?list1 rdf:rest ?rest. ( ?list2 (?al)) list:append ?list.  
+
+}=>{
+(?rest ?list) :transpair ?firstlist.} .
+
+
+{?l1 :groundlist ?l2}<={(() ?l2) :transpair ?l1}.
+
+
+#{?s :ground ?s1}<={?s e:label ?s1}.
+{?s :ground ?s}<={?s log:rawType ?types. ?types log:notEqualTo rdf:List. ?types log:notEqualTo log:Formula.  ?s e:notLabel ?l1}.
+{?s :ground ?s1.}<={?s log:rawType ?types. ?types log:equalTo rdf:List. ?s :groundlist ?s1.}.
+{?s :ground ?s3.}<={?s log:rawType ?types. ?types log:equalTo log:Formula. ?s e:graphList ?s2.  ?s2 list:rest ?rest. ?rest log:notEqualTo ().  ?s2 :groundlist ?s3}.
+{?s :ground ?s3.}<={?s log:rawType ?types. ?types log:equalTo log:Formula. ?s e:tripleList ?s2. ?s2 :groundlist ?s3}.
+
+{(?p ()) :transpair ?p. ?p1 list:in ?p. ?p1 log:rawType ?typep. ?typep log:equalTo rdf:List. } => {(?p1 ()) :transpair ?p1.}.
+{(?p ()) :transpair ?p. ?p1 list:in ?p. ?p1 log:rawType ?typep. ?typep log:equalTo log:Formula. ?p1 e:graphList ?p2. } => {(?p2 ()) :transpair ?p2.}.
+{(?p ()) :transpair ?p. ?p1 list:in ?p. ?p1 log:rawType ?typep. ?typep log:equalTo log:Formula. ?p1 e:tripleList ?p2. } => {(?p2 ()) :transpair ?p2.}.
+
+#################################################
+# Here I start something new: I want to have all elements in the body of a call
+#########################################################
+
+{
+?x r:gives ?y.
+?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n. ?z http:body ?body. ?body ?p ?o. }.
+}=> {
+?z a :call.
+?z :hasBodyObject ?o}.
+
+{?z a :call. _:f e:findall (?o {?z :hasBodyObject ?o} ?olist).}=>{ ?z :bodyObjects ?olist}.
+
+
+#################################################################################
+# check
+###################################################################################
+
+
+{?y :checked :ok.}<={?y log:notIncludes {?x :check ?z}}.
+
+{?y :checked :ok.}<={?y log:includes {?x :check ?z}. ?z e:notLabel ?zz}.
+
+
+
+
+
+
+
+
+
+
+

@@ -16,18 +16,20 @@
 {
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/" "doMeasurement");
-              http:body [
+              http:body {[
                   :message "Please measure a new part with the following settings.";
-                  :part_number ?n;
+                 :part_number ?n;
                   :machine_parameters (?p1 ?p2 ?p3 ?p4);
-                  :tolerances ((?min1 ?max1) (?min2 ?max2))
-              ];
+                  :tolerances ( {:a :min ?min1; :max ?max1} {:b :min ?min2; :max ?max2 })
+              ]};
               http:resp [
-                  http:body[
-                      :geometrical_dimension (_:d1 _:d2)
-                  ]
+                  http:body _:body
+                      
+                  
               ].
-    ?x :geometrical_dimension (_:d1 _:d2).
+#Todo: Change d1 and d2
+_:body :contains { _:x :geometrical_dimension (?d1 ?d2)}.
+    ?x :geometrical_dimension (?d1 ?d2).
     ?x a :calibration.
 }.
 
@@ -44,23 +46,25 @@
 {
     _:request http:methodName "POST";
               tmpl:requestURI ("http://pacific-shore-4503.herokuapp.com/calibrations");
-              http:body [
+              http:body {[
                   :operator "Arnold";
                   :part_number ?n;
                   :machine_parameters (?p1 ?p2 ?p3 ?p4);
-                  :tolerances ((?min1 ?max1) (?min2 ?max2));
+                  :tolerances ( {:a :min ?min1; :max ?max1} {:b :min ?min2; :max ?max2 });
                   :geometrical_dimension (?d1 ?d2)
-              ];
+              ]};
               http:resp [
-                  http:body[
-                      :id _:id;
-                      :result ?ok;
-                      :suggested_parameters (_:pp1 _:pp2 _:pp3 _:pp4)
-                  ]         
+                  http:body _:body
+                      
+                           
               ].
+#TODO the pps!
+_:body :contains { [] :id _:id;
+                      :result ?ok;
+                      :suggested_parameters (?pp1 ?pp2 ?pp3 ?pp4)}.
     ?x :result ?ok;
        :operator "Arnold";
-       :suggested_parameters (_:pp1 _:pp2 _:pp3 _:pp4).
+       :suggested_parameters (?pp1 ?pp2 ?pp3 ?pp4).
 }.
 
 
