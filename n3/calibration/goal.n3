@@ -7,21 +7,11 @@
 @prefix : <http://f4w.restdesc.org/demo#>.
 @prefix log: <http://www.w3.org/2000/10/swap/log#>.
 
-
-
-#This query is highly order dependent! Rule here: State the best solution first. We have to find another solution there.
-
 {
-?x     a     :calibration.
-?x :result ?ok.
-?ok e:whenGround "ok".
+    ?x     a     :calibration.
+    ?x :result ?ok.
+    ?ok e:whenGround "ok".
 }=>{
-?x     a     :calibration.
-?x :result ?ok.
+    ?x     a     :calibration.
+    ?x :result ?ok.
 }.
-
-
-
-
-
- 

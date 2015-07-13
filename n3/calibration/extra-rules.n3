@@ -15,7 +15,7 @@
        :tolerances (?t1 ?t2).
 
     ?x :result ?ok.
-    ?ok e:notLabel ?label.
+    ?ok e:notLabel ?label.          # make sure ?label is grounded
     ?ok log:notEqualTo "ok".
 
     ?x log:uri ?uri.
@@ -37,19 +37,20 @@
 #####################################
 
 {
-?x :partList ?list.
-?list e:label ?ll.
+    ?x :partList ?list.
+    ?list e:label ?ll.      # make sure ?list is grounded
 }=>{
-?x :partIdList ?list.
+    ?x :partIdList ?list.
 }.
 
-{?x :partList ?list.
-?list e:notLabel ?ll.
-?list log:conjunction ?graph.
-_:x e:findall (?id {?graph log:includes {?sk :id ?id}} ?newlist).
+{
+    ?x :partList ?list.
+    ?list e:notLabel ?ll.
+    ?list log:conjunction ?graph.
+    _:x e:findall (?id {?graph log:includes {?sk :id ?id}} ?newlist).
 }
 =>
 {
-?x :partIdList ?newlist.
+    ?x :partIdList ?newlist.
 }.
 

@@ -10,7 +10,7 @@
     ?x a :calibration;
        :part_number ?n;
        :machine_parameters (?p1 ?p2 ?p3 ?p4);
-       :tolerances ((?min1 ?max1) (?min2 ?max2)).
+       :tolerances ({?a :min ?min1; :max ?max1} {?b :min ?min2; :max ?max2}).
 }
 =>
 {
@@ -18,20 +18,18 @@
               tmpl:requestURI ("http://askTheWorker/" "doMeasurement");
               http:body {[
                   :message "Please measure a new part with the following settings.";
-                 :part_number ?n;
+                  :part_number ?n;
                   :machine_parameters (?p1 ?p2 ?p3 ?p4);
-                  :tolerances ( {:a :min ?min1; :max ?max1} {:b :min ?min2; :max ?max2 })
+                  :tolerances ({?a :min ?min1; :max ?max1} {?b :min ?min2; :max ?max2})
               ]};
               http:resp [
                   http:body _:body
-                      
-                  
               ].
-#Todo: Change d1 and d2, pps
-_:body :contains { _:x :geometrical_dimension (?d1 ?d2); :machine_parameters (?pp1 ?pp2 ?pp3 ?pp4); }.
-    ?x :geometrical_dimension (?d1 ?d2).
-    ?x :used_machine_parameters (?pp1 ?pp2 ?pp3 ?pp4).
-    ?x a :calibration.
+#TODO: Change d1 and d2, pps
+    _:body :contains { [ :geometrical_dimension (?d1 ?d2); :machine_parameters (?pp1 ?pp2 ?pp3 ?pp4) ] }.
+    ?x :geometrical_dimension (?d1 ?d2);
+       :used_machine_parameters (?pp1 ?pp2 ?pp3 ?pp4);
+       a :calibration.
 }.
 
 
@@ -40,7 +38,7 @@ _:body :contains { _:x :geometrical_dimension (?d1 ?d2); :machine_parameters (?p
     ?x a :calibration.
     ?x :part_number ?n;
        :used_machine_parameters (?p1 ?p2 ?p3 ?p4);
-       :tolerances ((?min1 ?max1) (?min2 ?max2)); # problem with nested objects
+       :tolerances ({?a :min ?min1; :max ?max1} {?b :min ?min2; :max ?max2});
        :geometrical_dimension (?d1 ?d2).
 }
 =>
@@ -51,18 +49,18 @@ _:body :contains { _:x :geometrical_dimension (?d1 ?d2); :machine_parameters (?p
                   :operator "Arnold";
                   :part_number ?n;
                   :machine_parameters (?p1 ?p2 ?p3 ?p4);
-                  :tolerances ( {:a :min ?min1; :max ?max1} {:b :min ?min2; :max ?max2 });
+                  :tolerances ( {?a :min ?min1; :max ?max1} {?b :min ?min2; :max ?max2});
                   :geometrical_dimension (?d1 ?d2)
               ]};
               http:resp [
                   http:body _:body
-                      
-                           
               ].
 #TODO the pps!
-_:body :contains { [] :id _:id;
-                      :result ?ok;
-                      :suggested_parameters (?pp1 ?pp2 ?pp3 ?pp4)}.
+    _:body :contains {[
+        :id _:id;
+        :result ?ok;
+        :suggested_parameters (?pp1 ?pp2 ?pp3 ?pp4)
+    ]}.
     ?x :result ?ok;
        :operator "Arnold";
        :suggested_parameters (?pp1 ?pp2 ?pp3 ?pp4).
