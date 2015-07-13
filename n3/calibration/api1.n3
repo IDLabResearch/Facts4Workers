@@ -58,7 +58,7 @@
         :tolerances ( {[ :min ?min1; :max ?max1 ]} {[ :min ?min2; :max ?max2 ]} );
         :machine_parameters ( ?p1 ?p2 ?p3 ?p4 )
     ]}.
-    ?x :tolerances ({:a :min ?min1; :max ?max1} {:b :min ?min2; :max ?max2});
+    ?x :tolerances ( {[ :min ?min1; :max ?max1 ]} {[ :min ?min2; :max ?max2 ]} );
        :machine_parameters ( ?p1 ?p2 ?p3 ?p4 ).
 }.
 
