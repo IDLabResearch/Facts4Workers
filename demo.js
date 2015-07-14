@@ -36,9 +36,11 @@ app.use('/demo/documentation', express.static(process.cwd() + "/documentation/")
 app.use('/demo/n3', express.static(process.cwd() + "/n3"));
 app.use('/demo/n3', serveIndex(__dirname + '/n3', {icons: true, view: 'details'}));
 
+// TODO: more generic way to load all files?
 var api1 = fs.readFileSync('n3/calibration/api1.n3', 'utf-8');
 var api2 = fs.readFileSync('n3/calibration/api2.n3', 'utf-8');
 var input = fs.readFileSync('n3/calibration/in.n3', 'utf-8');
+var extra = fs.readFileSync('n3/calibration/extra-rules.n3', 'utf-8');
 
 var goals = {
     'calibration': fs.readFileSync('n3/calibration/goal.n3', 'utf-8')
@@ -89,7 +91,7 @@ app.post('/demo/next', function (req, res)
             map = mapInput(req.body.json, req.body.eye);
         cacheKey = req.body.eye.data;
     }
-    var rest = new RESTdesc([api1, api2, input], goal, cacheKey);
+    var rest = new RESTdesc([api1, api2, input, extra], goal, cacheKey);
     rest.fillInBlanks(map, function () { handleNext(rest, req, res); });
 
 });
@@ -100,7 +102,7 @@ function mapInput (json, eye)
         throw "Response body not found.";
 
     var map = {};
-    var body = eye['http:resp']['http:body'];
+    var body = eye['http:resp']['http:body']['contains'] || eye['http:resp']['http:body']; // skip 'contains' if it is present
     mapInputRecurisve(json, body, map);
 
     return map;

@@ -7,7 +7,11 @@ script(type='text/javascript').
       var json = $("#form form").serializeObject();
       json.val1 = parseFloat(json.val1);
       json.val2 = parseFloat(json.val2);
-      submit({geometrical_dimension:[json.val1, json.val2]});
+      json.p1 = parseFloat(json.p1);
+      json.p2 = parseFloat(json.p2);
+      json.p3 = parseFloat(json.p3);
+      json.p4 = parseFloat(json.p4);
+      submit({geometrical_dimension:[json.val1, json.val2], used_machine_parameters:[json.p1, json.p2, json.p3, json.p4]});
    }
 
 form
@@ -21,3 +25,10 @@ form
       label(for="val2").
          Second Value:
       input(id='val2', type='text', value='0.37', name='val2')
+   div
+      label(for="p1").
+         Machine parameters:
+      input(id='p1', type='text', value='1200', name='p1')
+      input(id='p2', type='text', value='0', name='p2')
+      input(id='p3', type='text', value='13', name='p3')
+      input(id='p4', type='text', value='270', name='p4')

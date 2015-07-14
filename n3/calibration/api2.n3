@@ -10,7 +10,7 @@
     ?x a :calibration;
        :part_number ?n;
        :machine_parameters (?p1 ?p2 ?p3 ?p4);
-       :tolerances ({?a :min ?min1; :max ?max1} {?b :min ?min2; :max ?max2}).
+       :tolerances ( ?a ?b ).
 }
 =>
 {
@@ -20,13 +20,13 @@
                   :message "Please measure a new part with the following settings.";
                   :part_number ?n;
                   :machine_parameters (?p1 ?p2 ?p3 ?p4);
-                  :tolerances ({?a :min ?min1; :max ?max1} {?b :min ?min2; :max ?max2})
+                  :tolerances ( ?a ?b )
               ]};
               http:resp [
                   http:body _:body
               ].
 #TODO: Change d1 and d2, pps
-    _:body :contains { [ :geometrical_dimension (?d1 ?d2); :machine_parameters (?pp1 ?pp2 ?pp3 ?pp4) ] }.
+    _:body :contains { [ :geometrical_dimension (?d1 ?d2); :used_machine_parameters (?pp1 ?pp2 ?pp3 ?pp4) ] }.
     ?x :geometrical_dimension (?d1 ?d2);
        :used_machine_parameters (?pp1 ?pp2 ?pp3 ?pp4);
        a :calibration.
@@ -38,7 +38,7 @@
     ?x a :calibration.
     ?x :part_number ?n;
        :used_machine_parameters (?p1 ?p2 ?p3 ?p4);
-       :tolerances ({?a :min ?min1; :max ?max1} {?b :min ?min2; :max ?max2});
+       :tolerances ( ?a ?b );
        :geometrical_dimension (?d1 ?d2).
 }
 =>
@@ -49,7 +49,7 @@
                   :operator "Arnold";
                   :part_number ?n;
                   :machine_parameters (?p1 ?p2 ?p3 ?p4);
-                  :tolerances ( {?a :min ?min1; :max ?max1} {?b :min ?min2; :max ?max2});
+                  :tolerances ( ?a ?b );
                   :geometrical_dimension (?d1 ?d2)
               ]};
               http:resp [

@@ -20,9 +20,9 @@ function RESTdesc (input, goal, cacheKey)
     if (!_.isArray(this.input))
         this.input = [this.input];
 
-    this.list = fs.readFileSync('n3/list.n3', 'utf-8');
-    this.find = fs.readFileSync('n3/find_executable_calls.n3', 'utf-8');
-    this.findall = fs.readFileSync('n3/findallcalls.n3', 'utf-8');
+    // TODO: more generic paths
+    this.list = fs.readFileSync('n3/calibration/list.n3', 'utf-8');
+    this.find = fs.readFileSync('n3/calibration/find_executable_calls.n3', 'utf-8');
 
     this.eye = null;
 
@@ -43,7 +43,7 @@ RESTdesc.prototype.fillInBlanks = function (map, callback)
     this.cache.pop(function (err, val)
     {
         var jsonld = this._replaceJSONLDblanks(JSON.parse(val), map);
-        this.cache.push(JSON.stringify(jsonld));
+        this.cache.push(JSON.stringify(this._skolemizeJSONLD(jsonld, {}))); // TODO: the fact that this skolemize is necessary means the body wasn't correct to begin with
         this.cache.close(callback); // it's really important to execute the callback after the push is finished or there is a race condition
     }.bind(this));
 };
@@ -58,12 +58,12 @@ RESTdesc.prototype._replaceJSONLDblanks = function (jsonld, map, idMap)
         return jsonld.map(function (thingy) { return this._replaceJSONLDblanks(thingy, map, idMap); }.bind(this));
 
     // TODO: might have more complicated situations where this is incorrect
-    if (jsonld['@id'] && map[jsonld['@id']])
+    if (jsonld['@id'] && map[jsonld['@id']] !== undefined) // '0' can be a valid result
     {
         var id = jsonld['@id'];
         if (idMap[id])
             return idMap[id];
-        var replaced = this._skolemizeJSONLD(this._JSONtoJSONLD(map[id])); // need to do skolemization here to keep ids consistent
+        var replaced = this._skolemizeJSONLD(this._JSONtoJSONLD(map[id]), {}); // need to do skolemization here to keep ids consistent
         // we actually check this again after the previous step because that step could have changed the values in idMap
         if (idMap[id])
             return idMap[id];
@@ -180,26 +180,36 @@ RESTdesc.prototype._JSONLDtoJSON = function (jsonld, baseURI)
     return json;
 };
 
+// TODO: some duplication here with the N3Parser here to fix 'blank' nodes (.well-known), was fastest way to fix
 // this is only partial skolemization since we don't want to convert the nodes the user has to fill in.
-RESTdesc.prototype._skolemizeJSONLD = function (jsonld, blankMap)
+RESTdesc.prototype._skolemizeJSONLD = function (jsonld, blankMap, context)
 {
     if (_.isNumber(jsonld))
         return jsonld;
 
     if (_.isString(jsonld))
     {
-        // TODO: funny thing, what if we have a string literal that starts with _: ? need to know object key...
-        if (blankMap && _.startsWith(jsonld, '_:'))
+        var colonIdx = jsonld.indexOf(':');
+        if (colonIdx >= 0)
         {
-            if (!blankMap[jsonld])
-                blankMap[jsonld] = this.prefix + uuid.v4();
-            return blankMap[jsonld];
+            var prefix = jsonld.substring(0, colonIdx);
+            // TODO: funny thing, what if we have a string literal that starts with _: ? need to know object key...
+            // TODO: other thing: scoping
+            if (blankMap && (prefix === '_' || (context[prefix] && _.contains(context[prefix], '.well-known'))))
+            {
+                if (!blankMap[jsonld])
+                    blankMap[jsonld] = this.prefix + uuid.v4();
+                return blankMap[jsonld];
+            }
         }
         return jsonld;
     }
 
     if (_.isArray(jsonld))
-        return jsonld.map(function (child) { return this._skolemizeJSONLD(child, blankMap); }, this);
+        return jsonld.map(function (child) { return this._skolemizeJSONLD(child, blankMap, context); }, this);
+
+    if (!context && jsonld['@context'])
+        context = jsonld['@context'];
 
     var result = {};
     // TODO: skolemize predicates
@@ -209,7 +219,7 @@ RESTdesc.prototype._skolemizeJSONLD = function (jsonld, blankMap)
         if (key === '@context')
             result[key] = jsonld[key];
         else
-            result[key] = this._skolemizeJSONLD(jsonld[key], blankMap);
+            result[key] = this._skolemizeJSONLD(jsonld[key], blankMap, context);
     }
 
     // all these don't need to be skolemized for eye/n3
