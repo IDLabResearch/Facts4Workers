@@ -42,14 +42,12 @@ RESTdesc.prototype.fillInBlanks = function (map, callback)
     this.cache.open();
     this.cache.pop(function (err, val)
     {
-        // skolemization possibly needed for new json data
-        var jsonld = this._skolemizeJSONLD(this._replaceJSONLDblanks(JSON.parse(val), map));
+        var jsonld = this._replaceJSONLDblanks(JSON.parse(val), map);
         this.cache.push(JSON.stringify(jsonld));
         this.cache.close(callback); // it's really important to execute the callback after the push is finished or there is a race condition
     }.bind(this));
 };
 
-// TODO: if we replace blank nodes we still have to make sure they get the correct URI during skolemization
 RESTdesc.prototype._replaceJSONLDblanks = function (jsonld, map, idMap)
 {
     idMap = idMap || {};
@@ -57,7 +55,7 @@ RESTdesc.prototype._replaceJSONLDblanks = function (jsonld, map, idMap)
         return jsonld;
 
     if (_.isArray(jsonld))
-        return jsonld.map(function (thingy) { return this._replaceJSONLDblanks(thingy, map); }.bind(this));
+        return jsonld.map(function (thingy) { return this._replaceJSONLDblanks(thingy, map, idMap); }.bind(this));
 
     // TODO: might have more complicated situations where this is incorrect
     if (jsonld['@id'] && map[jsonld['@id']])
@@ -65,14 +63,18 @@ RESTdesc.prototype._replaceJSONLDblanks = function (jsonld, map, idMap)
         var id = jsonld['@id'];
         if (idMap[id])
             return idMap[id];
-        idMap[id] = this._JSONtoJSONLD(map[id]); // TODO: need to do skolemization here to keep ids consistent
+        var replaced = this._skolemizeJSONLD(this._JSONtoJSONLD(map[id])); // need to do skolemization here to keep ids consistent
+        // we actually check this again after the previous step because that step could have changed the values in idMap
+        if (idMap[id])
+            return idMap[id];
+        idMap[id] = replaced;
         return idMap[id];
     }
 
     // TODO: technically keys should also be checked;
     var result = {};
     for (var key in jsonld)
-        result[key] = this._replaceJSONLDblanks(jsonld[key], map);
+        result[key] = this._replaceJSONLDblanks(jsonld[key], map, idMap);
     return result;
 };
 
