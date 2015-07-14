@@ -10,7 +10,7 @@
     ?x a :calibration;
        :part_number ?n;
        :machine_parameters (?p1 ?p2 ?p3 ?p4);
-       :tolerances ( ?a ?b ).
+       :tolerances ( { ?a :min ?min1; :max ?max1 } { ?b :min ?min2; :max ?max2 } ).
 }
 =>
 {
@@ -20,7 +20,7 @@
                   :message "Please measure a new part with the following settings.";
                   :part_number ?n;
                   :machine_parameters (?p1 ?p2 ?p3 ?p4);
-                  :tolerances ( ?a ?b )
+                  :tolerances ( { ?a :min ?min1; :max ?max1 } { ?b :min ?min2; :max ?max2 } )
               ]};
               http:resp [
                   http:body _:body
@@ -38,7 +38,7 @@
     ?x a :calibration.
     ?x :part_number ?n;
        :used_machine_parameters (?p1 ?p2 ?p3 ?p4);
-       :tolerances ( ?a ?b );
+       :tolerances ( { ?a :min ?min1; :max ?max1 } { ?b :min ?min2; :max ?max2 } );
        :geometrical_dimension (?d1 ?d2).
 }
 =>
@@ -49,7 +49,7 @@
                   :operator "Arnold";
                   :part_number ?n;
                   :machine_parameters (?p1 ?p2 ?p3 ?p4);
-                  :tolerances ( ?a ?b );
+                  :tolerances ( { ?a :min ?min1; :max ?max1 } { ?b :min ?min2; :max ?max2 } );
                   :geometrical_dimension (?d1 ?d2)
               ]};
               http:resp [
