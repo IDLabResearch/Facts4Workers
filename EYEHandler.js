@@ -27,16 +27,19 @@ EYEHandler.prototype.call = function (data, query, proof, singleAnswer, newTripl
 
         if (!proof)
             args.push('--nope');
+        args.push('--no-qvars');
 
         // blame windows npm implementation
         // http://stackoverflow.com/questions/17516772/using-nodejss-spawn-causes-unknown-option-and-error-spawn-enoent-err
         var proc = spawn(process.platform === "win32" ? "eye.cmd" : "eye", args);
         var output = "";
         proc.stdout.on('data', function (data) {
-            output += data;
+            output += data.toString();
+            //console.log(data.toString());
         });
         proc.stderr.on('data', function (data) {
             // TODO: do we need to log this somewhere?
+            //console.error(data.toString());
         });
         proc.on('close', function (code) {
             // TODO: check exit code?
