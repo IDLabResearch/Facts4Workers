@@ -84,7 +84,7 @@ RESTdesc.prototype.next = function (callback)
     {
         // TODO: how big of a performance hit is it to always convert the jsonld?
         var parser = new JSONLDParser();
-        data = data.map(function (str) { return parser.parse(JSON.parse(str)); });
+        data = data.map(function (str) { return parser.parse(JSON.parse(str, this.prefix)); });
         // create new eye handler every time so we know when to call destroy function
         this.eye = new EYEHandler();
         this.eye.call(this.input.concat(data), this.goal, true, true, false, function (proof) { this._handleProof(proof, callback); }.bind(this), this._error);
@@ -118,8 +118,6 @@ RESTdesc.prototype._handleNext = function (next, callback)
     else
     {
         jsonld = this._skolemizeJSONLD(jsonld);
-        var jsonldParser = new JSONLDParser();
-        //var n3 = jsonldParser.parse(jsonld); // don'y use 'next' since we need skolemization
         this.cache.push(JSON.stringify(jsonld));
         var template = {'http:methodName':'GET', 'http:requestURI':'', 'http:body':{}, 'http:resp':{'http:body':{}}};
         json = _.assign(template, json);
@@ -127,7 +125,7 @@ RESTdesc.prototype._handleNext = function (next, callback)
     }
 };
 
-RESTdesc.prototype._JSONLDtoJSON = function (jsonld, baseURI)
+RESTdesc.prototype._JSONLDtoJSON = function (jsonld)
 {
     // TODO: what about lang/datatype?
     if (_.isString(jsonld) || _.isNumber(jsonld))
@@ -135,11 +133,7 @@ RESTdesc.prototype._JSONLDtoJSON = function (jsonld, baseURI)
 
     // TODO: find out how to write this with bind and partialright
     if (_.isArray(jsonld))
-        return jsonld.map(function (child) { return this._JSONLDtoJSON(child, baseURI); }, this);
-
-    // TODO: another vocab dependency
-    if (jsonld['@context'] && jsonld['@context']['@vocab'])
-        baseURI = jsonld['@context']['@vocab'];
+        return jsonld.map(function (child) { return this._JSONLDtoJSON(child); }, this);
 
     var json = {};
     var keys = _.without(Object.keys(jsonld), '@context');
@@ -150,7 +144,7 @@ RESTdesc.prototype._JSONLDtoJSON = function (jsonld, baseURI)
 
         if (key === '@graph')
         {
-            var result = this._JSONLDtoJSON(jsonld[key], baseURI);
+            var result = this._JSONLDtoJSON(jsonld[key]);
             // will always be a list, but often with only 1 element
             if (result.length === 0)
                 return {};
@@ -161,16 +155,16 @@ RESTdesc.prototype._JSONLDtoJSON = function (jsonld, baseURI)
 
         // TODO: special cases where graph/array/@id are subject
         if ((key === '@list' || key === '@graph' || key === '@id') && keys.length === 1)
-            return this._JSONLDtoJSON(jsonld[key], baseURI);
+            return this._JSONLDtoJSON(jsonld[key]);
 
         // ignore URIs for now
         if (key === '@id')
             continue;
 
-        // TODO: what if uri still contains colons? maybe this isn't necessary anyway
-        var val = this._JSONLDtoJSON(jsonld[key], baseURI);
-        if (baseURI && _.startsWith(key, baseURI))
-            key = key.substr(baseURI.length);
+        // this might produce invalid URIs, but we don't care since the output is JSON, not JSON-lD
+        var val = this._JSONLDtoJSON(jsonld[key]);
+        if (_.startsWith(key, this.prefix))
+            key = key.substr(this.prefix.length);
 
         if (key === 'tolerances' && _.isArray(val) && val.length === 2 && _.isArray(val[0])) // TODO: should definitely also not be necessary
             val = [{min: val[0][0], max: val[0][1]}, {min: val[1][0], max: val[1][1]}];
