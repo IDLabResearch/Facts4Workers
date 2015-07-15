@@ -19,7 +19,7 @@
     ?ok log:notEqualTo "ok".
 
     ?x log:uri ?uri.
-    (?uri "_rec") string:concatenation ?conc.
+    (?uri "_rec") string:concatenation ?conc. # TODO: do something nicer here
     ?new log:uri ?conc.
 }=>{
     ?x :continuedAs ?new.

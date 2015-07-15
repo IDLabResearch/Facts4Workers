@@ -58,7 +58,7 @@ RESTdesc.prototype._replaceJSONLDblanks = function (jsonld, map, idMap)
         return jsonld.map(function (thingy) { return this._replaceJSONLDblanks(thingy, map, idMap); }.bind(this));
 
     // TODO: might have more complicated situations where this is incorrect
-    if (jsonld['@id'] && map[jsonld['@id']] !== undefined) // '0' can be a valid result
+    if (jsonld['@id'] && map[jsonld['@id']] !== undefined) // 0 can be a valid result so we should compare with undefined
     {
         var id = jsonld['@id'];
         if (idMap[id])
@@ -84,7 +84,7 @@ RESTdesc.prototype.next = function (callback)
     {
         // TODO: how big of a performance hit is it to always convert the jsonld?
         var parser = new JSONLDParser();
-        data = data.map(function (str) { return parser.parse(JSON.parse(str, this.prefix)); });
+        data = data.map(function (str) { return parser.parse(JSON.parse(str), this.prefix); }.bind(this));
         // create new eye handler every time so we know when to call destroy function
         this.eye = new EYEHandler();
         this.eye.call(this.input.concat(data), this.goal, true, true, false, function (proof) { this._handleProof(proof, callback); }.bind(this), this._error);
@@ -166,29 +166,28 @@ RESTdesc.prototype._JSONLDtoJSON = function (jsonld)
         if (_.startsWith(key, this.prefix))
             key = key.substr(this.prefix.length);
 
-        if (key === 'tolerances' && _.isArray(val) && val.length === 2 && _.isArray(val[0])) // TODO: should definitely also not be necessary
-            val = [{min: val[0][0], max: val[0][1]}, {min: val[1][0], max: val[1][1]}];
-
         json[key] = val;
     }
     return json;
 };
 
 // this is only partial skolemization since we don't want to convert the nodes the user has to fill in.
-RESTdesc.prototype._skolemizeJSONLD = function (jsonld, blankMap, context)
+RESTdesc.prototype._skolemizeJSONLD = function (jsonld, blankMap, context, parentKey)
 {
     if (_.isNumber(jsonld))
         return jsonld;
 
     if (_.isString(jsonld))
     {
+        if (parentKey !== '@id' && parentKey !== '@type') // @type content fields are always URIs
+            return jsonld;
+
         var colonIdx = jsonld.indexOf(':');
         if (colonIdx >= 0)
         {
             var prefix = jsonld.substring(0, colonIdx);
-            // TODO: funny thing, what if we have a string literal that starts with _: ? need to know object key...
-            // TODO: other thing: scoping (.well-known URIs are assumed to be identical for the full input file)
-            if (blankMap && (prefix === '_' || (context[prefix] && _.contains(context[prefix], '.well-known'))))
+            // TODO: scoping (.well-known URIs are assumed to be identical for the full input file)
+            if (blankMap && (prefix === '_' || (context && context[prefix] && _.contains(context[prefix], '.well-known'))))
             {
                 if (!blankMap[jsonld])
                     blankMap[jsonld] = this.prefix + uuid.v4();
@@ -199,7 +198,7 @@ RESTdesc.prototype._skolemizeJSONLD = function (jsonld, blankMap, context)
     }
 
     if (_.isArray(jsonld))
-        return jsonld.map(function (child) { return this._skolemizeJSONLD(child, blankMap, context); }, this);
+        return jsonld.map(function (child) { return this._skolemizeJSONLD(child, blankMap, context, parentKey); }, this);
 
     if (!context && jsonld['@context'])
         context = jsonld['@context'];
@@ -208,15 +207,12 @@ RESTdesc.prototype._skolemizeJSONLD = function (jsonld, blankMap, context)
     // TODO: skolemize predicates
     for (var key in jsonld)
     {
-        // don't skolemize in the context
-        if (key === '@context')
-            result[key] = jsonld[key];
-        else
-            result[key] = this._skolemizeJSONLD(jsonld[key], blankMap, context);
+        var predicate = this._skolemizeJSONLD(key, blankMap, context, '@id'); // treat predicates as though they are in a @id field
+        result[key] = this._skolemizeJSONLD(jsonld[key], blankMap, context, key);
     }
 
-    // all these don't need to be skolemized for eye/n3
-    if (!result['@id'] && !result['@graph'] && !result['@value'] && !result['@list'])
+    // all these don't need to be skolemized for eye/n3, all the others are blank nodes
+    if (!result['@id'] && !result['@graph'] && !result['@value'] && !result['@list'] && parentKey !== '@context')
         result['@id'] = this.prefix + uuid.v4();
 
     return result;
