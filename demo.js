@@ -171,30 +171,6 @@ function handleNext (rest, req, res, output, count)
                 method: data['http:methodName']
             };
 
-            // TODO: should not be necessary
-            if (body)
-            {
-                if (body.geometrical_dimension)
-                {
-                    body.geometrical_dimension[0] = parseFloat(body.geometrical_dimension[0]);
-                    body.geometrical_dimension[1] = parseFloat(body.geometrical_dimension[1]);
-                }
-                if (body.machine_parameters)
-                {
-                    body.machine_parameters[0] = parseFloat(body.machine_parameters[0]);
-                    body.machine_parameters[1] = parseFloat(body.machine_parameters[1]);
-                    body.machine_parameters[2] = parseFloat(body.machine_parameters[2]);
-                    body.machine_parameters[3] = parseFloat(body.machine_parameters[3]);
-                }
-                if (body.tolerances)
-                {
-                    body.tolerances[0].min = parseFloat(body.tolerances[0].min);
-                    body.tolerances[0].max = parseFloat(body.tolerances[0].max);
-                    body.tolerances[1].min = parseFloat(body.tolerances[1].min);
-                    body.tolerances[1].max = parseFloat(body.tolerances[1].max);
-                }
-            }
-
             if (body)
                 requestParams.json = body;
 

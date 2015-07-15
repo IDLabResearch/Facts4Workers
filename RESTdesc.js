@@ -180,7 +180,6 @@ RESTdesc.prototype._JSONLDtoJSON = function (jsonld, baseURI)
     return json;
 };
 
-// TODO: some duplication here with the N3Parser here to fix 'blank' nodes (.well-known), was fastest way to fix
 // this is only partial skolemization since we don't want to convert the nodes the user has to fill in.
 RESTdesc.prototype._skolemizeJSONLD = function (jsonld, blankMap, context)
 {
@@ -194,7 +193,7 @@ RESTdesc.prototype._skolemizeJSONLD = function (jsonld, blankMap, context)
         {
             var prefix = jsonld.substring(0, colonIdx);
             // TODO: funny thing, what if we have a string literal that starts with _: ? need to know object key...
-            // TODO: other thing: scoping
+            // TODO: other thing: scoping (.well-known URIs are assumed to be identical for the full input file)
             if (blankMap && (prefix === '_' || (context[prefix] && _.contains(context[prefix], '.well-known'))))
             {
                 if (!blankMap[jsonld])
