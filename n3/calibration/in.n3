@@ -6,33 +6,5 @@
 @prefix string: <http://www.w3.org/2000/10/swap/string#>.
 
 
-
 :c1 a          :calibration.
 :c1 :startedBy :worker.
-
-#TODO: we should have separate files for this kind of logic
-#start a new calibration-round
-{
-    ?x a :calibration.
-    ?x :part_number ?n;
-       :operator ?o;
-       :suggested_parameters (?p1 ?p2 ?p3 ?p4);
-       :tolerances (?t1 ?t2).
-
-    ?x :result ?ok.
-    ?ok e:notLabel ?label.
-    ?ok log:notEqualTo "ok".
-
-    ?x log:uri ?uri.
-    (?uri "_rec") string:concatenation ?conc.
-    ?new log:uri ?conc.
-}=>{
-    ?x :continuedAs ?new.
-    ?new a :calibration.
-    ?new :part_number ?n;
-         :operator ?o;
-         :machine_parameters (?p1 ?p2 ?p3 ?p4);
-         :tolerances (?t1 ?t2).
-}.
-
-

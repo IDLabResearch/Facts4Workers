@@ -50,13 +50,13 @@ RESTdesc.prototype.fillInBlanks = function (map, callback)
 
 RESTdesc.prototype._replaceNode = function (id, map, idMap)
 {
-    if (!map[id])
+    if (map[id] === undefined)
         return id;
-    if (idMap[id])
+    if (idMap[id] !== undefined)
         return idMap[id];
     var replaced = this._skolemizeJSONLD(this._JSONtoJSONLD(map[id]), idMap); // need to do skolemization here to keep ids consistent
     // we actually check this again after the previous step because that step could have changed the values in idMap
-    if (idMap[id])
+    if (idMap[id] !== undefined)
         return idMap[id];
     idMap[id] = replaced;
     return idMap[id];
