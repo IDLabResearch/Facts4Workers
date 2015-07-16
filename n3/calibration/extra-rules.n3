@@ -37,20 +37,20 @@
 #####################################
 
 {
-    ?x :partList ?list.
-    ?list e:label ?ll.      # make sure ?list is grounded
+    ?list a :partList.
+    ?list e:label ?ll.      # make sure ?list is not grounded
 }=>{
-    ?x :partIdList ?list.
+    ?list a :partIdList.
 }.
 
 {
-    ?x :partList ?list.
-    ?list e:notLabel ?ll.
+    ?list a :partList.
+    ?list e:notLabel ?ll.  # make sure ?list is grounded
     ?list log:conjunction ?graph.
     _:x e:findall (?id {?graph log:includes {?sk :id ?id}} ?newlist).
 }
 =>
 {
-    ?x :partIdList ?newlist.
+    ?newlist a :partIdList.
 }.
 

@@ -73,7 +73,19 @@ RESTdesc.prototype._replaceJSONLDblanks = function (jsonld, map, idMap)
 
     // TODO: will this always be correct?
     if (jsonld['@id'] && map[jsonld['@id']] !== undefined) // 0 can be a valid result so we should compare with undefined
-        return this._replaceNode(jsonld['@id'], map, idMap);
+    {
+        var val = this._replaceNode(jsonld['@id'], map, idMap);
+        if (Object.keys(jsonld).length === 1)
+            return val;
+        else
+        {
+            // this is a special case, there are already predicates with the input as a subject
+            // we have to find what is the best way to inject this
+            // TODO: currently only works for lists, extend this for literals/URIs/etc.
+            // TODO: can give problems with nested values too?
+            return _.extend(_.omit(jsonld, '@id'), val);
+        }
+    }
 
     var result = {};
     for (var key in jsonld)
@@ -110,7 +122,9 @@ RESTdesc.prototype._handleNext = function (next, callback)
     var n3Parser = new N3Parser();
     var jsonld = n3Parser.parse(next);
     var json = this._JSONLDtoJSON(jsonld);
-    json = _.find(json, 'http:methodName');
+    // if there are multiple elements, find the one corresponding to the request
+    if (_.isArray(json))
+        json = _.find(json, 'http:methodName');
     if (json && json['tmpl:requestURI'])
     {
         json['http:requestURI'] = json['tmpl:requestURI'].join('');
