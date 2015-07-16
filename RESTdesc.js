@@ -43,9 +43,23 @@ RESTdesc.prototype.fillInBlanks = function (map, callback)
     this.cache.pop(function (err, val)
     {
         var jsonld = this._replaceJSONLDblanks(JSON.parse(val), map);
-        this.cache.push(JSON.stringify(this._skolemizeJSONLD(jsonld, {}))); // TODO: the fact that this skolemize is necessary means the body wasn't correct to begin with
+        this.cache.push(JSON.stringify(this._skolemizeJSONLD(jsonld, {}))); // skolemize is necessary because the body will contain '.well-known' URIs which also need to be replaced
         this.cache.close(callback); // it's really important to execute the callback after the push is finished or there is a race condition
     }.bind(this));
+};
+
+RESTdesc.prototype._replaceNode = function (id, map, idMap)
+{
+    if (!map[id])
+        return id;
+    if (idMap[id])
+        return idMap[id];
+    var replaced = this._skolemizeJSONLD(this._JSONtoJSONLD(map[id]), idMap); // need to do skolemization here to keep ids consistent
+    // we actually check this again after the previous step because that step could have changed the values in idMap
+    if (idMap[id])
+        return idMap[id];
+    idMap[id] = replaced;
+    return idMap[id];
 };
 
 RESTdesc.prototype._replaceJSONLDblanks = function (jsonld, map, idMap)
@@ -57,24 +71,17 @@ RESTdesc.prototype._replaceJSONLDblanks = function (jsonld, map, idMap)
     if (_.isArray(jsonld))
         return jsonld.map(function (thingy) { return this._replaceJSONLDblanks(thingy, map, idMap); }.bind(this));
 
-    // TODO: might have more complicated situations where this is incorrect
+    // TODO: will this always be correct?
     if (jsonld['@id'] && map[jsonld['@id']] !== undefined) // 0 can be a valid result so we should compare with undefined
-    {
-        var id = jsonld['@id'];
-        if (idMap[id])
-            return idMap[id];
-        var replaced = this._skolemizeJSONLD(this._JSONtoJSONLD(map[id]), {}); // need to do skolemization here to keep ids consistent
-        // we actually check this again after the previous step because that step could have changed the values in idMap
-        if (idMap[id])
-            return idMap[id];
-        idMap[id] = replaced;
-        return idMap[id];
-    }
+        return this._replaceNode(jsonld['@id'], map, idMap);
 
-    // TODO: technically keys should also be checked;
     var result = {};
     for (var key in jsonld)
-        result[key] = this._replaceJSONLDblanks(jsonld[key], map, idMap);
+    {
+        var replaced = this._replaceJSONLDblanks(jsonld[key], map, idMap);
+        key = this._replaceNode(key, map, idMap); // there might be rare cases where the id also needs to be replaced
+        result[key] = replaced;
+    }
     return result;
 };
 
@@ -131,9 +138,8 @@ RESTdesc.prototype._JSONLDtoJSON = function (jsonld)
     if (_.isString(jsonld) || _.isNumber(jsonld))
         return jsonld;
 
-    // TODO: find out how to write this with bind and partialright
     if (_.isArray(jsonld))
-        return jsonld.map(function (child) { return this._JSONLDtoJSON(child); }, this);
+        return jsonld.map(this._JSONLDtoJSON.bind(this));
 
     var json = {};
     var keys = _.without(Object.keys(jsonld), '@context');
@@ -204,11 +210,10 @@ RESTdesc.prototype._skolemizeJSONLD = function (jsonld, blankMap, context, paren
         context = jsonld['@context'];
 
     var result = {};
-    // TODO: skolemize predicates
     for (var key in jsonld)
     {
         var predicate = this._skolemizeJSONLD(key, blankMap, context, '@id'); // treat predicates as though they are in a @id field
-        result[key] = this._skolemizeJSONLD(jsonld[key], blankMap, context, key);
+        result[predicate] = this._skolemizeJSONLD(jsonld[key], blankMap, context, key);
     }
 
     // all these don't need to be skolemized for eye/n3, all the others are blank nodes
@@ -224,7 +229,7 @@ RESTdesc.prototype._JSONtoJSONLD = function (json)
         return json;
 
     if (_.isArray(json))
-        return { '@list': json.map(function (thingy) { return this._JSONtoJSONLD(thingy); }.bind(this)) };
+        return { '@list': json.map(this._JSONtoJSONLD.bind(this)) };
 
     // TODO: might want to use different prefix for different APIs?
     var jsonld = {};
