@@ -63,7 +63,8 @@ app.get('/demo/start', function (req, res)
 
 app.get('/demo/doMeasurement', function (req, res)
 {
-    res.render('doMeasurement');
+    var params = JSON.parse(req.query.body).suggested_parameters;
+    res.render('doMeasurement', {params: params});
 });
 
 app.post('/demo/eye', function (req, res)

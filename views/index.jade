@@ -29,16 +29,6 @@ html
 
             function start ()
             {
-                //$.get("eye", function (data)
-                //{
-                //    alert('done');
-                //    $('#test').val(data);
-                //});
-                //$.get("start", '', function (data)
-                //{
-                //    $('#form').html(data);
-                //    $('#btn').show();
-                //});
                 $('#startBtn').hide();
                 $.post('/demo/next', function (data)
                 {
@@ -95,7 +85,7 @@ html
                 {
                     var workerURL = data['http:requestURI'];
                     workerURL = workerURL.replace('http://askTheWorker/', '');
-                    $.get('/demo/' + workerURL, function (html)
+                    $.get('/demo/' + workerURL, {'body': JSON.stringify(globalData['http:body']) }, function (html)
                     {
                         $('#form').html(html);
                         $('#btn').show();
