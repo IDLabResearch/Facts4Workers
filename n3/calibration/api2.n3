@@ -63,11 +63,20 @@
         :suggested_parameters (?pp1 ?pp2 ?pp3 ?pp4)
     ]}.
     ?x :result ?ok.
-    _:c a :calibration;
+    _:c a :potential_calibration;
+        :previous_calibration ?x;
         :tolerances ( ?t1 ?t2 );
         :suggested_parameters ( ?pp1 ?pp2 ?pp3 ?pp4 );
         :part ?p.
 }.
 
-
+{
+    ?c a :potential_calibration;
+       :previous_calibration ?pc.
+    ?pc :result "recalibrate".
+}
+=>
+{
+    ?c a :calibration.
+}.
 
