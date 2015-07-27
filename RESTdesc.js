@@ -133,6 +133,7 @@ RESTdesc.prototype._handleNext = function (next, callback)
 
     if (!json || !json['http:requestURI'])
     {
+        // TODO: provide command for clearing the cache if user wants to stop
         this.cache.clear();
         callback('DONE');
     }
