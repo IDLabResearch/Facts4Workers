@@ -2,6 +2,7 @@
 @prefix http: <http://www.w3.org/2011/http#>.
 @prefix tmpl: <http://multimedialab.elis.ugent.be/organon/ontologies/tmpl#>.
 @prefix log: <http://www.w3.org/2000/10/swap/log#>.
+@prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
 
 # TODO: use API namespaces for predicates
 # TODO: same list problem as previous use case
@@ -118,7 +119,8 @@
             :defect_id ?d;
             :adopted_solution ?adopted.
     ?adopted :solution ?sol. # TODO: used same predicate for 2 different things, correct but ugly
-    ?sol log:includes {
+    ?sol e:whenGround ?sol_ground.
+    ?sol_ground log:includes {
         ?s :solution ?sol_text;
            :comment ?sol_comment.
     }
@@ -151,7 +153,8 @@
     ?adopted :solution ?sol;
              :result ?result;
              :comment ?comment.
-    ?sol log:includes { ?s :id ?solution_id. }
+    ?sol e:whenGround ?sol_ground.
+    ?sol_ground log:includes { ?s :id ?solution_id. }
 }
 =>
 {
