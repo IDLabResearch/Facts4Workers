@@ -13,7 +13,9 @@
               http:resp [
                   http:body _:list
               ].
-    _:list a :partList.
+    # TODO: hotfix to help with output parsing, should not be necessary
+    _:x a :partList;
+        :content _:list.
 }.
 
 # API “worker” start (request part ID)
