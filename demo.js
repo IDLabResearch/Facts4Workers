@@ -39,6 +39,8 @@ app.use('/demo/n3', serveIndex(__dirname + '/n3', {icons: true, view: 'details'}
 var api1 = fs.readFileSync('n3/calibration/api1.n3', 'utf-8');
 var api2 = fs.readFileSync('n3/calibration/api2.n3', 'utf-8');
 var extra = fs.readFileSync('n3/calibration/extra-rules.n3', 'utf-8');
+var teamleader_api = fs.readFileSync('n3/thermolympics_teamleader/api.n3', 'utf-8');
+var teamleader_extra = fs.readFileSync('n3/thermolympics_teamleader/extra-rules.n3', 'utf-8');
 
 var goals = {
     'calibration': fs.readFileSync('n3/calibration/goal.n3', 'utf-8'),
@@ -72,7 +74,7 @@ app.post('/back', function (req, res)
 
 app.get('/demo', function (req, res)
 {
-    res.render('index', { title: 'F4W demo', message: 'F4W demo', goal: 'calibration'});
+    res.render('index', { title: 'F4W demo', message: 'F4W demo', goal: req.query.goal || 'calibration'});
 });
 
 app.get('/demo/start', function (req, res)
@@ -111,7 +113,7 @@ app.post('/demo/next', function (req, res)
             map = mapInput(req.body.json, req.body.eye);
         cacheKey = req.body.eye.data;
     }
-    var rest = new RESTdesc([api1, api2, extra], goal, cacheKey);
+    var rest = new RESTdesc([api1, api2, extra, teamleader_api, teamleader_extra], goal, cacheKey);
     rest.fillInBlanks(map, function () { handleNext(rest, req, res); });
 
 });

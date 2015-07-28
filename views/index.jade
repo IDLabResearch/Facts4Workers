@@ -30,21 +30,22 @@ html
             function start ()
             {
                 $('#startBtn').hide();
-                $.post('/demo/next', function (data)
-                {
-                    handleResponse(data);
-                });
+                submit();
             }
 
             function submit (json)
             {
                 var nextData = {};
                 nextData.goal = "#{goal}";
-                nextData.json = json;
-                nextData.eye = jQuery.extend({}, globalData);
-                // prevent sending superfluous data
-                delete nextData.eye.output;
-                delete nextData.eye.proofs;
+                if (json)
+                    nextData.json = json;
+                if (globalData)
+                {
+                    nextData.eye = jQuery.extend({}, globalData);
+                    // prevent sending superfluous data
+                    delete nextData.eye.output;
+                    delete nextData.eye.proofs;
+                }
                 $.ajax({
                     type       :"POST",
                     url        :"/demo/next",
