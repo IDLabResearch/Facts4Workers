@@ -32,6 +32,31 @@ function RESTdesc (input, goal, cacheKey)
     this.proofs = [];
 }
 
+RESTdesc.prototype.clear = function ()
+{
+    this.cache.clear();
+};
+
+RESTdesc.prototype.back = function (callback, _recursive)
+{
+    // remove items from the cache until it is empty or we find the previous askTheWorker call
+    // the last item is the 'current' askTheWorker call, so that one always needs to be popped before we can go searching
+    if (!_recursive)
+        this.cache.open();
+
+    this.cache.pop(function (err, val)
+    {
+        if (!_recursive)
+            return this.back(callback, true);
+
+        // if val is null the list is empty
+        if (!val || _.contains(val, 'askTheWorker'))
+            return this.cache.close(callback);
+
+        this.back(callback, true);
+    }.bind(this));
+};
+
 // TODO: we can cache the cache in a list ...
 // keys of map are blank nodes, values are their replacements
 RESTdesc.prototype.fillInBlanks = function (map, callback)
@@ -43,8 +68,14 @@ RESTdesc.prototype.fillInBlanks = function (map, callback)
     this.cache.pop(function (err, val)
     {
         var jsonld = this._replaceJSONLDblanks(JSON.parse(val), map);
-        this.cache.push(JSON.stringify(this._skolemizeJSONLD(jsonld, {}))); // skolemize is necessary because the body will contain '.well-known' URIs which also need to be replaced
-        this.cache.close(callback); // it's really important to execute the callback after the push is finished or there is a race condition
+        this.cache.push(
+            JSON.stringify(this._skolemizeJSONLD(jsonld, {})), // skolemize is necessary because the body will contain '.well-known' URIs which also need to be replaced
+            function ()
+            {
+                this.cache.close(callback); // it's really important to execute the callback after the push is finished or there is a race condition
+            }.bind(this)
+        );
+
     }.bind(this));
 };
 
@@ -133,9 +164,7 @@ RESTdesc.prototype._handleNext = function (next, callback)
 
     if (!json || !json['http:requestURI'])
     {
-        // TODO: provide command for clearing the cache if user wants to stop
-        this.cache.clear();
-        callback('DONE');
+        callback({ status: 'DONE' });
     }
     else
     {

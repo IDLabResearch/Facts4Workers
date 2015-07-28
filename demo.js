@@ -6,7 +6,6 @@ var fs = require('fs');
 var _ = require('lodash');
 var RESTdesc = require('./RESTdesc');
 var serveIndex = require('serve-index');
-var N3 = require('n3');
 
 var args = require('minimist')(process.argv.slice(2));
 if (!args.p || args.h || args.help)
@@ -42,12 +41,33 @@ var api2 = fs.readFileSync('n3/calibration/api2.n3', 'utf-8');
 var extra = fs.readFileSync('n3/calibration/extra-rules.n3', 'utf-8');
 
 var goals = {
-    'calibration': fs.readFileSync('n3/calibration/goal.n3', 'utf-8')
+    'calibration': fs.readFileSync('n3/calibration/goal.n3', 'utf-8'),
+    'thermolympics_teamleader': fs.readFileSync('n3/thermolympics_teamleader/goal.n3', 'utf-8')
 };
 
 app.get('/', function (req, res)
 {
     res.render('goals');
+});
+
+app.post('/clear', function (req, res)
+{
+    if (!req.body || !req.body.data)
+        res.status(400).json({ error: 'Expected a JSON object with a "data" field.'});
+    var rest = new RESTdesc(null, null, req.body.data);
+    rest.clear();
+    res.sendStatus(200);
+});
+
+app.post('/back', function (req, res)
+{
+    if (!req.body || !req.body.data)
+        res.status(400).json({ error: 'Expected a JSON object with a "data" field.'});
+    var rest = new RESTdesc(null, null, req.body.data);
+    rest.back(function ()
+    {
+        res.sendStatus(200);
+    });
 });
 
 app.get('/demo', function (req, res)
@@ -152,16 +172,17 @@ function handleNext (rest, req, res, output, count)
         // give cacheKey to user so they can send it back in the next step
         data.data = rest.cacheKey;
 
-        if (data === 'DONE')
-            res.format({ json:function () { res.send({status: 'DONE', output: output, proofs: rest.proofs}); } });
+        data.output = output;
+        data.proofs = rest.proofs;
+
+        if (data.status === 'DONE')
+            res.format({json:function () { res.send(data); }});
         else if (url.indexOf('http://askTheWorker/') >= 0)
         {
             // remove pre part of URI
             data['http:requestURI'] = url.substring('http://askTheWorker/'.length);
 
             // send data to client
-            data.output = output;
-            data.proofs = rest.proofs;
             res.format({ json:function () { res.send(data); } });
         }
         else

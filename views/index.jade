@@ -74,12 +74,21 @@ html
                         buttons.append($('<button />', { 'class':'proof', text: 'Proof ' + (i+1), onClick: 'proof(' + i + ');'}));
                 }
 
-
                 if (data.status && data.status === 'DONE')
                 {
-                    $('#form').hide();
-                    $('#btn').hide();
-                    alert('DONE');
+                    $.ajax({
+                        type       :"POST",
+                        url        :"/clear",
+                        data       :JSON.stringify(globalData),
+                        contentType:"application/json; charset=utf-8",
+                        success    :function ()
+                        {
+                            $('#form').hide();
+                            $('#btn').hide();
+                            $('#btnBack').hide();
+                            alert('DONE');
+                        }
+                    });
                 }
                 else
                 {
@@ -89,8 +98,23 @@ html
                     {
                         $('#form').html(html);
                         $('#btn').show();
+                        $('#btnBack').show();
                     });
                 }
+            }
+
+            function back ()
+            {
+                $.ajax({
+                    type       :"POST",
+                    url        :"/back",
+                    data       :JSON.stringify(globalData),
+                    contentType:"application/json; charset=utf-8",
+                    success    :function ()
+                    {
+                        submit(null);
+                    }
+                });
             }
 
             function output ()
@@ -109,6 +133,8 @@ body
         div
             button#btn(onClick="parse();", hidden="hidden").
                 Submit
+            button#btnBack(onClick="back();", hidden="hidden").
+                Back
         div#buttons
             button#output(onClick="output();", hidden="hidden").
                 Output
