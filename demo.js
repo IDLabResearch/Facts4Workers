@@ -213,7 +213,6 @@ function handleNext (rest, req, res, output, count)
                         output += JSON.stringify(json, null, 4);
                         output += '\n';
 
-                        // TODO: duplication
                         var map = mapInput(json, data);
                         rest.fillInBlanks(map, function () { handleNext(rest, req, res, output, count+1); });
                     }

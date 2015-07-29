@@ -147,6 +147,7 @@ RESTdesc.prototype._handleProof = function (proof, callback)
     this.eye.call([proof, this.list], this.find, false, true, false, function (body) { this._handleNext(body, callback); }.bind(this), this._error);
 };
 
+// TODO: what if the result contains multiple possible APIs
 RESTdesc.prototype._handleNext = function (next, callback)
 {
     // TODO: strip unused prefixes?

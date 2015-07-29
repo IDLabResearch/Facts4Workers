@@ -38,7 +38,6 @@ EYEHandler.prototype.call = function (data, query, proof, singleAnswer, newTripl
             //console.log(data.toString());
         });
         proc.stderr.on('data', function (data) {
-            // TODO: do we need to log this somewhere?
             //console.error(data.toString());
         });
         proc.on('close', function (code) {
