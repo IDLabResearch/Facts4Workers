@@ -1,0 +1,41 @@
+//
+   Created by joachimvh on 2/04/2015.
+
+script(type='text/javascript').
+   function parse ()
+   {
+      var json = $("#form form").serializeObject();
+      if (json.id.length > 0)
+         json.solution = { id: parseInt(json.id) };
+      else
+         json.solution = { solution: json.solution, comment: json.solution_comment };
+
+      delete json.id;
+      delete json.solution_comment;
+
+      submit(json);
+   }
+
+form
+   label.
+      Insert the Solution ID and status or create a new solution.
+   div
+      label(for="id").
+         Solution ID:
+      input(id='id', type='text', value='1', name='id')
+   div
+      label(for="solution").
+         Solution (if new):
+      input(id='solution', type='text', value='', name='solution')
+   div
+      label(for="solution_comment").
+         Solution comment (if new):
+      input(id='solution_comment', type='text', value='', name='solution_comment')
+   div
+      label(for="result").
+         Result:
+      input(id='result', type='text', value='OK', name='result')
+   div
+      label(for="comment").
+         Result comment:
+      input(id='comment', type='text', value='', name='comment')

@@ -77,15 +77,25 @@ app.get('/demo', function (req, res)
     res.render('index', { title: 'F4W demo', message: 'F4W demo', goal: req.query.goal || 'calibration'});
 });
 
+// CALIBRATION
 app.get('/demo/start', function (req, res)
 {
     res.render('start');
 });
-
 app.get('/demo/doMeasurement', function (req, res)
 {
     var params = JSON.parse(req.query.body).suggested_parameters;
     res.render('doMeasurement', {params: params});
+});
+
+// THERMOLYMPICS_TEAMLEADER
+app.get('/demo/getDefect', function (req, res)
+{
+    res.render('getDefect');
+});
+app.get('/demo/getSolution', function (req, res)
+{
+    res.render('getSolution');
 });
 
 app.post('/demo/eye', function (req, res)
@@ -203,7 +213,7 @@ function handleNext (rest, req, res, output, count)
                 function (error, response, body)
                 {
                     // TODO: error handling
-                    if (!error && response.statusCode == 200)
+                    if (!error && response.statusCode < 400)
                     {
                         var json = body;
                         if (_.isString(body))

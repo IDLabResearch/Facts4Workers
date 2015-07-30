@@ -1,0 +1,18 @@
+//
+   Created by joachimvh on 2/04/2015.
+
+script(type='text/javascript').
+   function parse ()
+   {
+      var json = $("#form form").serializeObject();
+      json.id = parseInt(json.id);
+      submit(json);
+   }
+
+form
+   label.
+      Insert the Defect ID.
+   div
+      label(for="id").
+         Defect ID:
+      input(id='id', type='text', value='10', name='id')
