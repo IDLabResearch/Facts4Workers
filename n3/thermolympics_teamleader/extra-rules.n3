@@ -5,6 +5,7 @@
 @prefix log: <http://www.w3.org/2000/10/swap/log#>.
 @prefix tmpl: <http://multimedialab.elis.ugent.be/organon/ontologies/tmpl#>.
 @prefix string: <http://www.w3.org/2000/10/swap/string#>.
+@prefix list: <http://www.w3.org/2000/10/swap/list#>.
 
 #####################################
 # getting the ids out of a reportlist
@@ -13,7 +14,9 @@
 {
     ?x :reportList ?list.
     ?list e:label ?ll.      # make sure ?list is not grounded
-}=>{
+}
+=>
+{
     ?x :reportIdList ?list.
 }.
 
@@ -26,4 +29,15 @@
 =>
 {
     ?x :reportIdList ?newlist.
+}.
+
+
+{
+    ?x :oneOf ?list.
+    ?s ?p ?x.
+    ?y list:in ?list.
+}
+=>
+{
+    ?s ?p ?y.
 }.

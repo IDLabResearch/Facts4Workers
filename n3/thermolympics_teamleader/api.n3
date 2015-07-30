@@ -106,6 +106,8 @@
         :result ?result;
         :comment ?comment
     ]}.
+    # TODO: should use special namespace for things like oneOf to prevent overlap with API responses
+    ?sol :oneOf ( {[ :id _:id ]} {[ :solution _:solution ; :comment _:comment ]} ).
     ?report :adopted_solution _:adopted.
     _:adopted :solution ?sol;
               :result ?result;
@@ -119,8 +121,7 @@
             :defect_id ?d;
             :adopted_solution ?adopted.
     ?adopted :solution ?sol. # TODO: used same predicate for 2 different things, correct but ugly
-    ?sol e:whenGround ?sol_ground.
-    ?sol_ground log:includes {
+    ?sol log:includes {
         ?s :solution ?sol_text;
            :comment ?sol_comment.
     }
@@ -153,8 +154,7 @@
     ?adopted :solution ?sol;
              :result ?result;
              :comment ?comment.
-    ?sol e:whenGround ?sol_ground.
-    ?sol_ground log:includes { ?s :id ?solution_id. }
+    ?sol log:includes { ?s :id ?solution_id. }
 }
 =>
 {
