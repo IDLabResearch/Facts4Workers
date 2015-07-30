@@ -102,16 +102,29 @@
                   http:body _:body
               ].
     _:body :contains {[
-        :solution ?sol; # either an object { "id": 5 } or { "solution": "...", "comment": "..." }
+        :solution_used ?sol; # either an object { "id": 5 } or { "solution": "...", "comment": "..." }
         :result ?result;
         :comment ?comment
     ]}.
-    # TODO: should use special namespace for things like oneOf to prevent overlap with API responses
-    ?sol :oneOf ( {[ :id _:id ]} {[ :solution _:solution ; :comment _:comment ]} ).
     ?report :adopted_solution _:adopted.
-    _:adopted :solution ?sol;
+    _:adopted :solution_used ?sol;
               :result ?result;
               :comment ?comment.
+}.
+# needs to be outside of the API rule to not end up in the actual data with skolemized URIs for all possible contents
+{
+    ?x :solution_used ?sol.
+    ?sol e:label ?label. # only necessary when ?sol isn't grounded, if it is we have the actual object
+}
+=>
+{
+    ?x :solution_used {[
+        :id _:id
+    ]}.
+    ?x :solution_used {[
+        :solution _:solution;
+        :comment _:comment
+    ]}.
 }.
 
 # POST solution if it didn't exist yet
@@ -120,7 +133,7 @@
             :id ?n;
             :defect_id ?d;
             :adopted_solution ?adopted.
-    ?adopted :solution ?sol. # TODO: used same predicate for 2 different things, correct but ugly
+    ?adopted :solution_used ?sol.
     ?sol log:includes {
         ?s :solution ?sol_text;
            :comment ?sol_comment.
@@ -141,7 +154,7 @@
     _:body :contains {[
         :id ?id # TODO: should check if we actually get this back, we should though
     ]}.
-    ?sol :id ?id.
+    ?adopted :solution_used {[ :id ?id ]}.
 }.
 
 # POST adopted solution
@@ -151,7 +164,7 @@
             :defect_id ?d;
             :operator ?o;
             :adopted_solution ?adopted.
-    ?adopted :solution ?sol;
+    ?adopted :solution_used ?sol;
              :result ?result;
              :comment ?comment.
     ?sol log:includes { ?s :id ?solution_id. }
@@ -167,5 +180,5 @@
                   :result ?result;
                   :comment ?comment
               ]}.
-    ?adopted :is :posted. # TODO: this should not be the goal, it's possible the user wants to try out multiple solutions
+    ?adopted :is :posted.
 }.

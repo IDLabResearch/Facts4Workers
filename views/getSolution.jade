@@ -6,11 +6,12 @@ script(type='text/javascript').
    {
       var json = $("#form form").serializeObject();
       if (json.id.length > 0)
-         json.solution = { id: parseInt(json.id) };
+         json.solution_used = { id: parseInt(json.id) };
       else
-         json.solution = { solution: json.solution, comment: json.solution_comment };
+         json.solution_used = { solution: json.solution, comment: json.solution_comment };
 
       delete json.id;
+      delete json.solution;
       delete json.solution_comment;
 
       submit(json);
