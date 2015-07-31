@@ -3,7 +3,7 @@
 @prefix tmpl: <http://multimedialab.elis.ugent.be/organon/ontologies/tmpl#>.
 @prefix math: <http://www.w3.org/2000/10/swap/math#>.
 @prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
-@prefix out: <http://f4w.restdesc.org/demo/.well-known/genid/123456789#>.
+@prefix out: <http://f4w.restdesc.org/demo/.well-known/genid/0afd653e-52c4-497d-862f-b2c44252068f#>.
 
 
 # API “worker” doMeasurement (request geometrical dimensions)
