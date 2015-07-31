@@ -2,6 +2,7 @@
 @prefix http: <http://www.w3.org/2011/http#>.
 @prefix tmpl: <http://multimedialab.elis.ugent.be/organon/ontologies/tmpl#>.
 @prefix log: <http://www.w3.org/2000/10/swap/log#>.
+@prefix out: <http://f4w.restdesc.org/demo/.well-known/genid/123456789#>.
 
 # API 0 (get all parts)
 {
@@ -36,10 +37,10 @@
                   http:body _:body 
               ].
     _:body :contains {[
-        :id ?n
+        :id out:id
     ]}.
     _:x a :part;
-        :part_number ?n.
+        :part_number out:id.
 }.
 
 # API 1 (request part information)
@@ -56,12 +57,12 @@
               ].
 #TODO universals ?min1 ?max1 ?min2 ?max2 ?p1 ?p2 ?p3 ?p4
     _:body :contains {[
-        :tolerances ( ?t1 ?t2 );
-        :machine_parameters ( ?p1 ?p2 ?p3 ?p4 )
+        :tolerances ( out:t1 out:t2 );
+        :machine_parameters ( out:p1 out:p2 out:p3 out:p4 )
     ]}.
     _:c a :calibration;
-        :tolerances ( ?t1 ?t2 );
-        :suggested_parameters ( ?p1 ?p2 ?p3 ?p4 );
+        :tolerances ( out:t1 out:t2 );
+        :suggested_parameters ( out:p1 out:p2 out:p3 out:p4 );
         :part ?x.
 }.
 

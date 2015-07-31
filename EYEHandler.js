@@ -8,6 +8,7 @@ var _ = require('lodash');
 
 function EYEHandler () {}
 
+// TODO: a lot of these files can be loaded from disk instead of generating temp files every time
 // TODO: better way of passing all these parameters?
 EYEHandler.prototype.call = function (data, query, proof, singleAnswer, newTriples, callback, errorCallback)
 {
@@ -28,6 +29,9 @@ EYEHandler.prototype.call = function (data, query, proof, singleAnswer, newTripl
         if (!proof)
             args.push('--nope');
         args.push('--no-qvars');
+
+        args.push('--no-skolem');
+        args.push('http://f4w.restdesc.org/demo/.well-known/genid/123456789#');
 
         // blame windows npm implementation
         // http://stackoverflow.com/questions/17516772/using-nodejss-spawn-causes-unknown-option-and-error-spawn-enoent-err

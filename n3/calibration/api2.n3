@@ -3,6 +3,7 @@
 @prefix tmpl: <http://multimedialab.elis.ugent.be/organon/ontologies/tmpl#>.
 @prefix math: <http://www.w3.org/2000/10/swap/math#>.
 @prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
+@prefix out: <http://f4w.restdesc.org/demo/.well-known/genid/123456789#>.
 
 
 # API “worker” doMeasurement (request geometrical dimensions)
@@ -27,9 +28,12 @@
                   http:body _:body
               ].
 #TODO: Change d1 and d2, pps
-    _:body :contains { [ :geometrical_dimension (?d1 ?d2); :used_machine_parameters (?pp1 ?pp2 ?pp3 ?pp4) ] }.
-    ?x :geometrical_dimension (?d1 ?d2);
-       :machine_parameters (?pp1 ?pp2 ?pp3 ?pp4).
+    _:body :contains {[
+        :geometrical_dimension (out:d1 out:d2);
+        :used_machine_parameters (out:pp1 out:pp2 out:pp3 out:pp4)
+    ]}.
+    ?x :geometrical_dimension (out:d1 out:d2);
+       :machine_parameters (out:pp1 out:pp2 out:pp3 out:pp4).
 }.
 
 
@@ -56,17 +60,15 @@
               http:resp [
                   http:body _:body
               ].
-#TODO the pps!
     _:body :contains {[
-        :id _:id;
-        :result ?ok;
-        :suggested_parameters (?pp1 ?pp2 ?pp3 ?pp4)
+        :result out:ok;
+        :suggested_parameters (out:pp1 out:pp2 out:pp3 out:pp4)
     ]}.
-    ?x :result ?ok.
+    ?x :result out:ok.
     _:c a :potential_calibration;
         :previous_calibration ?x;
         :tolerances ( ?t1 ?t2 );
-        :suggested_parameters ( ?pp1 ?pp2 ?pp3 ?pp4 );
+        :suggested_parameters ( out:pp1 out:pp2 out:pp3 out:pp4 );
         :part ?p.
 }.
 
