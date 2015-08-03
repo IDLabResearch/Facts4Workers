@@ -9,6 +9,7 @@ var N3Parser = require('./N3Parser');
 var JSONLDParser = require('./JSONLDParser');
 var uuid = require('node-uuid');
 var Cache = require('./Cache');
+var path = require('path');
 
 function RESTdesc (dataPaths, goalPath, cacheKey)
 {
@@ -21,8 +22,8 @@ function RESTdesc (dataPaths, goalPath, cacheKey)
         this.dataPaths = [this.dataPaths];
 
     // TODO: more generic paths
-    this.list = 'n3/calibration/list.n3';
-    this.findPath = 'n3/calibration/find_executable_calls.n3';
+    this.list = path.join(__dirname, 'n3/calibration/list.n3');
+    this.findPath = path.join(__dirname, 'n3/calibration/find_executable_calls.n3');
 
     this.eye = null;
 

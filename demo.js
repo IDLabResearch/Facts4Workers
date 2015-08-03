@@ -2,7 +2,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var request = require('request');
-var fs = require('fs');
+var path = require('path');
 var _ = require('lodash');
 var RESTdesc = require('./RESTdesc');
 var serveIndex = require('serve-index');
@@ -18,9 +18,14 @@ var port = args.p;
 var app = express();
 app.set('view engine', 'jade');
 
+function relative (relativePath)
+{
+    return path.join(__dirname, relativePath);
+}
+
 // provide jquery file that can be used
-app.set('views', process.cwd() + '/views');
-app.use('/scripts/jquery.min.js', express.static(process.cwd() + '/node_modules/jquery/dist/jquery.min.js'));
+app.set('views', relative('/views'));
+app.use('/scripts/jquery.min.js', express.static(relative('node_modules/jquery/dist/jquery.min.js')));
 
 // parse post data
 app.use(bodyParser.json());       // to support JSON-encoded bodies
@@ -29,22 +34,22 @@ app.use(bodyParser.urlencoded({   // to support URL-encoded bodies
 }));
 
 // allow acces to documentation pdf
-app.use('/demo/documentation', express.static(process.cwd() + "/documentation/"));
+app.use('/demo/documentation', express.static(relative('documentation/')));
 
 // create index page of all our n3 files
-app.use('/demo/n3', express.static(process.cwd() + "/n3"));
-app.use('/demo/n3', serveIndex(__dirname + '/n3', {icons: true, view: 'details'}));
+app.use('/demo/n3', express.static(relative('n3')));
+app.use('/demo/n3', serveIndex(relative('n3'), {icons: true, view: 'details'}));
 
 // TODO: more generic way to load all files?
-var api1 = 'n3/calibration/api1.n3';
-var api2 = 'n3/calibration/api2.n3';
-var extra = 'n3/calibration/extra-rules.n3';
-var teamleader_api = 'n3/thermolympics_teamleader/api.n3';
-var teamleader_extra = 'n3/thermolympics_teamleader/extra-rules.n3';
+var api1 = relative('n3/calibration/api1.n3');
+var api2 = relative('n3/calibration/api2.n3');
+var extra = relative('n3/calibration/extra-rules.n3');
+var teamleader_api = relative('n3/thermolympics_teamleader/api.n3');
+var teamleader_extra = relative('n3/thermolympics_teamleader/extra-rules.n3');
 
 var goals = {
-    'calibration': 'n3/calibration/goal.n3',
-    'thermolympics_teamleader': 'n3/thermolympics_teamleader/goal.n3'
+    'calibration': relative('n3/calibration/goal.n3'),
+    'thermolympics_teamleader': relative('n3/thermolympics_teamleader/goal.n3')
 };
 
 app.get('/', function (req, res)
