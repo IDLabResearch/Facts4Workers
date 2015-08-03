@@ -24,7 +24,7 @@ function relative (relativePath)
 }
 
 // provide jquery file that can be used
-app.set('views', relative('/views'));
+app.set('views', relative('views'));
 app.use('/scripts/jquery.min.js', express.static(relative('node_modules/jquery/dist/jquery.min.js')));
 
 // parse post data
@@ -34,11 +34,11 @@ app.use(bodyParser.urlencoded({   // to support URL-encoded bodies
 }));
 
 // allow acces to documentation pdf
-app.use('/demo/documentation', express.static(relative('documentation/')));
+app.use('/demo/documentation', express.static(relative('documentation')));
 
 // create index page of all our n3 files
-app.use('/demo/n3', express.static(relative('n3')));
-app.use('/demo/n3', serveIndex(relative('n3'), {icons: true, view: 'details'}));
+app.use('/demo/n3', express.static(relative('n3'))); // allow access to the N3 files
+app.use('/demo/n3', serveIndex(relative('n3'), {icons: true, view: 'details'})); // allow access to the N3 folders
 
 // TODO: more generic way to load all files?
 var api1 = relative('n3/calibration/api1.n3');
