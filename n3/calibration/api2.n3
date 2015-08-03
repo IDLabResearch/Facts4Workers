@@ -29,11 +29,11 @@
               ].
 #TODO: Change d1 and d2, pps
     _:body :contains {[
-        :geometrical_dimension (out:d1 out:d2);
-        :used_machine_parameters (out:pp1 out:pp2 out:pp3 out:pp4)
+        :geometrical_dimension (?d1 ?d2);
+        :used_machine_parameters (?pp1 ?pp2 ?pp3 ?pp4)
     ]}.
-    ?x :geometrical_dimension (out:d1 out:d2);
-       :machine_parameters (out:pp1 out:pp2 out:pp3 out:pp4).
+    ?x :geometrical_dimension (?d1 ?d2);
+       :machine_parameters (?pp1 ?pp2 ?pp3 ?pp4).
 }.
 
 
@@ -61,14 +61,14 @@
                   http:body _:body
               ].
     _:body :contains {[
-        :result out:ok;
-        :suggested_parameters (out:pp1 out:pp2 out:pp3 out:pp4)
+        :result ?ok;
+        :suggested_parameters (?pp1 ?pp2 ?pp3 ?pp4)
     ]}.
-    ?x :result out:ok.
+    ?x :result ?ok.
     _:c a :potential_calibration;
         :previous_calibration ?x;
         :tolerances ( ?t1 ?t2 );
-        :suggested_parameters ( out:pp1 out:pp2 out:pp3 out:pp4 );
+        :suggested_parameters ( ?pp1 ?pp2 ?pp3 ?pp4 );
         :part ?p.
 }.
 
