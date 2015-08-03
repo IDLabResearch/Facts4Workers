@@ -8,18 +8,15 @@ var _ = require('lodash');
 
 function EYEHandler () {}
 
-// TODO: a lot of these files can be loaded from disk instead of generating temp files every time
 // TODO: better way of passing all these parameters?
-EYEHandler.prototype.call = function (data, query, proof, singleAnswer, newTriples, callback, errorCallback)
+EYEHandler.prototype.call = function (dataPaths, data, queryPath, proof, singleAnswer, callback, errorCallback)
 {
     var cache = new ResourceCache();
-    var fileNames = [];
-    var args = [];
-    var queryName = null;
-    var delayed = _.after(data.length + 1, function ()
+    var args = [].concat(dataPaths);
+    var execute = function ()
     {
         args.push('--query');
-        args.push(queryName);
+        args.push(queryPath);
         if (singleAnswer)
         {
             args.push('--tactic');
@@ -46,29 +43,27 @@ EYEHandler.prototype.call = function (data, query, proof, singleAnswer, newTripl
         });
         proc.on('close', function (code) {
             // TODO: check exit code?
-            // already gets unlinked in destroy step
-            //for (var i = 0; i < fileNames.length; ++i)
-            //    self.cache.release(fileNames[i]);
             cache.destroy();
             callback(output);
         });
-    });
+    };
 
-    // TODO: error handling
-    for (var i = 0; i < data.length; ++i){
-        cache.cacheFromString(data[i], function (error, fileName)
-        {
-            args.push(fileName);
-            fileNames.push(fileName);
-            delayed();
-        });
-    }
-    cache.cacheFromString(query, function (error, fileName)
+    if (data.length === 0)
+        execute();
+    else
     {
-        queryName = fileName;
-        fileNames.push(fileName);
-        delayed();
-    });
+        // TODO: error handling
+        var count = 0;
+        for (var i = 0; i < data.length; ++i)
+        {
+            cache.cacheFromString(data[i], function (error, fileName)
+            {
+                args.push(fileName);
+                if (++count >= data.length)
+                    execute();
+            });
+        }
+    }
 };
 
 module.exports = EYEHandler;

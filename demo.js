@@ -36,15 +36,15 @@ app.use('/demo/n3', express.static(process.cwd() + "/n3"));
 app.use('/demo/n3', serveIndex(__dirname + '/n3', {icons: true, view: 'details'}));
 
 // TODO: more generic way to load all files?
-var api1 = fs.readFileSync('n3/calibration/api1.n3', 'utf-8');
-var api2 = fs.readFileSync('n3/calibration/api2.n3', 'utf-8');
-var extra = fs.readFileSync('n3/calibration/extra-rules.n3', 'utf-8');
-var teamleader_api = fs.readFileSync('n3/thermolympics_teamleader/api.n3', 'utf-8');
-var teamleader_extra = fs.readFileSync('n3/thermolympics_teamleader/extra-rules.n3', 'utf-8');
+var api1 = 'n3/calibration/api1.n3';
+var api2 = 'n3/calibration/api2.n3';
+var extra = 'n3/calibration/extra-rules.n3';
+var teamleader_api = 'n3/thermolympics_teamleader/api.n3';
+var teamleader_extra = 'n3/thermolympics_teamleader/extra-rules.n3';
 
 var goals = {
-    'calibration': fs.readFileSync('n3/calibration/goal.n3', 'utf-8'),
-    'thermolympics_teamleader': fs.readFileSync('n3/thermolympics_teamleader/goal.n3', 'utf-8')
+    'calibration': 'n3/calibration/goal.n3',
+    'thermolympics_teamleader': 'n3/thermolympics_teamleader/goal.n3'
 };
 
 app.get('/', function (req, res)

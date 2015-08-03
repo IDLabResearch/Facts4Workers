@@ -10,19 +10,19 @@ var JSONLDParser = require('./JSONLDParser');
 var uuid = require('node-uuid');
 var Cache = require('./Cache');
 
-function RESTdesc (input, goal, cacheKey)
+function RESTdesc (dataPaths, goalPath, cacheKey)
 {
-    this.input = input;
-    this.goal = goal;
+    this.dataPaths = dataPaths;
+    this.goalPath = goalPath;
     this.cacheKey = cacheKey || uuid.v4();
     this.cache = new Cache(this.cacheKey);
 
-    if (!_.isArray(this.input))
-        this.input = [this.input];
+    if (!_.isArray(this.dataPaths))
+        this.dataPaths = [this.dataPaths];
 
     // TODO: more generic paths
-    this.list = fs.readFileSync('n3/calibration/list.n3', 'utf-8');
-    this.find = fs.readFileSync('n3/calibration/find_executable_calls.n3', 'utf-8');
+    this.list = 'n3/calibration/list.n3';
+    this.findPath = 'n3/calibration/find_executable_calls.n3';
 
     this.eye = null;
 
@@ -137,14 +137,14 @@ RESTdesc.prototype.next = function (callback)
         data = data.map(function (str) { return parser.parse(JSON.parse(str), this.prefix); }.bind(this));
         // create new eye handler every time so we know when to call destroy function
         this.eye = new EYEHandler();
-        this.eye.call(this.input.concat(data), this.goal, true, true, false, function (proof) { this._handleProof(proof, callback); }.bind(this), this._error);
+        this.eye.call(this.dataPaths, data, this.goalPath, true, true, function (proof) { this._handleProof(proof, callback); }.bind(this), this._error);
     }.bind(this));
 };
 
 RESTdesc.prototype._handleProof = function (proof, callback)
 {
     this.proofs.push(proof);
-    this.eye.call([proof, this.list], this.find, false, true, false, function (body) { this._handleNext(body, callback); }.bind(this), this._error);
+    this.eye.call([this.list], [proof], this.findPath, false, true, function (body) { this._handleNext(body, callback); }.bind(this), this._error);
 };
 
 // TODO: what if the result contains multiple possible APIs
