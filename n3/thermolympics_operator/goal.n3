@@ -4,10 +4,8 @@
 
 {
     ?report a :report;
-            :adopted_solution ?adopted.
-    ?adopted :is :posted.
+            :is :posted.
 }=>{
     ?report a :report;
-            :adopted_solution ?adopted.
-    ?adopted :is :posted.
+            :is :posted.
 }.

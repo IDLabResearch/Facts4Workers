@@ -102,7 +102,7 @@
                   http:body _:body
               ].
     _:body :contains {[
-        :solution_used ?sol; # either an object { "id": 5 } or { "solution": "...", "comment": "..." }
+        :solution ?sol; # either an object { "id": 5 } or { "solution": "...", "comment": "..." }
         :result ?result;
         :comment ?comment
     ]}.
