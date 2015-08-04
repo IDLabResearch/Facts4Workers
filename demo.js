@@ -44,11 +44,15 @@ app.use('/demo/n3', serveIndex(relative('n3'), {icons: true, view: 'details'}));
 var api1 = relative('n3/calibration/api1.n3');
 var api2 = relative('n3/calibration/api2.n3');
 var extra = relative('n3/calibration/extra-rules.n3');
+var operator_api = relative('n3/thermolympics_operator/api.n3');
 var teamleader_api = relative('n3/thermolympics_teamleader/api.n3');
 var teamleader_extra = relative('n3/thermolympics_teamleader/extra-rules.n3');
 
+var input = [api1, api2, extra, operator_api, teamleader_api, teamleader_extra];
+
 var goals = {
     'calibration': relative('n3/calibration/goal.n3'),
+    'thermolympics_operator': relative('n3/thermolympics_operator/goal.n3'),
     'thermolympics_teamleader': relative('n3/thermolympics_teamleader/goal.n3')
 };
 
@@ -93,6 +97,16 @@ app.get('/demo/doMeasurement', function (req, res)
     res.render('doMeasurement', {params: params});
 });
 
+// THERMOLYMPICS_OPERATOR
+app.get('/demo/getPartID', function (req, res)
+{
+    res.render('start'); // re-use
+});
+app.get('/demo/getReport', function (req, res)
+{
+    res.render('getReport');
+});
+
 // THERMOLYMPICS_TEAMLEADER
 app.get('/demo/getDefect', function (req, res)
 {
@@ -128,7 +142,7 @@ app.post('/demo/next', function (req, res)
             map = mapInput(req.body.json, req.body.eye);
         cacheKey = req.body.eye.data;
     }
-    var rest = new RESTdesc([api1, api2, extra, teamleader_api, teamleader_extra], goal, cacheKey);
+    var rest = new RESTdesc(input, goal, cacheKey);
     rest.fillInBlanks(map, function () { handleNext(rest, req, res); });
 
 });

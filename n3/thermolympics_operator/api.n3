@@ -12,7 +12,7 @@
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://askTheWorker/start");
+              tmpl:requestURI ("http://askTheWorker/getPartID");
               http:body {[
                   :message "Please provide the part ID you want to work with."
               ]};
@@ -76,10 +76,10 @@
 }
 =>
 {
-    ?x :defect {[
+    ?report :defect {[
         :id _:id
     ]}.
-    ?x :defect {[
+    ?report :defect {[
         :name _:name;
         :description _:description;
         :picture _:picture;
