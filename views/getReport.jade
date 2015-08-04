@@ -1,0 +1,48 @@
+//
+   Created by joachimvh on 2/04/2015.
+
+script(type='text/javascript').
+   function parse ()
+   {
+      var json = $("#form form").serializeObject();
+      if (json.id.length > 0)
+         json.defect = { id: parseInt(json.id) };
+      else
+         json.defect = { name: json.name, description: json.description, picture: json.picture, comment: json.comment };
+
+      delete json.id;
+      delete json.name;
+      delete json.description;
+      delete json.picture;
+      delete json.comment;
+
+      submit(json);
+   }
+
+form
+   label.
+      Insert the Defect ID and status or create a new defect.
+   div
+      label(for="id").
+         Defect ID:
+      input(id='id', type='text', value='1', name='id')
+   div
+      label(for="name").
+         Defect name (if new):
+      input(id='name', type='text', value='', name='name')
+   div
+      label(for="description").
+         Defect description (if new):
+      input(id='description', type='text', value='', name='description')
+   div
+      label(for="picture").
+         Defect picture (if new):
+      input(id='picture', type='text', value='', name='picture')
+   div
+      label(for="comment").
+         Defect comment (if new):
+      input(id='comment', type='text', value='', name='comment')
+   div
+      label(for="operator").
+         Operator name:
+      input(id='operator', type='text', value='Arnold', name='operator')
