@@ -151,9 +151,9 @@ RESTdesc.prototype._handleProof = function (proof, callback)
 // TODO: what if the result contains multiple possible APIs
 RESTdesc.prototype._handleNext = function (next, callback)
 {
-    // TODO: strip unused prefixes?
     var n3Parser = new N3Parser();
     var jsonld = n3Parser.parse(next);
+    // TODO: should move the JSONLD to JSON part somewhere else, closer to demo.js, that way we can take the Content-Type better into account
     var json = this._JSONLDtoJSON(jsonld);
     // if there are multiple elements, find the one corresponding to the request
     if (_.isArray(json))
