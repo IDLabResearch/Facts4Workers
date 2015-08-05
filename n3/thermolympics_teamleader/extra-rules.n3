@@ -17,7 +17,7 @@
 }
 =>
 {
-    ?x :reportIdList ?list.
+    ?x :reportIDList ?list.
 }.
 
 {
@@ -28,5 +28,5 @@
 }
 =>
 {
-    ?x :reportIdList ?newlist.
+    ?x :reportIDList ?newlist.
 }.

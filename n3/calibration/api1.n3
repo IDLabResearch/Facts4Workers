@@ -20,7 +20,7 @@
 
 # API “worker” start (request part ID)
 {
-    ?list a :partIdList.
+    ?list a :partIDList.
 }
 =>
 {
@@ -29,7 +29,7 @@
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]); # tells us to which format we have to convert the body for the call
               http:body {[
                   :message "Please input the starting information. 'id' corresponds to the part ID.";
-                  :partIdList ?list
+                  :partIDList ?list
               ].};
               http:resp [
 #TODO n should not be universal!

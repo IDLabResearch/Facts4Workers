@@ -18,15 +18,12 @@
               http:resp [
                   http:body _:list
               ].
-    # TODO: hotfix to help with output parsing, should not be necessary
-    _:x a :reportList;
-        :content _:list.
+    _:list a :reportList.
 }.
 
 # API USER 1 (send all reports and ask for which defect he wants to look at)
 {
-    ?x a :reportList;
-       :content ?list.
+    ?list a :reportIDList.
 }
 =>
 {
@@ -35,7 +32,7 @@
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {[
                   :message "Please provide the report ID you want to investigate.";
-                  :reportList ?list
+                  :reportIDList ?list
               ]};
               http:resp [
                   http:body _:body

@@ -39,7 +39,7 @@
     ?list a :partList.
     ?list e:label ?ll.      # make sure ?list is not grounded
 }=>{
-    ?list a :partIdList.
+    ?list a :partIDList.
 }.
 
 {
@@ -50,6 +50,6 @@
 }
 =>
 {
-    ?newlist a :partIdList.
+    ?newlist a :partIDList.
 }.
 
