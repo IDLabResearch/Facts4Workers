@@ -21,7 +21,6 @@ function RESTdesc (dataPaths, goalPath, cacheKey)
     if (!_.isArray(this.dataPaths))
         this.dataPaths = [this.dataPaths];
 
-    // TODO: more generic paths
     this.list = path.join(__dirname, 'n3/calibration/list.n3');
     this.findPath = path.join(__dirname, 'n3/calibration/find_executable_calls.n3');
 
@@ -163,6 +162,10 @@ RESTdesc.prototype._handleNext = function (next, callback)
         json['http:requestURI'] = json['tmpl:requestURI'].join('');
         delete json['tmpl:requestURI'];
     }
+    // remove 'contains' to keep consistency for end-user
+    var contains = _.result(json, '"http:resp"."http:body"."contains"');
+    if (contains)
+        json['http:resp']['http:body'] = json['http:resp']['http:body']['contains'];
 
     if (!json || !json['http:requestURI'])
     {
@@ -212,6 +215,10 @@ RESTdesc.prototype._JSONLDtoJSON = function (jsonld)
         // ignore URIs for now
         if (key === '@id')
             continue;
+
+        // TODO: this is already interpreting the content so shouldn't actually happen here (but later we lose the blank nodes)
+        if (key === 'http:body' && Object.keys(jsonld[key]).length > 1 && jsonld[key]['@id'])
+            return { 'http:body': jsonld[key]['@id'] };
 
         // this might produce invalid URIs, but we don't care since the output is JSON, not JSON-lD
         var val = this._JSONLDtoJSON(jsonld[key]);

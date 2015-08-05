@@ -43,8 +43,7 @@
 }.
 
 {
-    ?x a :partList.
-    ?x :content ?list.
+    ?list a :partList.
     ?list e:notLabel ?ll.  # make sure ?list is grounded
     ?list log:conjunction ?graph.
     _:x e:findall (?id {?graph log:includes {?sk :id ?id}} ?newlist).
