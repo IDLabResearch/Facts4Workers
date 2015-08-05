@@ -1,6 +1,6 @@
 @prefix : <http://f4w.restdesc.org/demo#>.
 @prefix http: <http://www.w3.org/2011/http#>.
-@prefix tmpl: <http://multimedialab.elis.ugent.be/organon/ontologies/tmpl#>.
+@prefix tmpl: <http://purl.org/restdesc/http-template#>.
 @prefix math: <http://www.w3.org/2000/10/swap/math#>.
 @prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
 @prefix out: <http://f4w.restdesc.org/demo/.well-known/genid/0afd653e-52c4-497d-862f-b2c44252068f#>.
@@ -18,6 +18,7 @@
 {
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/" "doMeasurement");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {[
                   :message "Please measure a new part with the following settings.";
                   :part_number ?n;
@@ -50,6 +51,7 @@
 {
     _:request http:methodName "POST";
               tmpl:requestURI ("http://pacific-shore-4503.herokuapp.com/calibrations");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {[
                   :operator "Arnold";
                   :part_number ?n;

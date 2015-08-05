@@ -7,7 +7,7 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 @prefix list: <http://www.w3.org/2000/10/swap/list#>.
 @prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
 PREFIX r: <http://www.w3.org/2000/10/swap/reason#>
-PREFIX tmpl: <http://multimedialab.elis.ugent.be/organon/ontologies/tmpl#>
+PREFIX tmpl: <http://purl.org/restdesc/http-template#>
 PREFIX http: <http://www.w3.org/2011/http#>
 
 #no list, no problem!

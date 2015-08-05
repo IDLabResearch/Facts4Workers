@@ -1,6 +1,6 @@
 PREFIX : <http://f4w.restdesc.org/demo#>
 PREFIX http: <http://www.w3.org/2011/http#>
-PREFIX tmpl: <http://multimedialab.elis.ugent.be/organon/ontologies/tmpl#>
+PREFIX tmpl: <http://purl.org/restdesc/http-template#>
 PREFIX e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>
 PREFIX log: <http://www.w3.org/2000/10/swap/log#>
 PREFIX r: <http://www.w3.org/2000/10/swap/reason#>

@@ -1,6 +1,6 @@
 @prefix : <http://f4w.restdesc.org/demo#>.
 @prefix http: <http://www.w3.org/2011/http#>.
-@prefix tmpl: <http://multimedialab.elis.ugent.be/organon/ontologies/tmpl#>.
+@prefix tmpl: <http://purl.org/restdesc/http-template#>.
 @prefix log: <http://www.w3.org/2000/10/swap/log#>.
 @prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
 @prefix out: <http://f4w.restdesc.org/demo/.well-known/genid/f3ed8675-47ce-42f1-ac89-9082b146b6db#>.
@@ -13,6 +13,7 @@
 {
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/getPartID");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {[
                   :message "Please provide the part ID you want to work with."
               ]};
@@ -52,6 +53,7 @@
 {
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/getReport");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {[
                   :message "Please report the defect.";
                   :defectList ?list
@@ -105,6 +107,7 @@
 {
     _:request http:methodName "POST";
               tmpl:requestURI ("http://thermolympic-demo.herokuapp.com/defects");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {[
                   :part_id ?id;
                   :name ?name;
@@ -133,6 +136,7 @@
 {
     _:request http:methodName "POST";
               tmpl:requestURI ("http://thermolympic-demo.herokuapp.com/reports");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {[
                   :defect_id ?id;
                   :operator ?operator
