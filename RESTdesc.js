@@ -217,7 +217,7 @@ RESTdesc.prototype._JSONLDtoJSON = function (jsonld)
             continue;
 
         // TODO: this is already interpreting the content so shouldn't actually happen here (but later we lose the blank nodes)
-        if (key === 'http:body' && Object.keys(jsonld[key]).length > 1 && jsonld[key]['@id'])
+        if (key === 'http:body' && Object.keys(jsonld[key]).length > 1 && jsonld[key]['@id'] && !jsonld[key]['http://f4w.restdesc.org/demo#contains'])
             return { 'http:body': jsonld[key]['@id'] };
 
         // this might produce invalid URIs, but we don't care since the output is JSON, not JSON-lD
