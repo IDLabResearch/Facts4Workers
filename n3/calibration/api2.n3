@@ -28,13 +28,12 @@
               http:resp [
                   http:body _:body
               ].
-#TODO: Change d1 and d2, pps
     _:body :contains {[
-        :geometrical_dimension (?d1 ?d2);
-        :used_machine_parameters (?pp1 ?pp2 ?pp3 ?pp4)
+        :geometrical_dimension (_:d1 _:d2);
+        :used_machine_parameters (_:pp1 _:pp2 _:pp3 _:pp4)
     ]}.
-    ?x :geometrical_dimension (?d1 ?d2);
-       :machine_parameters (?pp1 ?pp2 ?pp3 ?pp4).
+    ?x :geometrical_dimension (_:d1 _:d2);
+       :machine_parameters (_:pp1 _:pp2 _:pp3 _:pp4).
 }.
 
 
@@ -63,14 +62,14 @@
                   http:body _:body
               ].
     _:body :contains {[
-        :result ?ok;
-        :suggested_parameters (?pp1 ?pp2 ?pp3 ?pp4)
+        :result _:ok;
+        :suggested_parameters (_:pp1 _:pp2 _:pp3 _:pp4)
     ]}.
-    ?x :result ?ok.
+    ?x :result _:ok.
     _:c a :potential_calibration;
         :previous_calibration ?x;
         :tolerances ( ?t1 ?t2 );
-        :suggested_parameters ( ?pp1 ?pp2 ?pp3 ?pp4 );
+        :suggested_parameters ( _:pp1 _:pp2 _:pp3 _:pp4 );
         :part ?p.
 }.
 

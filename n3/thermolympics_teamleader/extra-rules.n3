@@ -12,21 +12,21 @@
 #####################################
 
 {
-    ?x :reportList ?list.
+    ?list a :reportList.
     ?list e:label ?ll.      # make sure ?list is not grounded
 }
 =>
 {
-    ?x :reportIDList ?list.
+    ?list a :reportIDList.
 }.
 
 {
-    ?x :reportList ?list.
+    ?list a :reportList.
     ?list e:notLabel ?ll.
     ?list log:conjunction ?graph.
     _:x e:findall (?id {?graph log:includes {?sk :id ?id}} ?newlist).
 }
 =>
 {
-    ?x :reportIDList ?newlist.
+    ?list a :reportIDList.
 }.

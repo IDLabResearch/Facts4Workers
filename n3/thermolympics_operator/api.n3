@@ -21,10 +21,10 @@
                   http:body _:body
               ].
     _:body :contains {[
-        :id ?n
+        :id _:n
     ]}.
     _:part a :part;
-           :id ?n.
+           :id _:n.
 }.
 
 # API 1 (request all defects for a given part ID)
@@ -62,13 +62,13 @@
                   http:body _:body
               ].
     _:body :contains {[
-        :defect ?d;
-        :operator ?o
+        :defect _:d;
+        :operator _:o
     ]}.
     _:report a :report;
              :part ?part;
-             :operator ?o;
-             :defect ?d.
+             :operator _:o;
+             :defect _:d.
 }.
 # TODO: maybe should have generic solution for this
 # needs to be outside of the API rule to not end up in the actual data with skolemized URIs for all possible contents
@@ -119,9 +119,9 @@
                   http:body _:body
               ].
     _:body :contains {[
-        :id ?id
+        :id _:id
     ]}.
-    ?report :defect {[ :id ?id ]}.
+    ?report :defect {[ :id _:id ]}.
 }.
 
 # POST new report

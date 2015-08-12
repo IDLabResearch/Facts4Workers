@@ -25,10 +25,10 @@ EYEHandler.prototype.call = function (dataPaths, data, queryPath, proof, singleA
 
         if (!proof)
             args.push('--nope');
-        args.push('--no-qvars');
-
-        args.push('--no-skolem');
-        args.push('http://f4w.restdesc.org/demo/.well-known/genid/');
+        //args.push('--no-qvars');
+        //
+        //args.push('--no-skolem');
+        //args.push('http://f4w.restdesc.org/demo/.well-known/genid/');
 
         // blame windows npm implementation
         // http://stackoverflow.com/questions/17516772/using-nodejss-spawn-causes-unknown-option-and-error-spawn-enoent-err

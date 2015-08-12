@@ -32,14 +32,13 @@
                   :partIDList ?list
               ].};
               http:resp [
-#TODO n should not be universal!
                   http:body _:body
               ].
     _:body :contains {[
-        :id ?id
+        :id _:id
     ]}.
     _:x a :part;
-        :part_number ?id.
+        :part_number _:id.
 }.
 
 # API 1 (request part information)
@@ -54,14 +53,13 @@
               http:resp [
                   http:body _:body
               ].
-#TODO universals ?min1 ?max1 ?min2 ?max2 ?p1 ?p2 ?p3 ?p4
     _:body :contains {[
-        :tolerances ( ?t1 ?t2 );
-        :machine_parameters ( ?p1 ?p2 ?p3 ?p4 )
+        :tolerances ( _:t1 _:t2 );
+        :machine_parameters ( _:p1 _:p2 _:p3 _:p4 )
     ]}.
     _:c a :calibration;
-        :tolerances ( ?t1 ?t2 );
-        :suggested_parameters ( ?p1 ?p2 ?p3 ?p4 );
+        :tolerances ( _:t1 _:t2 );
+        :suggested_parameters ( _:p1 _:p2 _:p3 _:p4 );
         :part ?x.
 }.
 

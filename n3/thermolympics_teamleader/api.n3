@@ -38,10 +38,10 @@
                   http:body _:body
               ].
     _:body :contains {[
-        :id ?n
+        :id _:n
     ]}.
     _:report a :report;
-             :id ?n.
+             :id _:n.
 }.
 
 # TODO: this can be extracted from the reportlist
@@ -58,13 +58,13 @@
                   http:body _:body
               ].
     _:body :contains {[
-        :defect_id ?d;
-        :operator ?o;
-        :status ?s
+        :defect_id _:d;
+        :operator _:o;
+        :status _:s
     ]}.
-    ?report :defect_id ?d;
-            :operator ?o;
-            :status ?s.
+    ?report :defect_id _:d;
+            :operator _:o;
+            :status _:s.
 }.
 
 # API 3 (get all solutions for a defect)
@@ -101,14 +101,14 @@
                   http:body _:body
               ].
     _:body :contains {[
-        :solution ?sol; # either an object { "id": 5 } or { "solution": "...", "comment": "..." }
-        :result ?result;
-        :comment ?comment
+        :solution _:sol; # either an object { "id": 5 } or { "solution": "...", "comment": "..." }
+        :result _:result;
+        :comment _:comment
     ]}.
     ?report :adopted_solution _:adopted.
-    _:adopted :solution_used ?sol;
-              :result ?result;
-              :comment ?comment.
+    _:adopted :solution_used _:sol;
+              :result _:result;
+              :comment _:comment.
 }.
 # needs to be outside of the API rule to not end up in the actual data with skolemized URIs for all possible contents
 {
@@ -152,7 +152,7 @@
                   http:body _:body
               ].
     _:body :contains {[
-        :id ?id # TODO: should check if we actually get this back, we should though
+        :id _:id # TODO: should check if we actually get this back, we should though
     ]}.
     ?adopted :solution_used {[ :id ?id ]}.
 }.
