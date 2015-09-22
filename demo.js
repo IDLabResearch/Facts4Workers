@@ -248,7 +248,19 @@ function handleNext (rest, req, res, output, count)
                         rest.fillInBlanks(map, function () { handleNext(rest, req, res, output, count+1); });
                     }
                     else
+                    {
+                        /* TODO: what to do when there is an error? pop last cache entry? prevent API from being called with same data? delete API description (how?)?
+                         *       check if we can find another solution without the API? let the user that calls RESTdesc decide?
+                         */
                         console.error(error, body);
+
+                        output += 'ERROR!\n';
+                        output += response.statusCode + ' ' + error;
+                        data.output = output;
+
+                        data.error = { statusCode: response.statusCode, error: error, body: body };
+                        res.format({ json: function () { res.send(data); } });
+                    }
                 }
             );
         }
