@@ -119,7 +119,7 @@ app.get('/demo/getSolution', function (req, res)
     res.render('getSolution');
 });
 
-app.post('/demo/eye', function (req, res)
+app.post('/eye', function (req, res)
 {
     var input = req.body.input || "";
     var goal = req.body.goal || "";
@@ -127,7 +127,9 @@ app.post('/demo/eye', function (req, res)
     handleNext(rest, req, res);
 });
 
-app.post('/demo/next', function (req, res)
+app.post('/demo/next', next); // TODO:kept for backwards compatability, should remove this at some point
+app.post('/next', next);
+function next (req, res)
 {
     var goal = goals['calibration'];
     if (req.body && req.body.goal)
@@ -147,7 +149,7 @@ app.post('/demo/next', function (req, res)
     var rest = new RESTdesc(input, goal, cacheKey);
     rest.fillInBlanks(map, function () { handleNext(rest, req, res); });
 
-});
+}
 
 function mapInput (json, eye)
 {
