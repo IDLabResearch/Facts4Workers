@@ -159,7 +159,16 @@ RESTdesc.prototype._handleNext = function (next, callback)
         json = _.find(json, 'http:methodName');
     if (json && json['tmpl:requestURI'])
     {
-        json['http:requestURI'] = json['tmpl:requestURI'].join('');
+        var uriList = json['tmpl:requestURI'];
+        // handle AGFA tmpl:requestURI
+        if (uriList.length > 1 && _.isArray(uriList[1]))
+        {
+            var uri = uriList[0];
+            for (var i = 1; i < uriList.length; ++i)
+                uri.replace('{' + uriList[i][0] + '}', uriList[i][1]);
+            uriList = [uri];
+        }
+        json['http:requestURI'] = uriList.join('');
         delete json['tmpl:requestURI'];
     }
     // remove 'contains' to keep consistency for end-user
