@@ -24,9 +24,9 @@
         :machine_id _:machine_id; # need both this and event_id due to dependencies
         :operator_id _:operator_id
     ]}.
-    ?problem :defect [ :id _:defect_id ];
-             :operator [ :id _:operator_id ];
-             :event [ :id _:event_id; :machine [ :id _:machine_id ] ].
+    _:problem :defect [ :id _:defect_id ];
+              :operator [ :id _:operator_id ];
+              :event [ :id _:event_id; :machine [ :id _:machine_id ] ].
 }.
 
 # TODO: report it if the machine has the incorrect state?
