@@ -1,0 +1,204 @@
+# http://facts4workers.surge.sh/
+
+@prefix : <http://f4w.restdesc.org/demo#>.
+@prefix http: <http://www.w3.org/2011/http#>.
+@prefix tmpl: <http://purl.org/restdesc/http-template#>.
+@prefix log: <http://www.w3.org/2000/10/swap/log#>.
+@prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
+
+# get initial data (TODO: how are defect and event connected?)
+{
+    log:Truth
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://askTheWorker/startFixDefect");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              http:resp [
+                  http:body _:body
+              ].
+    _:body :contains {[
+        :defect_id _:defect_id;
+        :event_id _:event_id;
+        :machine_id _:machine_id; # need both this and event_id due to dependencies
+        :operator_id _:operator_id
+    ]}.
+    ?problem :defect [ :id _:defect_id ];
+             :operator [ :id _:operator_id ];
+             :event [ :id _:event_id; :machine [ :id _:machine_id ] ].
+}.
+
+# TODO: report it if the machine has the incorrect state?
+# get additional machine information
+{
+    ?problem :event ?event.
+    ?event :machine ?machine.
+    ?machine :id ?machine_id.
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?machine_id);
+              http:resp [
+                  http:body _:body
+              ].
+    _:body :contains {[
+        :state _:state
+    ]}.
+    ?machine :state _:state.
+}.
+
+{
+    ?problem :defect ?defect;
+             :event ?event.
+    ?defect :id ?defect_id.
+    ?event :machine ?machine.
+    ?machine :state ?state.
+    ?state e:whenGround "stopped_02".
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/solutions?defect_id=" ?defect_id);
+              http:resp [
+                  http:body _:list
+              ].
+    ?defect :solutions _:list.
+}.
+
+{
+    ?problem :operator ?operator;
+             :event ?event.
+    ?operator :id ?operator_id.
+    ?event :machine ?machine.
+    ?machine :id ?machine_id.
+}
+=>
+{
+    _:request http:methodName "POST";
+              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?machine_id "/events/");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              http:body {[
+                  :name "Teamleader maintenance.";
+                  :desc "Machine stopped due to defect.";
+                  :machine_state "stopped_03";
+                  :operator_id ?operator_id
+              ]}.
+    ?problem :state :under_repair.
+}.
+
+# send solution list to worker
+{
+    ?problem :defect ?defect;
+             :operator ?operator;
+             :event ?event;
+             :state :under_repair.
+    ?defect :solutions ?list.
+    ?event :id ?event_id.
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://askTheWorker/defectSolutions");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              http:body {[
+                  :solutions ?list
+              ]}.
+    # dummy report to trigger next rule
+    _:report a :report;
+             :event ?event;
+             :operator ?operator;
+             :result 0;
+             :state :posted.
+}.
+
+# request report if the previous report failed
+{
+    ?report a :report;
+            :event ?event;
+            :operator ?operator;
+            :result 0;
+            :state :posted.
+
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://askTheWorker/reportOnSolution");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              http:resp [
+                  http:body _:body
+              ].
+    _:body :contains {[
+        :solution_id _:solution_id;
+        :result _:result;
+        :comment _:comment
+    ]}.
+    _:report a :report;
+             :event ?event;
+             :operator ?operator;
+             :solution [ :id _:solution_id ];
+             :result _:result;
+             :comment _:comment.
+}.
+
+# POST report
+{
+    ?report a :report;
+            :event ?event;
+            :operator ?operator;
+            :solution ?solution;
+            :result ?result;
+            :comment ?comment.
+    ?event :id ?event_id.
+    ?operator :id ?operator_id.
+    ?solution :id ?solution_id.
+}
+=>
+{
+    _:request http:methodName "POST";
+              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/reports");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              http:body {[
+                  :event_id ?event_id;
+                  :operator_id ?operator_id;
+                  :solution_id ?solution_id;
+                  :result ?result;
+                  :comment ?comment
+              ]};
+              http:resp [
+                  http:body _:body
+              ].
+    _:body :contains {[
+        :id _:id
+    ]}.
+    ?report :id _:id;
+            :state :posted.
+}.
+
+# update machine status if there was a succesful report
+{
+    ?report a :report;
+            :event ?event;
+            :operator ?operator;
+            :state :posted;
+            :result ?result.
+    ?result e:whenGround 1.
+    ?event :machine ?machine.
+    ?machine :id ?machine_id.
+    ?operator :id ?operator_id.
+}
+=>
+{
+    _:request http:methodName "POST";
+              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?machine_id "/events/");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              http:body {[
+                  :name "Teamleader maintenance finished.";
+                  :desc "Machine fixed.";
+                  :machine_state "stopped_01";
+                  :operator_id ?operator_id
+              ]}.
+    ?report :state :resolved.
+}.
