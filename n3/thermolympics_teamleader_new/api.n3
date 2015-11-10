@@ -127,6 +127,10 @@
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/reportOnSolution");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              #TODO: don't need this body, should remove it if it doesn't break rules anymore
+              http:body {[
+                  :dummy ?report
+              ]};
               http:resp [
                   http:body _:body
               ].
