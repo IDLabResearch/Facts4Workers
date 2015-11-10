@@ -55,7 +55,7 @@
     ?defect :id ?defect_id.
     ?event :machine ?machine.
     ?machine :state ?state.
-    ?state e:whenGround "stopped_02".
+    ?state e:whenGround 4.
 }
 =>
 {
@@ -82,7 +82,7 @@
               http:body {[
                   :name "Teamleader maintenance.";
                   :desc "Machine stopped due to defect.";
-                  :machine_state "stopped_03";
+                  :machine_state 3;
                   :operator_id ?operator_id
               ]}.
     ?problem :state :under_repair.
@@ -118,9 +118,9 @@
     ?report a :report;
             :event ?event;
             :operator ?operator;
-            :result 0;
+            :result ?result;
             :state :posted.
-
+    ?result e:whenGround 0.
 }
 =>
 {
@@ -197,7 +197,7 @@
               http:body {[
                   :name "Teamleader maintenance finished.";
                   :desc "Machine fixed.";
-                  :machine_state "stopped_01";
+                  :machine_state 4;
                   :operator_id ?operator_id
               ]}.
     ?report :state :resolved.

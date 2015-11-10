@@ -47,7 +47,8 @@ var rulePaths = [
     'n3/calibration/extra-rules.n3',
     'n3/thermolympics_operator/api.n3',
     'n3/thermolympics_teamleader/api.n3',
-    'n3/thermolympics_teamleader/extra-rules.n3'
+    'n3/thermolympics_teamleader/extra-rules.n3',
+    'n3/thermolympics_teamleader_new/api.n3'
 ];
 
 var input = rulePaths.map(relative);
@@ -55,7 +56,8 @@ var input = rulePaths.map(relative);
 var goals = {
     'calibration': relative('n3/calibration/goal.n3'),
     'thermolympics_operator': relative('n3/thermolympics_operator/goal.n3'),
-    'thermolympics_teamleader': relative('n3/thermolympics_teamleader/goal.n3')
+    'thermolympics_teamleader': relative('n3/thermolympics_teamleader/goal.n3'),
+    'thermolympics_teamleader_new': relative('n3/thermolympics_teamleader_new/goal.n3')
 };
 
 app.get('/', function (req, res)
