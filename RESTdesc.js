@@ -21,8 +21,8 @@ function RESTdesc (dataPaths, goalPath, cacheKey)
     if (!_.isArray(this.dataPaths))
         this.dataPaths = [this.dataPaths];
 
-    this.list = path.join(__dirname, 'n3/calibration/list.n3');
-    this.findPath = path.join(__dirname, 'n3/calibration/find_executable_calls.n3');
+    this.list = path.join(__dirname, 'n3/list.n3');
+    this.findPath = path.join(__dirname, 'n3/find_executable_calls.n3');
 
     this.eye = null;
 
