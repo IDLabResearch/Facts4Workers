@@ -46,6 +46,7 @@ html
                     delete nextData.eye.output;
                     delete nextData.eye.proofs;
                 }
+                nextData.output = true;
                 $.ajax({
                     type       :"POST",
                     url        :"/next",

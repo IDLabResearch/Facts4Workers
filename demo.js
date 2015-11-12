@@ -150,7 +150,6 @@ function next (req, res)
     }
     var rest = new RESTdesc(input, goal, cacheKey);
     rest.fillInBlanks(map, function () { handleNext(rest, req, res); });
-
 }
 
 function mapInput (json, eye)
@@ -209,8 +208,11 @@ function handleNext (rest, req, res, output, count)
         // give cacheKey to user so they can send it back in the next step
         data.data = rest.cacheKey;
 
-        data.output = output;
-        data.proofs = rest.proofs;
+        if (req.body && req.body.output)
+        {
+            data.output = output;
+            data.proofs = rest.proofs;
+        }
 
         if (data.status === 'DONE')
             res.format({json:function () { res.send(data); }});
@@ -260,7 +262,8 @@ function handleNext (rest, req, res, output, count)
 
                         output += 'ERROR!\n';
                         output += response.statusCode + ' ' + error;
-                        data.output = output;
+                        if (req.body && req.body.output)
+                            data.output = output;
 
                         data.error = { statusCode: response.statusCode, error: error, body: body };
                         res.format({ json: function () { res.send(data); } });
