@@ -6,9 +6,48 @@
 @prefix log: <http://www.w3.org/2000/10/swap/log#>.
 @prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
 
-# get initial data (TODO: how are defect and event connected?)
+# get teamleader operator ( TODO: probably should use same rule as worker part)
 {
     log:Truth
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://skillp.tho.f4w.l0g.in/api/operator_skills/");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              http:resp [
+                  http:body _:list
+              ].
+    _:list a :operatorSkillList.
+}.
+
+# TODO: extra rule :operatorSkillList -> :operatorList ?
+
+{
+    ?list a :operatorSkillList
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://askTheWorker/getOperator");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              http:body {[
+                  :operators ?list
+              ]};
+              http:resp [
+                  http:body _:body
+              ].
+    _:body :contains {[
+        :operator_id _:id
+    ]}.
+    _:problem a :problem;
+              :operator [ :id _:id ]
+}.
+
+# get initial data (TODO: how are defect and event connected?)
+{
+    ?problem a :problem;
+             :operator ?operator.
 }
 =>
 {
@@ -21,12 +60,10 @@
     _:body :contains {[
         :defect_id _:defect_id;
         :event_id _:event_id;
-        :machine_id _:machine_id; # need both this and event_id due to dependencies
-        :operator_id _:operator_id
+        :machine_id _:machine_id # need both this and event_id due to dependencies
     ]}.
-    _:problem :defect [ :id _:defect_id ];
-              :operator [ :id _:operator_id ];
-              :event [ :id _:event_id; :machine [ :id _:machine_id ] ].
+    ?problem :defect [ :id _:defect_id ];
+             :event [ :id _:event_id; :machine [ :id _:machine_id ] ].
 }.
 
 # TODO: report it if the machine has the incorrect state?
@@ -128,9 +165,7 @@
               tmpl:requestURI ("http://askTheWorker/reportOnSolution");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               #TODO: don't need this body, should remove it if it doesn't break rules anymore
-              http:body {[
-                  :dummy ?report
-              ]};
+              :check ?report;
               http:resp [
                   http:body _:body
               ].
