@@ -46,9 +46,10 @@ html
                     delete nextData.eye.output;
                     delete nextData.eye.proofs;
                 }
+                nextData.output = true;
                 $.ajax({
                     type       :"POST",
-                    url        :"/demo/next",
+                    url        :"/next",
                     data       :JSON.stringify(nextData),
                     contentType:"application/json; charset=utf-8",
                     dataType   :"json",
