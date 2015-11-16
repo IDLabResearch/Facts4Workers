@@ -178,7 +178,7 @@ RESTdesc.prototype._handleNext = function (next, callback)
         }
     }
 
-    // TODO: currently only taking 1 API, still need to do serialization
+    // TODO: currently only taking 1 API, still need to do parallellization
     json = json.length === 0 ? {} : json[0];
 
     if (!json || !json['http:requestURI'])
