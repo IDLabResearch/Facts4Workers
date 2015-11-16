@@ -49,6 +49,7 @@ _:r e:findall (
 {
 ?x r:gives ?y. 
 
+?y :checked :ok.
 #does ?y include an http-call?
 ?y log:includes {?z tmpl:requestURI ?a. 
 ?z http:methodName ?n. #?z :root ?root. 
