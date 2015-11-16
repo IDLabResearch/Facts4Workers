@@ -310,7 +310,7 @@
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://askTheWorker/HowDidItGo");
+              tmpl:requestURI ("http://askTheWorker/getReport");
               :check (?wm ?ms);
               http:body {[
                   :message "Report the outcome.";
