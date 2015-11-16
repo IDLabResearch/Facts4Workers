@@ -16,9 +16,10 @@
 #todo: find a smarter solution to also use the skills not just the names
 #get operator names
 {
-log:Truth.
+    log:Truth.
 }
-=>{
+=>
+{
     _:request http:methodName "GET";
               tmpl:requestURI ("http://thermolympic-demo.herokuapp.com/operator_skills");
               http:resp [
@@ -30,11 +31,13 @@ log:Truth.
 
 #get the operator id
 {
- ?list a :operatorlist.
-?problem a :problem.
-}=>{
+    ?list a :operatorlist.
+    ?problem a :problem.
+}
+=>
+{
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://askTheWorker/getPersonId");
+              tmpl:requestURI ("http://askTheWorker/getOperatorID");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {[
                   :message "Who are you? Please send your id from the list.";
@@ -44,16 +47,15 @@ log:Truth.
                   http:body _:body
               ].
     _:body :contains {
-      [:id _:n]
-   }.
+        [:id _:n]
+    }.
     _:n a :operator;
-           
-     :foundProblem ?problem.
+        :foundProblem ?problem.
 }.
 
 #get machine id list
 {
-log:Truth.
+    log:Truth.
 }
 =>{
     _:request http:methodName "GET";
@@ -61,15 +63,18 @@ log:Truth.
               http:resp [
                   http:body _:list
               ].
-   _:list a :machineList.
+    _:list a :machineList.
 }.
 
 #get machine id
-{?list a :machineList. 
-?operator :foundProblem ?problem.}
-=>{    
-              _:request http:methodName "GET";
-              tmpl:requestURI ("http://askTheWorker/getMachineId");
+{
+    ?list a :machineList.
+    ?operator :foundProblem ?problem.
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://askTheWorker/getMachineID");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {[
                   :message "On what machine are you working?";
@@ -79,15 +84,15 @@ log:Truth.
                   http:body _:body
               ].
     _:body :contains {
-      _:operator  :id _:n
+        _:operator  :id _:n
     }.
     _:n a :machine.
-     ?problem :occurredOnMachine _:n.      
-    }.
+    ?problem :occurredOnMachine _:n.
+}.
 
 # API USER 1 (ask for a part ID, might want to send all available part IDs but no API for this atm)
 {
-?problem :occurredOnMachine ?n.   
+    ?problem :occurredOnMachine ?n.
 }
 =>
 {
@@ -97,7 +102,7 @@ log:Truth.
               http:body {[
                   :message "Please provide the ID of the part on which the problem occurred.";
                   :machine ?n; 
-                   :parts ( "1" "2" ) 
+                  :parts ( "1" "2" )
               ]};
               http:resp [
                   http:body _:body
@@ -112,12 +117,12 @@ log:Truth.
 
 # API USER 2 (ask the user for a defect id)
 {
-  ?problem :occurredOnPart ?p
+    ?problem :occurredOnPart ?p
 }
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://askTheWorker/getDefectId");
+              tmpl:requestURI ("http://askTheWorker/getDefectID");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {[
                   :message "Please report the defect.";
@@ -129,43 +134,17 @@ log:Truth.
     _:body :contains {[
         :id _:d;
     ]}.
-?problem :defect _:d.
+    ?problem :defect _:d.
 }.
-
-#get solution list
-#{
-#   ?problem :defect ?id.
-#}
-#=>
-#{
-#    _:request http:methodName "GET";
-#              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/solutions?defect_id=" ?id);
-#              http:resp [
-#                  http:body _:list
-#              ].
-#_:list a :solutionList.
-#?problem :solutionList _:list.
-#}.
-
-#there is not even a solution attempt
-#{
-#?problem :defect ?id.
-#_:e e:findall(?problem {?problem :trySolution ?solution.}()).
-#}=>{?problem :openSolution "no".}.
-
-#there exists no solution attempt which has not been tried
-#{?problem :trySolution ?solution. _:e e:findall (?solution {?problem :trySolution ?solution. ?solution :tried "no"} ())}=>{?problem :openSolution "no".}.
-
-
 
 #choose a solution
 {
-?problem :defect ?id.
-?problem :trySolution ?sol.
+    ?problem :defect ?id;
+             :trySolution ?sol.
 }=>{
     _:request http:methodName "GET";
               :check ?sol;
-              tmpl:requestURI ("http://askTheWorker/Solution");
+              tmpl:requestURI ("http://askTheWorker/getSolutionID");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {[
                   :message "Choose one of the following solutions.";
@@ -177,24 +156,26 @@ log:Truth.
     _:body :contains {[
         :id _:d;
     ]}.
-
- ?sol :solutionId _:d.
-
+    ?sol :solutionId _:d.
 }.
 
 #solution has no result yet?
 {
-
-?solution :solutionId ?id.
-_:x e:findall (?res {?solution :triedAndReported "yes"} ()).
-}=>{?solution :triedAndReported "no"}.
+    ?solution :solutionId ?id.
+    _:x e:findall (?res {?solution :triedAndReported "yes"} ()).
+}
+=>
+{
+    ?solution :triedAndReported "no"
+}.
 
 
 #get operator skills
 {
-?id :foundProblem ?problem.
+    ?id :foundProblem ?problem.
 }
-=>{
+=>
+{
     _:request http:methodName "GET";
               tmpl:requestURI ("http://skillp.tho.f4w.l0g.in/api/operator_skills/" ?id);
               http:resp [
@@ -203,16 +184,17 @@ _:x e:findall (?res {?solution :triedAndReported "yes"} ()).
     _:body :contains {[
         :skills {[ :machine _:m; :tool _:t; :computer _:c]}
     ]}.
-   ?id :machineSkills _:m; :toolSkills _:t; :computerSkills _:c.
+    ?id :machineSkills _:m;
+        :toolSkills _:t;
+        :computerSkills _:c.
 }.
 
 #get skills required for solution
 {
-?problem :defect ?id.
-?problem :trySolution ?solution.
-?solution :solutionId ?sid.
-?sid :requiredSkillsKnown "no".
-#?solution :triedAndReported "no".
+    ?problem :defect ?id;
+             :trySolution ?solution;
+             :solutionId ?sid.
+    ?sid :requiredSkillsKnown "no".
 }=>{
     _:request http:methodName "GET";
               tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/solutions/" ?sid);
@@ -222,19 +204,22 @@ _:x e:findall (?res {?solution :triedAndReported "yes"} ()).
     _:body :contains {[
         :skill {[ :machine _:m; :tool _:t; :computer _:c]}
     ]}.
-   ?sid :reqMachineSkills _:m; :reqToolSkills _:t; :reqComputerSkills _:c. #problem: sometimes no computer value
-   ?sid :requiredSkillsKnown ?yes. #please ground with "yes"
+    ?sid :reqMachineSkills _:m;
+         :reqToolSkills _:t;
+         :reqComputerSkills _:c. #problem: sometimes no computer value
+    ?sid :requiredSkillsKnown ?yes. #please ground with "yes"
 }.
 
 
 {
-?problem :defect ?id.
-?problem :trySolution ?solution.
-?solution :solutionId ?sid.
-_:e e:findall(?sid {?sid :requiredSkillsKnown "yes"} ()).
- 
-}=>{
-?sid :requiredSkillsKnown "no".
+    ?problem :defect ?id;
+             :trySolution ?solution.
+    ?solution :solutionId ?sid.
+    _:e e:findall(?sid {?sid :requiredSkillsKnown "yes"} ()).
+}
+=>
+{
+    ?sid :requiredSkillsKnown "no".
 }.
 
 
@@ -250,134 +235,150 @@ _:e e:findall(?sid {?sid :requiredSkillsKnown "yes"} ()).
 
 #stop the machine and get id
 {
-?problem :occurredOnMachine ?m. ?m :state "notstopped2". ?m :state "notstopped1".
-?wid :foundProblem ?problem.
-?wid :machineSkills ?wm; :toolSkills ?wt; :computerSkills ?wc.
+    ?problem :occurredOnMachine ?m.
+    ?m :state "notstopped2";
+       :state "notstopped1".
+    ?wid :foundProblem ?problem;
+         :machineSkills ?wm;
+         :toolSkills ?wt;
+         :computerSkills ?wc.
 
-?problem :trySolution ?solution.
-?solution :solutionId ?id.
-?solution :triedAndReported "no".
-?id :reqMachineSkills ?ms; :reqToolSkills ?t; :reqComputerSkills ?c.
+    ?problem :trySolution ?solution.
+    ?solution :solutionId ?id;
+              :triedAndReported "no".
+    ?id :reqMachineSkills ?ms; :reqToolSkills ?t; :reqComputerSkills ?c.
 
-(?wm ?wt ?wc ?ms ?t ?c) e:whenGround (?wm2 ?wt2 ?wc2 ?m2 ?t2 ?c2).
+    (?wm ?wt ?wc ?ms ?t ?c) e:whenGround (?wm2 ?wt2 ?wc2 ?m2 ?t2 ?c2).
 
-
-(?wm2 ?wt2 ?wc2) :match (?m2 ?t2 ?c2).
-
-
-}=>{
-
-  _:request http:methodName "POST";
+    (?wm2 ?wt2 ?wc2) :match (?m2 ?t2 ?c2).
+}
+=>
+{
+    _:request http:methodName "POST";
               tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?m "/events");
-   :check (?wm ?ms);
-   http:body {[
+              :check (?wm ?ms);
+              http:body {[
                   :name "Stop the machine";
                   :desc "Stoping the machine after a defect was spotted!";
                   :machine_state "4";
                   :operator_id ?wid
               ]};
-             http:resp [
+              http:resp [
                   http:body _:body
               ].
-    _:body :contains {[ :id _:e ]}.
-{?m :state _:stopped1.} :eventId _:e.
-?m :state _:stopped1. #please put "stopped1" here when grounding.
+    _:body :contains {[
+        :id _:e
+    ]}.
+    {?m :state _:stopped1.} :eventId _:e.
+    ?m :state _:stopped1. #please put "stopped1" here when grounding.
 }.
 
 {
-?problem :trySolution ?solution.
-?solution :solutionId ?id.
-_:e e:findall (?solution {?solution :tried "yes"} ()).
-}=>{?solution :tried "no"}.
+    ?problem :trySolution ?solution.
+    ?solution :solutionId ?id.
+    _:e e:findall (?solution {?solution :tried "yes"} ()).
+}
+=>
+{
+    ?solution :tried "no"
+}.
 
 {?solution :worked "yes".}=>{?solution :tried "yes"}.
 {?solution :worked "no".}=>{?solution :tried "yes"}.
 
 # report the result
 {
-?wid :foundProblem ?problem.
-?wid :machineSkills ?wm; :toolSkills ?wt; :computerSkills ?wc.
+    ?wid :foundProblem ?problem;
+         :machineSkills ?wm;
+         :toolSkills ?wt;
+         :computerSkills ?wc.
 
-?problem :occurredOnMachine ?m.
-{?m :state ?stopped1.} :eventId ?e.
-?problem :trySolution ?solution.
-?solution :solutionId ?id.
-?solution :tried "no".
-?solution :triedAndReported "no".
-?id :reqMachineSkills ?ms; :reqToolSkills ?t; :reqComputerSkills ?c.
+    ?problem :occurredOnMachine ?m.
+    {?m :state ?stopped1.} :eventId ?e.
+    ?problem :trySolution ?solution.
+    ?solution :solutionId ?id;
+              :tried "no";
+              :triedAndReported "no".
+    ?id :reqMachineSkills ?ms;
+        :reqToolSkills ?t;
+        :reqComputerSkills ?c.
 
-(?wm ?wt ?wc ?ms ?t ?c) e:whenGround (?wm2 ?wt2 ?wc2 ?m2 ?t2 ?c2).
+    (?wm ?wt ?wc ?ms ?t ?c) e:whenGround (?wm2 ?wt2 ?wc2 ?m2 ?t2 ?c2).
 
-
-(?wm2 ?wt2 ?wc2) :match (?m2 ?t2 ?c2).
-
-}=>{
-_:request http:methodName "GET";
-              tmpl:requestURI ("http://askTheWorker/HowDidItGo");
+    (?wm2 ?wt2 ?wc2) :match (?m2 ?t2 ?c2).
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://askTheWorker/getReport");
               :check (?wm ?ms);
               http:body {[
                   :message "Report the outcome.";
                   :solutionId ?id
-                 
               ]};
               http:resp [
                   http:body _:body
               ].
     _:body :contains {[
-  
         :solved _:yn;
         :comment _:comment
-
     ]}.
-?solution :worked _:yn.
-?solution :comment _:comment.
+    ?solution :worked _:yn;
+              :comment _:comment.
 }.
-
 
 
 # skill-matching
 {
-(?wm ?wt ?wc) :match (?m ?t ?c).
-}<={
-?m math:notGreaterThan ?wm.
-?t math:notGreaterThan ?wt.
-?c math:notGreaterThan ?wc.
+    (?wm ?wt ?wc) :match (?m ?t ?c).
+}
+<=
+{
+    ?m math:notGreaterThan ?wm.
+    ?t math:notGreaterThan ?wt.
+    ?c math:notGreaterThan ?wc.
 }.
 
 {
-(?wm ?wt ?wc) :noMatch (?m ?t ?c).
-}<={
-?t math:greaterThan ?wt.
+    (?wm ?wt ?wc) :noMatch (?m ?t ?c).
+}
+<=
+{
+    ?t math:greaterThan ?wt.
 }.
 
 {
-(?wm ?wt ?wc) :noMatch (?m ?t ?c).
-}<={
-?m math:greaterThan ?wm.
+    (?wm ?wt ?wc) :noMatch (?m ?t ?c).
+}
+<=
+{
+    ?m math:greaterThan ?wm.
 }.
 
 {
-(?wm ?wt ?wc) :noMatch (?m ?t ?c).
-}<={
-?c math:greaterThan ?wc.
+    (?wm ?wt ?wc) :noMatch (?m ?t ?c).
+}
+<=
+{
+    ?c math:greaterThan ?wc.
 }.
 
 
 # POST solution intent
 {
- ?wid :foundProblem ?problem.  
-?problem :trySolution ?solution.
-?solution :solutionId ?sid .     
-?solution :worked ?yn. ?yn e:whenGround "yes".
-?solution :comment ?comment.
-{?mid :state ?stopped.} :eventId ?eid.
+    ?wid :foundProblem ?problem.
+    ?problem :trySolution ?solution.
+    ?solution :solutionId ?sid;
+              :worked ?yn;
+              :comment ?comment.
+    ?yn e:whenGround "yes".
+    {?mid :state ?stopped.} :eventId ?eid.
 }
 =>
 {
     _:request http:methodName "POST";
               tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/reports");
               http:body {[
-          
                      #I am not sure, but maybe this answers to the machine stopped event?
                     :event_id ?eid;
                     :operator_id ?wid;
@@ -387,21 +388,23 @@ _:request http:methodName "GET";
               ]}.
     ?solution :triedAndReported _:yes. #put "yes"
 }.
+
+
 # POST solution intent
 {
- ?wid :foundProblem ?problem.  
-?problem :trySolution ?solution.
-?solution :solutionId ?sid .     
-?solution :worked ?yn. ?yn e:whenGround "no".
-?solution :comment ?comment.
-{?mid :state ?stopped.} :eventId ?eid.
+    ?wid :foundProblem ?problem.
+    ?problem :trySolution ?solution.
+    ?solution :solutionId ?sid;
+              :worked ?yn;
+              :comment ?comment.
+    ?yn e:whenGround "no".
+    {?mid :state ?stopped.} :eventId ?eid.
 }
 =>
 {
     _:request http:methodName "POST";
               tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/reports");
               http:body {[
-          
                      #I am not sure, but maybe this answers to the machine stopped event?
                     :event_id ?eid;
                     :operator_id ?wid;
@@ -416,73 +419,71 @@ _:request http:methodName "GET";
 }.
 
 
-{?solution :triedAndReported ?yes.
-?yes e:whenGround "yes".
-   ?solution :worked ?yn. ?yn e:whenGround "yes".
-?problem :occurredOnMachine ?mid.
- ?wid :foundProblem ?problem.  
-?problem :trySolution ?solution.     
-
-}=>
 {
- _:request http:methodName "POST";
-           :check (?yn ?yes);
+    ?solution :triedAndReported ?yes;
+              :worked ?yn.
+    ?yes e:whenGround "yes".
+    ?yn e:whenGround "yes".
+    ?problem :occurredOnMachine ?mid;
+             :trySolution ?solution.
+    ?wid :foundProblem ?problem.
+}
+=>
+{
+    _:request http:methodName "POST";
+              :check (?yn ?yes);
               tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?mid "/events");
               http:body {[
-          
                      #I am not sure, but maybe this answers to the machine stopped event?
                     :name "Starting the machine";
                     :desc "Starting the machine after a solution was successfully applied!";
                     :operator_id ?wid;
                     :machine_state "1"
-                    
               ]}.
-  
-    ?problem :finalState :solved. 
-    
-
+    ?problem :finalState :solved.
 }.
 
 
 {
-?problem :occurredOnMachine ?mid. ?mid :state "notstopped2". 
-?wid :foundProblem ?problem.
-?wid :machineSkills ?wm; :toolSkills ?wt; :computerSkills ?wc.
+    ?problem :occurredOnMachine ?mid.
+    ?mid :state "notstopped2".
+    ?wid :foundProblem ?problem;
+         :machineSkills ?wm;
+         :toolSkills ?wt;
+         :computerSkills ?wc.
 
-?problem :trySolution ?solution.
-?solution :solutionId ?id.
-?solution :triedAndReported "no".
-?id :reqMachineSkills ?m; :reqToolSkills ?t; :reqComputerSkills ?c.
+    ?problem :trySolution ?solution.
+    ?solution :solutionId ?id;
+              :triedAndReported "no".
+    ?id :reqMachineSkills ?m;
+        :reqToolSkills ?t;
+        :reqComputerSkills ?c.
 
-(?wm ?wt ?wc ?m ?t ?c) e:whenGround (?wm2 ?wt2 ?wc2 ?m2 ?t2 ?c2).
+    (?wm ?wt ?wc ?m ?t ?c) e:whenGround (?wm2 ?wt2 ?wc2 ?m2 ?t2 ?c2).
 
-
-(?wm2 ?wt2 ?wc2) :noMatch (?m2 ?t2 ?c2).
-
-
-}=>{
-
-  _:request http:methodName "POST";
+    (?wm2 ?wt2 ?wc2) :noMatch (?m2 ?t2 ?c2).
+}
+=>
+{
+    _:request http:methodName "POST";
               tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?m "/events");
-   http:body {[
+              http:body {[
                   :name "Stop the machine";
                   :desc "Stoping the machine. Problem has to be fixed by the team leader.";
-#TODO: put the tight machine state
+                  #TODO: put the tight machine state
                   :machine_state "3";
                   :operator_id ?wid
               ]};
-http:resp [
+              http:resp [
                   http:body _:body
               ].
     _:body :contains {[
         :id _:e
-        
     ]}.
 
-
-{?m :state _:stopped2.} :eventId _:e.
-?m :state _:stopped2. #please put "stopped2" here when grounding.
-?problem :finalState :sentToTeamleader.
+    {?m :state _:stopped2.} :eventId _:e.
+    ?m :state _:stopped2. #please put "stopped2" here when grounding.
+    ?problem :finalState :sentToTeamleader.
 }.
 
 
