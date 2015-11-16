@@ -82,13 +82,13 @@ _:r e:findall ( ?o {?body log:includes {?s ?p ?o}} ?os).
 
 {?y :checked :ok.}<={?y log:notIncludes {?x :check ?z}}.
 
-{?y :checked :ok.}<={?y log:includes {?x :check ?z}. ?z e:notLabel ?zz}.
+{?y :checked :ok.}<={?y log:includes {?x :check ?z}. ?z e:notLabel ?zz. ?z log:rawType ?type. ?type log:notEqualTo   rdf:List}.
+
+{?y :checked :ok.}<={?y log:includes {?x :check ?z}. ?z log:rawType ?type. ?type log:equalTo   rdf:List. ?z :testList ?z2.}.#
+#{?y :checked ?type.}<={?y log:includes {?x :check ?z}. ?z e:notLabel ?zz. ?z log:rawType ?type. ?type log:notEqualTo   log:List}.
 
 
-
-
-
-
+{?f r:gives ?y. ?y log:includes {?x :check ?z}. ?z log:rawType rdf:List.}=>{(?z ()) :transpair ?z.}.
 
 
 

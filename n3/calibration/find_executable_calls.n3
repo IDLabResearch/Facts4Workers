@@ -6,10 +6,14 @@ PREFIX log: <http://www.w3.org/2000/10/swap/log#>
 PREFIX r: <http://www.w3.org/2000/10/swap/reason#>
 @prefix list: <http://www.w3.org/2000/10/swap/list#>.
 
+
+
 #This file will only output executable calls. It also keeps information about one call together
 
 {
 ?x r:gives ?y. 
+
+?y :checked :ok.
 
 #does ?y include an http-call?
 ?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n. #?z :root ?root. 
@@ -46,7 +50,8 @@ _:r e:findall (
 ?x r:gives ?y. 
 
 #does ?y include an http-call?
-?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n. #?z :root ?root. 
+?y log:includes {?z tmpl:requestURI ?a. 
+?z http:methodName ?n. #?z :root ?root. 
  }.
 
 ?y log:notIncludes {?z http:body ?body.}.
