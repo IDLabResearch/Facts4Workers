@@ -144,7 +144,7 @@ RESTdesc.prototype.next = function (callback)
 RESTdesc.prototype._handleProof = function (proof, callback)
 {
     this.proofs.push(proof);
-    this.eye.call([this.list], [proof], this.findPath, false, true, function (body) { this._handleNext(body, callback); }.bind(this), this._error);
+    this.eye.call([this.list], [proof], this.findPath, false, false, function (body) { this._handleNext(body, callback); }.bind(this), this._error);
 };
 
 // TODO: what if the result contains multiple possible APIs
@@ -156,25 +156,30 @@ RESTdesc.prototype._handleNext = function (next, callback)
     var json = this._JSONLDtoJSON(jsonld);
     // if there are multiple elements, find the one corresponding to the request
     if (_.isArray(json))
-        json = _.find(json, 'http:methodName');
-    if (json && json['tmpl:requestURI'])
+        json = _.filter(json, 'http:methodName');
+    else
+        json = [json];
+    for (var i = 0; i < json.length; ++i)
     {
-        var uriList = json['tmpl:requestURI'];
-        // handle AGFA tmpl:requestURI
-        if (uriList.length > 1 && _.isArray(uriList[1]))
+        var subJSON = json[i];
+        if (subJSON['tmpl:requestURI'])
         {
-            var uri = uriList[0];
-            for (var i = 1; i < uriList.length; ++i)
-                uri.replace('{' + uriList[i][0] + '}', uriList[i][1]);
-            uriList = [uri];
+            var uriList = subJSON['tmpl:requestURI'];
+            // handle AGFA tmpl:requestURI
+            if (uriList.length > 1 && _.isArray(uriList[1]))
+            {
+                var uri = uriList[0];
+                for (var j = 1; j < uriList.length; ++j)
+                    uri.replace('{' + uriList[j][0] + '}', uriList[j][1]);
+                uriList = [uri];
+            }
+            subJSON['http:requestURI'] = uriList.join('');
+            delete subJSON['tmpl:requestURI'];
         }
-        json['http:requestURI'] = uriList.join('');
-        delete json['tmpl:requestURI'];
     }
-    // remove 'contains' to keep consistency for end-user
-    var contains = _.result(json, '"http:resp"."http:body"."contains"');
-    if (contains)
-        json['http:resp']['http:body'] = json['http:resp']['http:body']['contains'];
+
+    // TODO: currently only taking 1 API, still need to do serialization
+    json = json.length === 0 ? {} : json[0];
 
     if (!json || !json['http:requestURI'])
     {
