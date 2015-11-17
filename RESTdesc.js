@@ -144,7 +144,8 @@ RESTdesc.prototype.next = function (callback)
 RESTdesc.prototype._handleProof = function (proof, callback)
 {
     this.proofs.push(proof);
-    this.eye.call([this.list], [proof], this.findPath, false, false, function (body) { this._handleNext(body, callback); }.bind(this), this._error);
+    // TODO: singleAnswer true to prevent problems atm, should be changed for parallelization
+    this.eye.call([this.list], [proof], this.findPath, false, true, function (body) { this._handleNext(body, callback); }.bind(this), this._error);
 };
 
 // TODO: what if the result contains multiple possible APIs

@@ -21,7 +21,7 @@
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://thermolympic-demo.herokuapp.com/operator_skills");
+              tmpl:requestURI ("http://skillp.tho.f4w.l0g.in/api/operator_skills/");
               http:resp [
                   http:body _:list
               ].
