@@ -101,7 +101,7 @@
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {[
                   :message "Please provide the ID of the part on which the problem occurred.";
-                  :machine ?n; 
+                  :machine ?n;
                   :parts ( "1" "2" )
               ]};
               http:resp [
@@ -111,7 +111,7 @@
         :id _:n
     ]}.
     _:n :partOf ?n.
-    ?problem :occurredOnPart _:n.    
+    ?problem :occurredOnPart _:n.
 }.
 
 
@@ -192,8 +192,8 @@
 #get skills required for solution
 {
     ?problem :defect ?id;
-             :trySolution ?solution;
-             :solutionId ?sid.
+             :trySolution ?solution.
+    ?solution :solutionId ?sid.
     ?sid :requiredSkillsKnown "no".
 }=>{
     _:request http:methodName "GET";
@@ -414,8 +414,8 @@
               ]}.
     ?solution :triedAndReported _:yes. #put "yes"
     _:newSolution a :Solution.
-    ?problem :trySolution _:newSolution. 
-   
+    ?problem :trySolution _:newSolution.
+
 }.
 
 
