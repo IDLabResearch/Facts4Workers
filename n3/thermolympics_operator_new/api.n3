@@ -466,14 +466,14 @@
 =>
 {
     _:request http:methodName "POST";
-              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?m "/events");
+              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/:" ?mid "/events");
               http:body {[
-                  :name "Stop the machine";
+                  :name "waiting_for_teamleader";
                   :desc "Stoping the machine. Problem has to be fixed by the team leader.";
-                  #TODO: put the tight machine state
+                  #TODO: put the right machine state
                   :machine_state "3";
-                  :operator_id ?wid
-              ]};
+                  :operator_id ?wid;
+              ].};
               http:resp [
                   http:body _:body
               ].
