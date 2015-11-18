@@ -3,7 +3,7 @@
 @prefix log: <http://www.w3.org/2000/10/swap/log#>.
 
 {
-    ?mid :finalState ?x.
+    ?problem :tellTheWorker ?x.
 }=>{
-    ?mid :finalState ?x.
+    ?problem :tellTheWorker ?x.
 }.

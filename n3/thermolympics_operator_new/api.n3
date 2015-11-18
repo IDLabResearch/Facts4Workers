@@ -440,6 +440,7 @@
                     :operator_id ?wid;
                     :machine_state "1"
               ]}.
+     ?mid :newState _:state.
     ?problem :finalState :solved.
 }.
 
@@ -484,6 +485,41 @@
     {?m :state _:stopped2.} :eventId _:e.
     ?m :state _:stopped2. #please put "stopped2" here when grounding.
     ?problem :finalState :sentToTeamleader.
+}.
+
+{
+ ?problem :finalState :solved.
+?problem :occurredOnMachine ?m.
+?m :newState ?state.
+}=>{
+_:request tmpl:requestURI ("http://askTheWorker/YouAreDone");
+              :check ?state;
+              http:body {[
+                  :message "Problem Solved.";
+                  :problem ?problem;
+                  :machine ?m
+                 
+           
+              ]}.
+
+?problem :tellTheWorker "solved".
+}.
+
+
+{
+?problem :finalState :sentToTeamleader.
+?problem :occurredOnMachine ?m.
+?m :state ?stopped2.
+?stopped2 e:whenGround "stopped2".
+}=>{
+_:request tmpl:requestURI ("http://askTheWorker/SentToTeamLeader");
+              :check ?stopped2;
+              http:body {[
+                  :message "Teamleader was notified."
+           
+              ]}.
+
+?problem :tellTheWorker ?stopped2.
 }.
 
 
