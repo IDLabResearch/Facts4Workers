@@ -76,6 +76,7 @@
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/getMachineID");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              :check ?operator;
               http:body {[
                   :message "On what machine are you working?";
                   :sendList ?list
