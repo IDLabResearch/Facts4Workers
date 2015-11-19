@@ -67,6 +67,7 @@ RESTdesc.prototype.fillInBlanks = function (map, callback)
     this.cache.open();
     this.cache.pop(function (err, val)
     {
+        console.log(JSON.stringify(JSON.parse(val), null, 4));
         var jsonld = this._replaceJSONLDblanks(JSON.parse(val), map);
         this.cache.push(
             JSON.stringify(this._skolemizeJSONLD(jsonld, {})), // skolemize is necessary because the body will contain '.well-known' URIs which also need to be replaced
@@ -114,6 +115,8 @@ RESTdesc.prototype._replaceJSONLDblanks = function (jsonld, map, idMap)
             // we have to find what is the best way to inject this
             // TODO: currently only works for lists, extend this for literals/URIs/etc.
             // TODO: can give problems with nested values too?
+            if (!_.isObject(val))
+                return _.extend(_.omit(jsonld, '@id'), { '@id': val });
             return _.extend(_.omit(jsonld, '@id'), val);
         }
     }
@@ -151,6 +154,7 @@ RESTdesc.prototype._handleProof = function (proof, callback)
 // TODO: what if the result contains multiple possible APIs
 RESTdesc.prototype._handleNext = function (next, callback)
 {
+    console.log(next);
     var n3Parser = new N3Parser();
     var jsonld = n3Parser.parse(next);
     // TODO: should move the JSONLD to JSON part somewhere else, closer to demo.js, that way we can take the Content-Type better into account
@@ -190,6 +194,7 @@ RESTdesc.prototype._handleNext = function (next, callback)
     {
         jsonld = this._skolemizeJSONLD(jsonld);
         this.cache.push(JSON.stringify(jsonld));
+        console.log(JSON.stringify(jsonld, null, 2));
         var template = {'http:methodName':'GET', 'http:requestURI':'', 'http:body':{}, 'http:resp':{'http:body':{}}};
         json = _.assign(template, json);
         callback(json);
@@ -314,3 +319,11 @@ RESTdesc.prototype._error = function (error, content)
 };
 
 module.exports = RESTdesc;
+
+//var DUMMY = JSON.parse('{ "@context": { "log": "http://www.w3.org/2000/10/swap/log#", "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#", "rdfs": "http://www.w3.org/2000/01/rdf-schema#", "owl": "http://www.w3.org/2002/07/owl#", "list": "http://www.w3.org/2000/10/swap/list#", "e": "http://eulersharp.sourceforge.net/2003/03swap/log-rules#", "r": "http://www.w3.org/2000/10/swap/reason#", "tmpl": "http://purl.org/restdesc/http-template#", "http": "http://www.w3.org/2011/http#", "out": "http://f4w.restdesc.org/demo/.well-known/genid/f3ed8675-47ce-42f1-ac89-9082b146b6db#", "math": "http://www.w3.org/2000/10/swap/math#" }, "@graph": [ { "@id": "_:sk7_1", "http:methodName": "GET", "tmpl:requestURI": { "@list": [ "http://askTheWorker/getMachineID" ] }, "http:headers": { "@list": [ { "@id": "_:sk8_1", "http:fieldName": "Content-Type", "http:fieldValue": "application/json" } ] }, "http:body": { "@graph": [ { "@id": "_:sk9_1", "http://f4w.restdesc.org/demo#message": "On what machine are you working?", "http://f4w.restdesc.org/demo#sendList": { "@list": [ { "@graph": [ { "@id": "http://f4w.restdesc.org/demo#bb7dffb3-68fa-4aff-947b-49e9f57cdbea", "http://f4w.restdesc.org/demo#id": 2, "http://f4w.restdesc.org/demo#name": "Turning Machine", "http://f4w.restdesc.org/demo#desc": "MoriSeki TurninMachine", "http://f4w.restdesc.org/demo#state": 3, "http://f4w.restdesc.org/demo#optional": { "@id": "true" } } ] }, { "@graph": [ { "@id": "http://f4w.restdesc.org/demo#0412964f-be33-48c3-9823-780c0802eb37", "http://f4w.restdesc.org/demo#id": 1, "http://f4w.restdesc.org/demo#name": "Cooling machine", "http://f4w.restdesc.org/demo#desc": "Machine used for cooling purposes", "http://f4w.restdesc.org/demo#state": 3, "http://f4w.restdesc.org/demo#optional": { "@id": "true" } } ] } ] } } ] }, "http:resp": { "@id": "_:sk10_1", "http:body": { "@id": "_:sk11_1", "http://f4w.restdesc.org/demo#contains": { "@graph": [ { "@id": "_:sk12_1", "http://f4w.restdesc.org/demo#id": { "@id": "_:sk13_3" } } ] } } } }, { "@id": "http://f4w.restdesc.org/demo#thereIsADefect", "http://f4w.restdesc.org/demo#occurredOnMachine": { "@id": "_:sk13_3", "@type": "http://f4w.restdesc.org/demo#machine" } } ]}');
+//var rest = new RESTdesc(null, null, 0);
+//var result = rest._replaceJSONLDblanks(DUMMY, { '_:sk13_3': 5});
+//console.log(JSON.stringify(result, null, 2));
+//var parser = new JSONLDParser(2);
+//var n3 = parser.parse(result, "http://base/");
+//console.log(n3);
