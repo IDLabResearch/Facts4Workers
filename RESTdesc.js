@@ -67,7 +67,6 @@ RESTdesc.prototype.fillInBlanks = function (map, callback)
     this.cache.open();
     this.cache.pop(function (err, val)
     {
-        console.log(JSON.stringify(JSON.parse(val), null, 4));
         var jsonld = this._replaceJSONLDblanks(JSON.parse(val), map);
         this.cache.push(
             JSON.stringify(this._skolemizeJSONLD(jsonld, {})), // skolemize is necessary because the body will contain '.well-known' URIs which also need to be replaced
@@ -154,7 +153,6 @@ RESTdesc.prototype._handleProof = function (proof, callback)
 // TODO: what if the result contains multiple possible APIs
 RESTdesc.prototype._handleNext = function (next, callback)
 {
-    console.log(next);
     var n3Parser = new N3Parser();
     var jsonld = n3Parser.parse(next);
     // TODO: should move the JSONLD to JSON part somewhere else, closer to demo.js, that way we can take the Content-Type better into account
@@ -194,7 +192,6 @@ RESTdesc.prototype._handleNext = function (next, callback)
     {
         jsonld = this._skolemizeJSONLD(jsonld);
         this.cache.push(JSON.stringify(jsonld));
-        console.log(JSON.stringify(jsonld, null, 2));
         var template = {'http:methodName':'GET', 'http:requestURI':'', 'http:body':{}, 'http:resp':{'http:body':{}}};
         json = _.assign(template, json);
         callback(json);
