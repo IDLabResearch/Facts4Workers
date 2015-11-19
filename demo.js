@@ -183,7 +183,12 @@ function mapInputRecurisve (json, response, map)
         for (var key in response)
         {
             if (json[key] === undefined)
+            {
+                // TODO: hardcoded for demo
+                if (key === 'computer')
+                    continue;
                 throw "Missing JSON input key: " + key;
+            }
             mapInputRecurisve(json[key], response[key], map);
         }
     }

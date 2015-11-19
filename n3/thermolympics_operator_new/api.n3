@@ -102,7 +102,7 @@
               http:body {[
                   :message "Please provide the ID of the part on which the problem occurred.";
                   :machine ?n;
-                  :parts ( "1" "2" )
+                  :parts ( 1 2 )
               ]};
               http:resp [
                   http:body _:body
@@ -114,10 +114,24 @@
     ?problem :occurredOnPart _:n.
 }.
 
+#get defect id list
+{
+    ?problem :occurredOnPart ?p
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/defects?part_id=" ?p);
+              http:resp [
+                  http:body _:list
+              ].
+    _:list a :defectList.
+}.
 
 # API USER 2 (ask the user for a defect id)
 {
-    ?problem :occurredOnPart ?p
+    ?list a :defectList.
+    ?operator :foundProblem ?problem.
 }
 =>
 {
@@ -126,7 +140,7 @@
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {[
                   :message "Please report the defect.";
-                  :defectListURI ("http://defects.tho.f4w.l0g.in/api/defects?part_id=" ?p)
+                  :sendList ?list
               ]};
               http:resp [
                   http:body _:body
@@ -137,10 +151,24 @@
     ?problem :defect _:d.
 }.
 
-#choose a solution
+#get solution id list
 {
     ?problem :defect ?id;
-             :trySolution ?sol.
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/solutions?defect_id=" ?id);
+              http:resp [
+                  http:body _:list
+              ].
+    _:list a :solutionList.
+}.
+
+#choose a solution
+{
+    ?list a :solutionList.
+    ?problem :trySolution ?sol.
 }=>{
     _:request http:methodName "GET";
               :check ?sol;
@@ -148,7 +176,7 @@
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {[
                   :message "Choose one of the following solutions.";
-                  :defectListURI ("http://defects.tho.f4w.l0g.in/api/solutions?defect_id=" ?id)
+                  :sendList ?list
               ]};
               http:resp [
                   http:body _:body
