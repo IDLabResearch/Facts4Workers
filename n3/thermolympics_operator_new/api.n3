@@ -411,7 +411,7 @@
     ?problem :trySolution ?solution.
  ?problem :occurredOnMachine ?mid.
     ?solution :solutionId ?sid;
-              :worked ?truesfalse;
+              :worked ?truefalse;
               :comment ?comment.
     ?truefalse e:whenGround true.
     {?mid :state ?stopped.} :eventId ?eid.
