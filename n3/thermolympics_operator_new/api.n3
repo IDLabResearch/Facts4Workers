@@ -409,12 +409,12 @@
     ?operator :foundProblem ?problem;
               :operatorId ?wid.
     ?problem :trySolution ?solution.
- ?problem :occurredOnMachine ?mid.
+ ?problem :occurredOnMachine ?machine.
     ?solution :solutionId ?sid;
               :worked ?truefalse;
               :comment ?comment.
     ?truefalse e:whenGround true.
-    {?mid :state ?stopped.} :eventId ?eid.
+    {?machine :state ?stopped.} :eventId ?eid.
 }
 =>
 {
@@ -442,7 +442,7 @@
               :worked ?tf;
               :comment ?comment.
     ?tf e:whenGround false.
-    {?mid :state ?stopped.} :eventId ?eid.
+    {?machine :state ?stopped.} :eventId ?eid.
 }
 =>
 {
@@ -492,8 +492,9 @@
 
 
 {
-    ?problem :occurredOnMachine ?mid.
-    ?mid :state "notstopped2".
+    ?problem :occurredOnMachine ?machine.
+    ?machine :state "notstopped2";
+             :machineID ?mid.
     ?operator :foundProblem ?problem;
          :operatorId ?wid;
          :machineSkills ?wm;
@@ -514,7 +515,7 @@
 =>
 {
     _:request http:methodName "POST";
-              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/:" ?mid "/events");
+              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?mid "/events");
               http:body {[
                   :name "waiting_for_teamleader";
                   :desc "Stoping the machine. Problem has to be fixed by the team leader.";
@@ -529,10 +530,10 @@
         :id _:e
     ]}.
 
-    {?mid :state _:stopped2.} :eventId _:e.
-    ?mid :state _:stopped2. #please put "stopped2" here when grounding.
+    {?machine :state _:stopped2.} :eventId _:e.
+    ?machine :state _:stopped2. #please put "stopped2" here when grounding.
     ?problem :finalState :sentToTeamleader.
-     ?mid :stateTL _:tl.
+     ?machine :stateTL _:tl.
 }.
 
 {
