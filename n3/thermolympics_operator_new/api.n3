@@ -94,7 +94,7 @@
 
 # API USER 1 (ask for a part ID, might want to send all available part IDs but no API for this atm)
 {
-    ?problem :occurredOnMachine ?machine. ?machine :machineID _:n.
+    ?problem :occurredOnMachine ?machine. ?machine :machineID ?n.
 }
 =>
 {
