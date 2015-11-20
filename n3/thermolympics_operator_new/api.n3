@@ -441,7 +441,7 @@
     ?solution :solutionId ?sid;
               :worked ?tf;
               :comment ?comment.
-    ?yn e:whenGround false.
+    ?tf e:whenGround false.
     {?mid :state ?stopped.} :eventId ?eid.
 }
 =>
@@ -453,7 +453,7 @@
                     :event_id ?eid;
                     :operator_id ?wid;
                     :solution_id ?sid;
-                    :result ?yn;
+                    :result ?tf;
                     :comment ?comment
               ]}.
     ?solution :triedAndReported _:yes. #put "yes"
@@ -477,7 +477,7 @@
 =>
 {
     _:request http:methodName "POST";
-              :check (?yn ?yes);
+              :check (?tf ?yes);
               tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?mid "/events");
               http:body {[
                      #I am not sure, but maybe this answers to the machine stopped event?
