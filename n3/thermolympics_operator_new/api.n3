@@ -94,7 +94,7 @@
 
 # API USER 1 (ask for a part ID, might want to send all available part IDs but no API for this atm)
 {
-    ?problem :occurredOnMachine ?machine. ?machine :machineID ?n.
+    ?problem :occurredOnMachine ?machine. ?machine :machineID ?mid.
 }
 =>
 {
@@ -103,7 +103,7 @@
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {[
                   :message "Please provide the ID of the part on which the problem occurred.";
-                  :machine ?n;
+                  :machine ?mid;
                   :parts ( 1 2 )
               ]};
               http:resp [
@@ -322,8 +322,8 @@
     ?solution :tried "no"
 }.
 
-{?solution :worked "yes".}=>{?solution :tried "yes"}.
-{?solution :worked "no".}=>{?solution :tried "yes"}.
+{?solution :worked true.}=>{?solution :tried "yes"}.
+{?solution :worked false.}=>{?solution :tried "yes"}.
 
 # report the result
 {
@@ -360,10 +360,10 @@
                   http:body _:body
               ].
     _:body :contains {[
-        :solved _:yn;
+        :solved _:tf;
         :comment _:comment
     ]}.
-    ?solution :worked _:yn;
+    ?solution :worked _:tf;
               :comment _:comment.
 }.
 
@@ -411,9 +411,9 @@
     ?problem :trySolution ?solution.
  ?problem :occurredOnMachine ?mid.
     ?solution :solutionId ?sid;
-              :worked ?yn;
+              :worked ?truesfalse;
               :comment ?comment.
-    ?yn e:whenGround "yes".
+    ?truefalse e:whenGround true.
     {?mid :state ?stopped.} :eventId ?eid.
 }
 =>
@@ -425,7 +425,7 @@
                     :event_id ?eid;
                     :operator_id ?wid;
                     :solution_id ?sid;
-                    :result ?yn;
+                    :success ?truefalse;
                     :comment ?comment
               ]}.
     ?solution :triedAndReported _:yes. #put "yes"
@@ -439,9 +439,9 @@
               :operatorId ?wid.
     ?problem :trySolution ?solution.
     ?solution :solutionId ?sid;
-              :worked ?yn;
+              :worked ?tf;
               :comment ?comment.
-    ?yn e:whenGround "no".
+    ?yn e:whenGround false.
     {?mid :state ?stopped.} :eventId ?eid.
 }
 =>
@@ -465,9 +465,9 @@
 
 {
     ?solution :triedAndReported ?yes;
-              :worked ?yn.
+              :worked ?tf.
     ?yes e:whenGround "yes".
-    ?yn e:whenGround "yes".
+    ?tf e:whenGround true.
     ?problem :occurredOnMachine ?machine.
     ?machine :machineID ?mid.
      ?problem        :trySolution ?solution.
