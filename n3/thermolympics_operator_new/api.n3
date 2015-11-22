@@ -94,7 +94,7 @@
 
 # API USER 1 (ask for a part ID, might want to send all available part IDs but no API for this atm)
 {
-    ?problem :occurredOnMachine ?machine. ?machine :machineID ?mid.
+    ?problem :occurredOnMachine ?machine. ?machine :machineID ?n.
 }
 =>
 {
@@ -103,7 +103,7 @@
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {[
                   :message "Please provide the ID of the part on which the problem occurred.";
-                  :machine ?mid;
+                  :machine ?n;
                   :parts ( 1 2 )
               ]};
               http:resp [
@@ -322,8 +322,8 @@
     ?solution :tried "no"
 }.
 
-{?solution :worked true.}=>{?solution :tried "yes"}.
-{?solution :worked false.}=>{?solution :tried "yes"}.
+{?solution :worked "yes".}=>{?solution :tried "yes"}.
+{?solution :worked "no".}=>{?solution :tried "yes"}.
 
 # report the result
 {
@@ -360,10 +360,10 @@
                   http:body _:body
               ].
     _:body :contains {[
-        :solved _:tf;
+        :solved _:yn;
         :comment _:comment
     ]}.
-    ?solution :worked _:tf;
+    ?solution :worked _:yn;
               :comment _:comment.
 }.
 
@@ -411,37 +411,9 @@
     ?problem :trySolution ?solution.
  ?problem :occurredOnMachine ?mid.
     ?solution :solutionId ?sid;
-              :worked ?truesfalse;
+              :worked ?yn;
               :comment ?comment.
-    ?truefalse e:whenGround true.
-    {?mid :state ?stopped.} :eventId ?eid.
-}
-=>
-{
-    _:request http:methodName "POST";
-              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/reports");
-              http:body {[
-                     #I am not sure, but maybe this answers to the machine stopped event?
-                    :event_id ?eid;
-                    :operator_id ?wid;
-                    :solution_id ?sid;
-                    :success ?truefalse;
-                    :comment ?comment
-              ]}.
-    ?solution :triedAndReported _:yes. #put "yes"
-
-}.
-
-
-# POST solution intent
-{
-    ?operator :foundProblem ?problem;
-              :operatorId ?wid.
-    ?problem :trySolution ?solution.
-    ?solution :solutionId ?sid;
-              :worked ?tf;
-              :comment ?comment.
-    ?yn e:whenGround false.
+    ?yn e:whenGround "yes".
     {?mid :state ?stopped.} :eventId ?eid.
 }
 =>
@@ -457,17 +429,45 @@
                     :comment ?comment
               ]}.
     ?solution :triedAndReported _:yes. #put "yes"
-    _:newSolution a :Solution.
-    ?problem :trySolution _:newSolution.
 
 }.
 
 
+# POST solution intent
+{
+    ?operator :foundProblem ?problem;
+              :operatorId ?wid.
+    ?problem :trySolution ?solution.
+    ?solution :solutionId ?sid;
+              :worked ?yn;
+              :comment ?comment.
+    ?yn e:whenGround "no".
+    {?mid :state ?stopped.} :eventId ?eid.
+}
+=>
+{
+    _:request http:methodName "POST";
+              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/reports");
+              http:body {[
+                     #I am not sure, but maybe this answers to the machine stopped event?
+                    :event_id ?eid;
+                    :operator_id ?wid;
+                    :solution_id ?sid;
+                    :result ?yn;
+                    :comment ?comment
+              ]}.
+    ?solution :triedAndReported _:yes. #put "yes"
+    ?problem :tryNewSolution ?solution.
+
+}.
+
+{?problem :tryNewSolution ?solution}=>{}.
+
 {
     ?solution :triedAndReported ?yes;
-              :worked ?tf.
+              :worked ?yn.
     ?yes e:whenGround "yes".
-    ?tf e:whenGround true.
+    ?yn e:whenGround "yes".
     ?problem :occurredOnMachine ?machine.
     ?machine :machineID ?mid.
      ?problem        :trySolution ?solution.
