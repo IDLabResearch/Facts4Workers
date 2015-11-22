@@ -414,7 +414,7 @@
 
               :worked ?tf;
               :comment ?comment.
-    ?truefalse e:whenGround true.
+    ?tf e:whenGround true.
     {?machine :state ?stopped.} :eventId ?eid.
 
 }
