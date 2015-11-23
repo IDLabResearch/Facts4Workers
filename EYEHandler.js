@@ -21,6 +21,8 @@ EYEHandler.prototype.call = function (dataPaths, data, queryPath, proof, singleA
         {
             args.push('--tactic');
             args.push('single-answer');
+            args.push('--tactic');
+            args.push('existing-path');
         }
 
         if (!proof)

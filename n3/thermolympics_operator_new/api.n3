@@ -473,7 +473,7 @@ _:l e:findall (?s {?solution :nextTry ?s.} ()).
 ("solution" ?m) string:concatenation ?w.
 }=>{?solution :nextTry ?w.
 ?problem :trySolution ?w.
-?solution :solutionNo ?m.
+?w :solutionNo ?m.
 }.
 
 
