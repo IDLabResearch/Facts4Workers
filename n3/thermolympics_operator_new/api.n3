@@ -562,7 +562,7 @@ _:request http:methodName "GET";
 tmpl:requestURI ("http://askTheWorker/YouAreDone");
               :check ?state;
               http:body {[
-                  :message "Problem Solved.";
+                  :message "Problem Solved."
 
            
               ]}.
