@@ -38,7 +38,7 @@
                   http:body _:body
               ].
     _:body :contains {[
-        :operator_id _:id
+        :id _:id
     ]}.
     _:problem a :problem;
               :operator [ :id _:id ]
@@ -99,14 +99,34 @@
     _:body :contains {[
         :id _:id;
         # TODO: same problem as other APIs with multiple options: optional could be empty (if machine is not stopped for example)
-        :optional {[
-            :defect_id _:defect_id;
-            :stopped_for_defect_event_id _:original_id
-        ]}
+        :optional _:optional
     ]}.
     ?problem :event [ :id _:id;
-                      :defect [ :id _:defect_id ];
-                      :original [ :id _:original_id ] ].
+                      :optional _:optional ].
+}.
+# TODO: problem with 'optional' being, well, optional
+{
+    ?problem :event ?event.
+    ?event :optional ?optional.
+    ?optional e:label ?label.
+}
+=>
+{
+    ?event :defect [ :id _:defect_id ];
+           :original [ :id _:original_id ].
+}.
+{
+    ?problem :event ?event.
+    ?event :optional ?optional.
+    ?optional log:includes { ?x :defect_id ?did; :stopped_for_defect_event_id ?oid }.
+}
+=>
+{
+    # TODO: do these need to be grounded at this point? can be created at the end of another rule to force grounding?
+    ?event :defect :defect;
+           :original :original.
+    :defect :id ?did.
+    :original :id ?oid.
 }.
 
 # get solutions
@@ -241,6 +261,7 @@
     ?problem :operator ?operator;
              :machine ?machine;
              :event ?event.
+    ?machine :id ?machine_id.
     ?event :original ?original.
     ?report a :report;
             :event ?original;
@@ -254,6 +275,7 @@
     _:request http:methodName "POST";
               tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?machine_id "/events/");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              :check ?report;
               http:body {[
                   :name "Teamleader maintenance finished.";
                   :desc "Machine fixed.";

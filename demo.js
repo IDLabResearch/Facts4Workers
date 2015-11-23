@@ -48,8 +48,8 @@ var rulePaths = [
     //'n3/thermolympics_operator/api.n3',
     //'n3/thermolympics_teamleader/api.n3',
     //'n3/thermolympics_teamleader/extra-rules.n3',
-    'n3/thermolympics_operator_new/api.n3'
-    //'n3/thermolympics_teamleader_new/api.n3'
+    'n3/thermolympics_operator_new/api.n3',
+    'n3/thermolympics_teamleader_new/api.n3'
 ];
 
 var input = rulePaths.map(relative);
@@ -58,8 +58,8 @@ var goals = {
     //'calibration': relative('n3/calibration/goal.n3'),
     //'thermolympics_operator': relative('n3/thermolympics_operator/goal.n3'),
     //'thermolympics_teamleader': relative('n3/thermolympics_teamleader/goal.n3'),
-    'thermolympics_operator_new': relative('n3/thermolympics_operator_new/goal.n3')
-    //'thermolympics_teamleader_new': relative('n3/thermolympics_teamleader_new/goal.n3')
+    'thermolympics_operator_new': relative('n3/thermolympics_operator_new/goal.n3'),
+    'thermolympics_teamleader_new': relative('n3/thermolympics_teamleader_new/goal.n3')
 };
 
 app.get('/', function (req, res)
@@ -70,7 +70,7 @@ app.get('/', function (req, res)
 app.post('/clear', function (req, res)
 {
     if (!req.body || !req.body.data)
-        res.status(400).json({ error: 'Expected a JSON object with a "data" field.'});
+        return res.status(400).json({ error: 'Expected a JSON object with a "data" field.'});
     var rest = new RESTdesc(null, null, req.body.data);
     rest.clear();
     res.sendStatus(200);
@@ -79,7 +79,7 @@ app.post('/clear', function (req, res)
 app.post('/back', function (req, res)
 {
     if (!req.body || !req.body.data)
-        res.status(400).json({ error: 'Expected a JSON object with a "data" field.'});
+        return res.status(400).json({ error: 'Expected a JSON object with a "data" field.'});
     var rest = new RESTdesc(null, null, req.body.data);
     rest.back(function ()
     {
@@ -147,7 +147,16 @@ function next (req, res)
     if (req.body.eye)
     {
         if (req.body.json)
-            map = mapInput(req.body.json, req.body.eye);
+        {
+            try
+            {
+                map = mapInput(req.body.json, req.body.eye);
+            }
+            catch (e)
+            {
+                return res.status(400).json({ error: e});
+            }
+        }
         cacheKey = req.body.eye.data;
     }
     var rest = new RESTdesc(input, goal, cacheKey);
@@ -180,6 +189,8 @@ function mapInputRecurisve (json, response, map)
     }
     else
     {
+        if (!_.isObject(json))
+            throw "JSON not mapping to expected response!\nJSON: " + json + "\nMAPPING: " + JSON.stringify(response);
         for (var key in response)
         {
             if (json[key] === undefined)
@@ -260,7 +271,14 @@ function handleNext (rest, req, res, output, count)
                         output += JSON.stringify(json, null, 4);
                         output += '\n';
 
-                        var map = mapInput(json, data);
+                        try
+                        {
+                            var map = mapInput(json, data);
+                        }
+                        catch (e)
+                        {
+                            return res.status(400).json({ error: e});
+                        }
                         rest.fillInBlanks(map, function () { handleNext(rest, req, res, output, count+1); });
                     }
                     else
