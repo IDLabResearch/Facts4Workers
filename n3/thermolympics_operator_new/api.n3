@@ -427,7 +427,7 @@
                     :event_id ?eid;
                     :operator_id ?wid;
                     :solution_id ?sid;
-                    :result ?tf;
+                    :success ?tf;
                     :comment ?comment
               ]}.
     ?solution :triedAndReported _:yes. #put "yes"
@@ -455,7 +455,7 @@
                     :event_id ?eid;
                     :operator_id ?wid;
                     :solution_id ?sid;
-                    :result false;
+                    :success false;
                     :comment ?comment
               ]}.
     ?solution :triedAndReported _:yes. #put "yes"
