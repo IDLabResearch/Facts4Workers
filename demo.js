@@ -147,7 +147,16 @@ function next (req, res)
     if (req.body.eye)
     {
         if (req.body.json)
-            map = mapInput(req.body.json, req.body.eye);
+        {
+            try
+            {
+                map = mapInput(req.body.json, req.body.eye);
+            }
+            catch (e)
+            {
+                return res.status(400).json({ error: e});
+            }
+        }
         cacheKey = req.body.eye.data;
     }
     var rest = new RESTdesc(input, goal, cacheKey);
@@ -180,6 +189,8 @@ function mapInputRecurisve (json, response, map)
     }
     else
     {
+        if (!_.isObject(json))
+            throw "JSON not mapping to expected response!\nJSON: " + json + "\nMAPPING: " + JSON.stringify(response);
         for (var key in response)
         {
             if (json[key] === undefined)
@@ -260,7 +271,14 @@ function handleNext (rest, req, res, output, count)
                         output += JSON.stringify(json, null, 4);
                         output += '\n';
 
-                        var map = mapInput(json, data);
+                        try
+                        {
+                            var map = mapInput(json, data);
+                        }
+                        catch (e)
+                        {
+                            return res.status(400).json({ error: e});
+                        }
                         rest.fillInBlanks(map, function () { handleNext(rest, req, res, output, count+1); });
                     }
                     else
