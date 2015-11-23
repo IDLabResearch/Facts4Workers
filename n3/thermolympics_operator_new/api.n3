@@ -563,9 +563,7 @@ tmpl:requestURI ("http://askTheWorker/YouAreDone");
               :check ?state;
               http:body {[
                   :message "Problem Solved.";
-                  :problem ?problem;
-                  :machine ?mid
-                 
+
            
               ]}.
 
