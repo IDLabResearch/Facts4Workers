@@ -61,12 +61,13 @@ RESTdesc.prototype.back = function (callback, _recursive)
 // keys of map are blank nodes, values are their replacements
 RESTdesc.prototype.fillInBlanks = function (map, callback)
 {
-    if (!map)
-        return callback();
+    map = map || {}; // still need to skolemize, even if there is no map
 
     this.cache.open();
     this.cache.pop(function (err, val)
     {
+        if (!val)
+            return this.cache.close(callback); // no data (yet)
         var jsonld = this._replaceJSONLDblanks(JSON.parse(val), map);
         this.cache.push(
             JSON.stringify(this._skolemizeJSONLD(jsonld, {})), // skolemize is necessary because the body will contain '.well-known' URIs which also need to be replaced
@@ -75,7 +76,6 @@ RESTdesc.prototype.fillInBlanks = function (map, callback)
                 this.cache.close(callback); // it's really important to execute the callback after the push is finished or there is a race condition
             }.bind(this)
         );
-
     }.bind(this));
 };
 
