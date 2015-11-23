@@ -38,7 +38,7 @@
                   http:body _:body
               ].
     _:body :contains {[
-        :operator_id _:id
+        :id _:id
     ]}.
     _:problem a :problem;
               :operator [ :id _:id ]
