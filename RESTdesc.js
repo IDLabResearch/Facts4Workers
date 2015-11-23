@@ -304,6 +304,9 @@ RESTdesc.prototype._JSONtoJSONLD = function (json)
     if (_.isString(json) || _.isNumber(json) || _.isBoolean(json))
         return json;
 
+    if (json === null)
+        return { '@id': 'rdf:nil' };
+
     if (_.isArray(json))
         return { '@list': json.map(this._JSONtoJSONLD.bind(this)) };
 
@@ -323,9 +326,9 @@ RESTdesc.prototype._error = function (error, content)
 
 module.exports = RESTdesc;
 
-//var jsonld = {"@context":{"log":"http://www.w3.org/2000/10/swap/log#","rdf":"http://www.w3.org/1999/02/22-rdf-syntax-ns#","rdfs":"http://www.w3.org/2000/01/rdf-schema#","owl":"http://www.w3.org/2002/07/owl#","list":"http://www.w3.org/2000/10/swap/list#","e":"http://eulersharp.sourceforge.net/2003/03swap/log-rules#","r":"http://www.w3.org/2000/10/swap/reason#","tmpl":"http://purl.org/restdesc/http-template#","http":"http://www.w3.org/2011/http#","out":"http://f4w.restdesc.org/demo/.well-known/genid/f3ed8675-47ce-42f1-ac89-9082b146b6db#","math":"http://www.w3.org/2000/10/swap/math#","string":"http://www.w3.org/2000/10/swap/string#"},"@graph":[{"@id":"_:sk15_1","http:methodName":"POST","tmpl:requestURI":{"@list":["http://defects.tho.f4w.l0g.in/api/reports"]},"http:body":{"@graph":[{"@id":"_:sk16_1","http://f4w.restdesc.org/demo#event_id":175,"http://f4w.restdesc.org/demo#operator_id":3,"http://f4w.restdesc.org/demo#solution_id":3,"http://f4w.restdesc.org/demo#success":false,"http://f4w.restdesc.org/demo#comment":"solved!"}]}},{"@id":"http://f4w.restdesc.org/demo#firstTry","http://f4w.restdesc.org/demo#triedAndReported":{"@id":"_:sk17_1"},"http://f4w.restdesc.org/demo#tryNewSolution":true}]};
+//var jsonld = {"@context":{"log":"http://www.w3.org/2000/10/swap/log#","rdf":"http://www.w3.org/1999/02/22-rdf-syntax-ns#","rdfs":"http://www.w3.org/2000/01/rdf-schema#","owl":"http://www.w3.org/2002/07/owl#","list":"http://www.w3.org/2000/10/swap/list#","e":"http://eulersharp.sourceforge.net/2003/03swap/log-rules#","r":"http://www.w3.org/2000/10/swap/reason#","tmpl":"http://purl.org/restdesc/http-template#","http":"http://www.w3.org/2011/http#","out":"http://f4w.restdesc.org/demo/.well-known/genid/f3ed8675-47ce-42f1-ac89-9082b146b6db#","math":"http://www.w3.org/2000/10/swap/math#","string":"http://www.w3.org/2000/10/swap/string#"},"@graph":[{"@id":"_:sk84_1","http:methodName":"GET","tmpl:requestURI":{"@list":["http://mstate.tho.f4w.l0g.in/api/machines/",1,"/last_event"]},"http:resp":{"@id":"_:sk85_1","http:body":{"@id":"_:sk86_1","http://f4w.restdesc.org/demo#contains":{"@graph":[{"@id":"_:sk87_1","http://f4w.restdesc.org/demo#id":{"@id":"_:sk88_1"},"http://f4w.restdesc.org/demo#optional":{"@id":"_:sk89_1"}}]}}}},{"@id":"http://f4w.restdesc.org/demo#2a915060-abb7-48bc-86d7-425611f98a31","http://f4w.restdesc.org/demo#event":{"@id":"_:sk90_1","http://f4w.restdesc.org/demo#id":{"@id":"_:sk88_1"},"http://f4w.restdesc.org/demo#optional":{"@id":"_:sk89_1"}}}]};
 //var rest = new RESTdesc(null, null, 0);
-//var result = rest._replaceJSONLDblanks(jsonld, { '_:sk14_2': 1 });
+//var result = rest._replaceJSONLDblanks(jsonld, { '_:sk88_1': 178, '_:sk89_1': null });
 //console.log(JSON.stringify(result, null, 2));
 //var parser = new JSONLDParser(2);
 //var n3 = parser.parse(result, rest.prefix);
