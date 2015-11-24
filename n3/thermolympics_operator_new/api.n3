@@ -309,7 +309,7 @@
     ]}.
     {?m :state _:stopped1.} :eventId _:e.
     ?m :state _:stopped1. #please put "stopped1" here when grounding.
-    ?m :state2 _:stopped1.
+    ?m :state2 "stopped1".
 }.
 
 {
