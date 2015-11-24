@@ -274,22 +274,21 @@
 {
     ?problem :occurredOnMachine ?m.
     ?m :machineID ?machineID.
-    ?m :state "notstopped2";
-       :state "notstopped1".
-    ?operator :foundProblem ?problem;
-         :operatorId ?wid;
-         :machineSkills ?wm;
-         :toolSkills ?wt;
-         :computerSkills ?wc.
+    ?m :state "notstopped1".
+    ?operator :foundProblem ?problem.
+     #    :operatorId ?wid;
+     #    :machineSkills ?wm;
+     #    :toolSkills ?wt;
+     #    :computerSkills ?wc.
 
-    ?problem :trySolution ?solution.
-    ?solution :solutionId ?id;
-              :triedAndReported "no".
-    ?solution :reqMachineSkills ?ms; :reqToolSkills ?t; :reqComputerSkills ?c.
+    #?problem :trySolution ?solution.
+    #?solution :solutionId ?id;
+    #          :triedAndReported "no".
+   # ?solution :reqMachineSkills ?ms; :reqToolSkills ?t; :reqComputerSkills ?c.
 
-    (?wm ?wt ?wc ?ms ?t ?c) e:whenGround (?wm2 ?wt2 ?wc2 ?m2 ?t2 ?c2).
+  #  (?wm ?wt ?wc ?ms ?t ?c) e:whenGround (?wm2 ?wt2 ?wc2 ?m2 ?t2 ?c2).
 
-   (?wm2 ?wt2 ?wc2) :match (?m2 ?t2 ?c2).
+ #  (?wm2 ?wt2 ?wc2) :match (?m2 ?t2 ?c2).
 }
 =>
 {
@@ -310,6 +309,7 @@
     ]}.
     {?m :state _:stopped1.} :eventId _:e.
     ?m :state _:stopped1. #please put "stopped1" here when grounding.
+    ?m :state2 _:stopped1.
 }.
 
 {
@@ -508,6 +508,7 @@ _:l e:findall (?s {?solution :nextTry ?s.} ()).
 
 {
     ?problem :occurredOnMachine ?machine.
+    ?machine :state2 [ e:whenground "stopped1"].
     ?machine :state "notstopped2";
              :machineID ?mid.
     ?operator :foundProblem ?problem;
