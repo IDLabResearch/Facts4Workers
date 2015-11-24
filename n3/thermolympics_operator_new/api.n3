@@ -275,8 +275,8 @@
     ?problem :occurredOnMachine ?m.
     ?m :machineID ?machineID.
     ?m :state "notstopped1".
-    ?operator :foundProblem ?problem.
-     #    :operatorId ?wid;
+    ?operator :foundProblem ?problem;
+              :operatorId ?wid.
      #    :machineSkills ?wm;
      #    :toolSkills ?wt;
      #    :computerSkills ?wc.
@@ -294,7 +294,7 @@
 {
     _:request http:methodName "POST";
               tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?machineID "/events");
-              :check (?wm ?ms);
+              :check ?problem;
               http:body {[
                   :name "Stop the machine";
                   :desc "Stoping the machine after a defect was spotted!";
@@ -508,7 +508,8 @@ _:l e:findall (?s {?solution :nextTry ?s.} ()).
 
 {
     ?problem :occurredOnMachine ?machine.
-    ?machine :state2 [ e:whenground "stopped1"].
+    ?machine :state2 ?state2.
+    ?state2 e:whenGround "stopped1".
     ?machine :state "notstopped2";
              :machineID ?mid.
     ?operator :foundProblem ?problem;
