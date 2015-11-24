@@ -254,7 +254,7 @@
     ?solution :requiredSkillsKnown "no".
 }.
 
-#####################
+
 {?solution :solutionId ?sid. ?solution2 :solutionId ?sid. 
  ?solution :reqMachineSkills ?ms; :reqToolSkills ?t; :reqComputerSkills ?c. ?solution :requiredSkillsKnown "yes"
 }=>{?solution2 :reqMachineSkills ?ms; :reqToolSkills ?t; :reqComputerSkills ?c. ?solution2 :requiredSkillsKnown "yes"}.
@@ -277,24 +277,12 @@
     ?m :state "notstopped1".
     ?operator :foundProblem ?problem;
               :operatorId ?wid.
-     #    :machineSkills ?wm;
-     #    :toolSkills ?wt;
-     #    :computerSkills ?wc.
 
-    #?problem :trySolution ?solution.
-    #?solution :solutionId ?id;
-    #          :triedAndReported "no".
-   # ?solution :reqMachineSkills ?ms; :reqToolSkills ?t; :reqComputerSkills ?c.
-
-  #  (?wm ?wt ?wc ?ms ?t ?c) e:whenGround (?wm2 ?wt2 ?wc2 ?m2 ?t2 ?c2).
-
- #  (?wm2 ?wt2 ?wc2) :match (?m2 ?t2 ?c2).
 }
 =>
 {
     _:request http:methodName "POST";
               tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?machineID "/events");
-              :check ?problem;
               http:body {[
                   :name "Stop the machine";
                   :desc "Stoping the machine after a defect was spotted!";
@@ -309,7 +297,6 @@
     ]}.
     {?m :state _:stopped1.} :eventId _:e.
     ?m :state _:stopped1. #please put "stopped1" here when grounding.
-    ?m :state2 "stopped1".
 }.
 
 {
@@ -508,9 +495,10 @@ _:l e:findall (?s {?solution :nextTry ?s.} ()).
 
 {
     ?problem :occurredOnMachine ?machine.
-    ?machine :state2 ?state2.
+    ?problem :defect ?defect.
+    {?machine :state ?state2.} :eventId ?eid.
     ?state2 e:whenGround "stopped1".
-    ?machine :state "notstopped2";
+    ?machine #:state "notstopped2";
              :machineID ?mid.
     ?operator :foundProblem ?problem;
          :operatorId ?wid;
@@ -540,6 +528,7 @@ _:l e:findall (?s {?solution :nextTry ?s.} ()).
                   #TODO: put the right machine state
                   :machine_state "3";
                   :operator_id ?wid;
+                  :optional {[ :defect_id ?defect; :stopped_for_defect_event_id ?eid].}
               ].};
               http:resp [
                   http:body _:body
