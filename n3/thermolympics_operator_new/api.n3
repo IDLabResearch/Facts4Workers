@@ -254,7 +254,7 @@
     ?solution :requiredSkillsKnown "no".
 }.
 
-
+#####################
 {?solution :solutionId ?sid. ?solution2 :solutionId ?sid. 
  ?solution :reqMachineSkills ?ms; :reqToolSkills ?t; :reqComputerSkills ?c. ?solution :requiredSkillsKnown "yes"
 }=>{?solution2 :reqMachineSkills ?ms; :reqToolSkills ?t; :reqComputerSkills ?c. ?solution2 :requiredSkillsKnown "yes"}.
@@ -431,7 +431,7 @@
                     :comment ?comment
               ]}.
     ?solution :triedAndReported _:yes. #put "yes"
-
+    ?solution :new :triple.
 }.
 
 
@@ -460,7 +460,7 @@
               ]}.
     ?solution :triedAndReported _:yes. #put "yes"
     ?solution :tryNewSolution true.
-    
+    ?solution :new :triple.
 
 }.
 
