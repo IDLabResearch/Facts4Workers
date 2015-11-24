@@ -10,6 +10,32 @@ PREFIX r: <http://www.w3.org/2000/10/swap/reason#>
 PREFIX tmpl: <http://purl.org/restdesc/http-template#>
 PREFIX http: <http://www.w3.org/2011/http#>
 
+
+
+
+##########################
+#rule added to make the thermolympic use case work
+###################################
+
+{
+?x r:gives ?y. 
+
+
+?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n. 
+?z http:body ?body. }.
+
+_:r e:findall ( ?o {?body log:includes {?s ?p ?o}. ?p log:notEqualTo :optional} ?os).
+?body log:includes {?s2 :optional ?oo}. 
+_:r2 e:findall (?ooo {?oo log:includes {?sss ?ppp ?ooo}. } ?oos).
+
+(?os ?oos) list:append ?list. 
+
+#?os :testList ?oos.
+
+}=>{(?list ()) :transpair ?list}.
+####################################################################################################
+
+
 #no list, no problem!
 {?a :testList ?p.} <= {
 ?a log:rawType ?p. ?p log:notEqualTo rdf:List. 

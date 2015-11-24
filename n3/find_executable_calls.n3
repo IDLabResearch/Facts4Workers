@@ -8,6 +8,9 @@ PREFIX r: <http://www.w3.org/2000/10/swap/reason#>
 
 
 
+
+
+
 #This file will only output executable calls. It also keeps information about one call together
 
 {
@@ -113,4 +116,41 @@ _:r e:findall ( ?o {?body log:includes {?s ?p ?o}} ?os).
 
 
 
+######################################
+#added for the thermolympics use case
+##########################################
+
+{
+?x r:gives ?y. 
+
+?y :checked :ok.
+
+#does ?y include an http-call?
+?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n. #?z :root ?root. 
+?z http:body ?body. }.
+
+
+
+
+#is this all ground?
+?a e:notLabel ?aa.
+?a :testList ?pp.
+
+?n e:notLabel ?m.
+?n :testList ?mm.
+
+#is the body ground?
+?body e:notLabel ?bodylabel.
+
+#Are all objects in the body ground?
+
+_:r e:findall ( ?o {?body log:includes {?s ?p ?o}. ?p log:notEqualTo :optional} ?os).
+?body log:includes {?s2 :optional ?oo}. 
+_:r2 e:findall (?ooo {?oo log:includes {?sss ?ppp ?ooo}. } ?oos).
+
+(?os ?oos) list:append ?list. 
+
+?list :testList ?list999.
+
+}=>  ?y.
 
