@@ -214,11 +214,17 @@
                   http:body _:body
               ].
     _:body :contains {[
+        :name _:name;
+        :desc _:desc;
+        :role _:role;
         :skills {[ :machine _:m; :tool _:t; :computer _:c]}
     ]}.
     ?operator :machineSkills _:m;
         :toolSkills _:t;
         :computerSkills _:c.
+    ?operator :name _:name;
+              :desc _:desc;
+              :role _:role.
 }.
 
 #get skills required for solution
@@ -234,12 +240,18 @@
                   http:body _:body
               ].
     _:body :contains {[
+        :name _:name;
+        :desc _:desc;
+        :comment _:comment;
         :skill {[ :machine _:m; :tool _:t; :computer _:c]}
     ]}.
     ?solution :reqMachineSkills _:m;
          :reqToolSkills _:t;
          :reqComputerSkills _:c. #problem: sometimes no computer value
     ?solution :requiredSkillsKnown ?yes. #please ground with "yes"
+    ?solution :name _:name;
+              :desc _:desc;
+              :comment _:comment.
 }.
 
 
@@ -316,11 +328,14 @@
 
 # report the result
 {
-    ?operator:foundProblem ?problem;
+    ?operator :foundProblem ?problem;
          :operatorId ?wid;
          :machineSkills ?wm;
          :toolSkills ?wt;
          :computerSkills ?wc.
+    ?operator :name ?w_name;
+              :desc ?w_desc;
+              :role ?w_role.
 
     ?problem :occurredOnMachine ?m.
     ?m :machineID ?machineID.
@@ -332,6 +347,9 @@
     ?solution :reqMachineSkills ?ms;
         :reqToolSkills ?t;
         :reqComputerSkills ?c.
+    ?solution :name ?s_name;
+              :desc ?s_desc;
+              :comment ?s_comment.
 
     (?wm ?wt ?wc ?ms ?t ?c) e:whenGround (?wm2 ?wt2 ?wc2 ?m2 ?t2 ?c2).
 
@@ -344,8 +362,18 @@
               :check (?wm ?ms);
               http:body {[
                   :message "Report the outcome.";
-                  :solutionId ?id;
-                  :operatorId ?wid;
+                  :solution {[
+                      :id ?id;
+                      :name ?s_name;
+                      :desc ?s_desc;
+                      :comment ?s_comment
+                  ]};
+                  :operator {[
+                      :id ?wid;
+                      :name ?w_name;
+                      :desc ?w_desc;
+                      :role ?w_role
+                  ]};
                   :machineId ?machineID;
                   :eventId ?e
               ]};
