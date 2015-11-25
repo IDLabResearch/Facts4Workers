@@ -272,7 +272,8 @@
 
 #stop the machine and get id
 {
-    ?problem :occurredOnMachine ?m.
+    ?problem :occurredOnMachine ?m;
+             :defect ?defectID.
     ?m :machineID ?machineID.
     ?m :state "notstopped1".
     ?operator :foundProblem ?problem;
@@ -287,7 +288,8 @@
                   :name "Stop the machine";
                   :desc "Stoping the machine after a defect was spotted!";
                   :machine_state "4";
-                  :operator_id ?wid
+                  :operator_id ?wid;
+                  :optional {[ :defect_id ?defectID ]}
               ]};
               http:resp [
                   http:body _:body
@@ -295,7 +297,7 @@
     _:body :contains {[
         :id _:e
     ]}.
-    {?m :state _:stopped1.} :eventId _:e.
+    {?m :state "stopped1".} :eventId _:e.
     ?m :state _:stopped1. #please put "stopped1" here when grounding.
 }.
 
