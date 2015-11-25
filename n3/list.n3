@@ -16,7 +16,6 @@ PREFIX http: <http://www.w3.org/2011/http#>
 ##########################
 #rule added to make the thermolympic use case work
 ###################################
-
 {
 ?x r:gives ?y. 
 
@@ -33,6 +32,28 @@ _:r2 e:findall (?ooo {?oo log:includes {?sss ?ppp ?ooo}. } ?oos).
 #?os :testList ?oos.
 
 }=>{(?list ()) :transpair ?list}.
+
+{
+?x r:gives ?y. 
+?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n. 
+?z http:body ?body. }.
+
+_:r e:findall ( ?o {?body log:includes {?s ?p ?o}. ?p log:notEqualTo :solution. ?p log:notEqualTo :operator} ?os).
+?body log:includes {?s2 :solution ?oo}. 
+_:r2 e:findall (?ooo {?oo log:includes {?sss ?ppp ?ooo}. } ?oos).
+
+
+?body log:includes {?s22 :solution ?oo2}. 
+_:r222 e:findall (?ooo2 {?oo2 log:includes {?sss2 ?ppp2 ?ooo2}. } ?oos2).
+
+
+(?os ?oos ?oos2 ) list:append ?list. 
+
+
+
+}=>{(?list ()) :transpair ?list}.
+
+
 ####################################################################################################
 
 

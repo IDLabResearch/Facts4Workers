@@ -120,6 +120,7 @@ _:r e:findall ( ?o {?body log:includes {?s ?p ?o}} ?os).
 #added for the thermolympics use case
 ##########################################
 
+
 {
 ?x r:gives ?y. 
 
@@ -153,4 +154,58 @@ _:r2 e:findall (?ooo {?oo log:includes {?sss ?ppp ?ooo}. } ?oos).
 ?list :testList ?list999.
 
 }=>  ?y.
+
+
+
+{
+?x r:gives ?y. 
+
+?y :checked :ok.
+
+#does ?y include an http-call?
+?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n. #?z :root ?root. 
+?z http:body ?body. }.
+
+
+
+
+#is this all ground?
+?a e:notLabel ?aa.
+?a :testList ?pp.
+
+?n e:notLabel ?m.
+?n :testList ?mm.
+
+#is the body ground?
+?body e:notLabel ?bodylabel.
+
+#Are all objects in the body ground?
+
+_:r e:findall ( ?o {?body log:includes {?s ?p ?o}. ?p log:notEqualTo :solution. ?p log:notEqualTo :operator} ?os).
+?body log:includes {?s2 :solution ?oo}. 
+_:r2 e:findall (?ooo {?oo log:includes {?sss ?ppp ?ooo}. } ?oos).
+
+
+?body log:includes {?s22 :solution ?oo2}. 
+_:r222 e:findall (?ooo2 {?oo2 log:includes {?sss2 ?ppp2 ?ooo2}. } ?oos2).
+
+
+(?os ?oos ?oos2 ) list:append ?list. 
+
+?list :testList ?list999.
+
+}=>  ?y.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
