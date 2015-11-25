@@ -323,6 +323,7 @@
          :computerSkills ?wc.
 
     ?problem :occurredOnMachine ?m.
+    ?m :machineID ?machineID.
     {?m :state ?stopped1.} :eventId ?e.
     ?problem :trySolution ?solution.
     ?solution :solutionId ?id;
@@ -343,7 +344,10 @@
               :check (?wm ?ms);
               http:body {[
                   :message "Report the outcome.";
-                  :solutionId ?id
+                  :solutionId ?id;
+                  :operatorId ?wid;
+                  :machineId ?machineID;
+                  :eventId ?e
               ]};
               http:resp [
                   http:body _:body
