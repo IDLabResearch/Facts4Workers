@@ -486,15 +486,25 @@
 }.
 
 {
-?problem :trySolution ?solution. 
-?solution :tryNewSolution true. 
-_:l e:findall (?s {?solution :nextTry ?s.} ()).
-?solution :solutionNo ?n. 
-(1 ?n) math:sum ?m.
-("solution" ?m) string:concatenation ?w.
-}=>{?solution :nextTry ?w.
-?problem :trySolution ?w.
-?w :solutionNo ?m.
+    ?problem :trySolution ?solution.
+    ?solution :tryNewSolution true.
+    _:l e:findall (?s {?solution :nextTry ?s.} ()).
+    ?solution :solutionNo ?n.
+    (1 ?n) math:sum ?m.
+    ("solution" ?m) string:concatenation ?w.
+
+    ?solution :name ?s_name;
+              :desc ?s_desc;
+              :comment ?s_comment.
+}
+=>
+{
+    ?solution :nextTry ?w.
+    ?problem :trySolution ?w.
+    ?w :solutionNo ?m.
+    ?w :name ?s_name;
+       :desc ?s_desc;
+       :comment ?s_comment.
 }.
 
 
