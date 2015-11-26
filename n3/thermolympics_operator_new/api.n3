@@ -385,7 +385,7 @@
         :comment _:comment
     ]}.
     ?solution :worked _:yn;
-              :comment _:comment.
+              :report_comment _:comment.
 }.
 
 
@@ -434,7 +434,7 @@
     ?solution :solutionId ?sid;
 
               :worked ?tf;
-              :comment ?comment.
+              :report_comment ?comment.
     ?tf e:whenGround true.
     {?machine :state ?stopped.} :eventId ?eid.
 
@@ -463,7 +463,7 @@
     ?problem :trySolution ?solution.
     ?solution :solutionId ?sid;
               :worked false;
-              :comment ?comment.
+              :report_comment ?comment.
     #?tf e:whenGround false.
     {?machine :state ?stopped.} :eventId ?eid.
 }
