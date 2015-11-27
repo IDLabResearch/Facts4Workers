@@ -12,6 +12,7 @@
     "express": "^4.12.3",
     "jade": "^1.9.2",
     "jquery": "^2.1.3",
+    "jsonld": "^0.4.2",
     "lodash": "^3.6.0",
     "minimist": "^1.1.1",
     "n3": "^0.4.2",
@@ -21,9 +22,11 @@
     "resourcecache": "^0.1.2",
     "serve-index": "^1.6.3"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "mocha": "^2.3.4"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "author": "",
   "license": "ISC"
