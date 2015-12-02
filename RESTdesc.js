@@ -29,6 +29,7 @@ function RESTdesc (dataPaths, goalPath, cacheKey)
     // TODO: generalize
     this.prefix = 'http://f4w.restdesc.org/demo#';
 
+    this.calls = [];
     this.proofs = [];
 }
 
@@ -59,7 +60,7 @@ RESTdesc.prototype.back = function (callback, _recursive)
 
 // TODO: we can cache the cache in a list ...
 // keys of map are blank nodes, values are their replacements
-RESTdesc.prototype.fillInBlanks = function (map, callback)
+RESTdesc.prototype.fillInBlanks = function (map, json, callback)
 {
     map = map || {}; // still need to skolemize, even if there is no map
 
@@ -68,15 +69,51 @@ RESTdesc.prototype.fillInBlanks = function (map, callback)
     {
         if (!val)
             return this.cache.close(callback); // no data (yet)
-        var jsonld = this._replaceJSONLDblanks(JSON.parse(val), map);
+        // TODO: how to know which API calls to delete and which to replace blank nodes in?
+        // TODO: pop the last jsonld from the cache, extract the relevent validCall thingy, push that as a new jsonld and then push the original jsonld again (without that validCall) if there are still calls left
+        var jsonld = JSON.parse(val);
+        var call = this._extractValidCall(jsonld, json);
+        call = this._replaceJSONLDblanks(call, map);
         this.cache.push(
-            JSON.stringify(this._skolemizeJSONLD(jsonld, {})), // skolemize is necessary because the body will contain '.well-known' URIs which also need to be replaced
+            JSON.stringify(this._skolemizeJSONLD(call, {})), // skolemize is necessary because the body will contain '.well-known' URIs which also need to be replaced
             function ()
             {
-                this.cache.close(callback); // it's really important to execute the callback after the push is finished or there is a race condition
+                // push unsolved jsonld in front of solved call
+                if (jsonld['@graph'].length > 0)
+                    this.cache.push( JSON.stringify(jsonld), function () { this.cache.close(callback); }.bind(this) );
+                else
+                    this.cache.close(callback); // it's really important to execute the callback after the push is finished or there is a race condition
             }.bind(this)
         );
     }.bind(this));
+};
+
+RESTdesc.prototype._extractValidCall = function (jsonld, json)
+{
+    // these 2 parts uniquely identify a URI call
+    var uri = json['http:requestURI'];
+    var body = json['http:body'];
+
+    var calls = jsonld['@graph'];
+    for (var i = 0; i < calls.length; ++i)
+    {
+        var call = calls[i][this.prefix + 'validCall'];
+        // find the element in the array corresponding the the API call
+        // TODO: some duplication with JSONLD to JSON code
+        if (_.isArray(call))
+            call = _.filter(json, 'http:methodName')[0];
+        call = this._JSONLDtoJSON(call);
+        // we always provide an empty body in the json, even if there is none in the jsonld, to keep things consistent for the end-user
+        if (call['http:requestURI'] === uri && _.isEqual(call['http:body'] || {}, body))
+            break;
+    }
+    if (i >= calls.length)
+        throw 'No stored valid call matching the given json data.';
+
+    var call = calls.splice(i, 1)[0];
+    call = call[this.prefix + 'validCall'];
+    call['@context'] = jsonld['@context'];
+    return call;
 };
 
 RESTdesc.prototype._replaceNode = function (id, map, idMap)
@@ -137,6 +174,9 @@ RESTdesc.prototype._replaceJSONLDblanks = function (jsonld, map, idMap)
 
 RESTdesc.prototype.next = function (callback)
 {
+    if (this.calls.length > 0)
+        return callback(this.calls.splice(0, 1)[0]);
+
     this.cache.list(function (err, data)
     {
         // TODO: how big of a performance hit is it to always convert the jsonld?
@@ -152,7 +192,7 @@ RESTdesc.prototype._handleProof = function (proof, callback)
 {
     this.proofs.push(proof);
     // TODO: singleAnswer true to prevent problems atm, should be changed for parallelization
-    this.eye.call([this.list], [proof], this.findPath, false, true, function (body) { this._handleNext(body, callback); }.bind(this), this._error);
+    this.eye.call([this.list], [proof], this.findPath, false, false, function (body) { this._handleNext(body, callback); }.bind(this), this._error);
 };
 
 // TODO: what if the result contains multiple possible APIs
@@ -160,33 +200,34 @@ RESTdesc.prototype._handleNext = function (next, callback)
 {
     var n3Parser = new N3Parser();
     var jsonld = n3Parser.parse(next);
+    // consistency, always put everything in an array
+    if (jsonld[this.prefix + 'validCall'])
+    {
+        var val = jsonld[this.prefix + 'validCall'];
+        delete jsonld[this.prefix + 'validCall'];
+        var validCall = {};
+        validCall[this.prefix + 'validCall'] = val;
+        jsonld['@graph'] = [validCall];
+    }
     // TODO: should move the JSONLD to JSON part somewhere else, closer to demo.js, that way we can take the Content-Type better into account
     var json = this._JSONLDtoJSON(jsonld);
-    // if there are multiple elements, find the one corresponding to the request
-    if (_.isArray(json))
-        json = _.filter(json, 'http:methodName');
-    else
+    // at this point 'json' is a list (or a single instance of) of validCall objects
+    if (!_.isArray(json))
         json = [json];
-    for (var i = 0; i < json.length; ++i)
-    {
-        var subJSON = json[i];
-        if (subJSON['tmpl:requestURI'])
-        {
-            var uriList = subJSON['tmpl:requestURI'];
-            // handle AGFA tmpl:requestURI
-            if (uriList.length > 1 && _.isArray(uriList[1]))
-            {
-                var uri = uriList[0];
-                for (var j = 1; j < uriList.length; ++j)
-                    uri.replace('{' + uriList[j][0] + '}', uriList[j][1]);
-                uriList = [uri];
-            }
-            subJSON['http:requestURI'] = uriList.join('');
-            delete subJSON['tmpl:requestURI'];
-        }
-    }
+    json = _.map(json, function (validCall) { return validCall['validCall'] });
+
+    // make sure end-user always sees the same format
+    json = _.map(json, function (thingy) {
+        // find the element in the array corresponding the the API call
+        if (_.isArray(thingy))
+            thingy = _.filter(thingy, 'http:methodName')[0];
+        var template = {'http:methodName':'GET', 'http:requestURI':'', 'http:body':{}, 'http:resp':{'http:body':{}}}; // needs to be inside function!
+        return _.assign(template, thingy);
+    });
 
     // TODO: currently only taking 1 API, still need to do parallellization
+    if (json.length > 1)
+        this.calls = json.slice(1);
     json = json.length === 0 ? {} : json[0];
 
     if (!json || !json['http:requestURI'])
@@ -197,8 +238,6 @@ RESTdesc.prototype._handleNext = function (next, callback)
     {
         jsonld = this._skolemizeJSONLD(jsonld);
         this.cache.push(JSON.stringify(jsonld));
-        var template = {'http:methodName':'GET', 'http:requestURI':'', 'http:body':{}, 'http:resp':{'http:body':{}}};
-        json = _.assign(template, json);
         callback(json);
     }
 };
@@ -213,10 +252,25 @@ RESTdesc.prototype._JSONLDtoJSON = function (jsonld)
         return jsonld.map(this._JSONLDtoJSON.bind(this));
 
     var json = {};
+    if (jsonld['tmpl:requestURI'])
+    {
+        var uriList = jsonld['tmpl:requestURI']['@list'];
+        // handle AGFA tmpl:requestURI
+        if (uriList.length > 1 && _.isArray(uriList[1]))
+        {
+            var uri = uriList[0];
+            for (var j = 1; j < uriList.length; ++j)
+                uri.replace('{' + uriList[j][0] + '}', uriList[j][1]);
+            uriList = [uri];
+        }
+        json['http:requestURI'] = uriList.join('');
+    }
+
     var keys = _.without(Object.keys(jsonld), '@context');
     for (var key in jsonld)
     {
-        if (key === '@context')
+        // already handled requestURI above
+        if (key === '@context' || key === 'tmpl:requestURI')
             continue;
 
         if (key === '@graph')
@@ -239,7 +293,7 @@ RESTdesc.prototype._JSONLDtoJSON = function (jsonld)
             continue;
 
         // TODO: this is already interpreting the content so shouldn't actually happen here (but later we lose the blank nodes)
-        if (key === 'http:body' && Object.keys(jsonld[key]).length > 1 && jsonld[key]['@id'] && !jsonld[key]['http://f4w.restdesc.org/demo#contains'])
+        if (key === 'http:body' && Object.keys(jsonld[key]).length > 1 && jsonld[key]['@id'] && !jsonld[key][this.prefix + 'contains'])
             return { 'http:body': jsonld[key]['@id'] };
 
         // this might produce invalid URIs, but we don't care since the output is JSON, not JSON-lD

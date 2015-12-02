@@ -3,7 +3,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var request = require('request');
 var path = require('path');
-var _ = require('lodash');
+var _ = require('lodash');//
 var RESTdesc = require('./RESTdesc');
 var serveIndex = require('serve-index');
 
@@ -42,14 +42,14 @@ app.use('/demo/n3', serveIndex(relative('n3'), {icons: true, view: 'details'}));
 
 // TODO: more generic way to load all files?
 var rulePaths = [
-    'n3/calibration/api1.n3',
-    'n3/calibration/api2.n3',
-    'n3/calibration/extra-rules.n3',
-    'n3/thermolympics_operator/api.n3',
-    'n3/thermolympics_teamleader/api.n3',
-    'n3/thermolympics_teamleader/extra-rules.n3',
+    //'n3/calibration/api1.n3',
+    //'n3/calibration/api2.n3',
+    //'n3/calibration/extra-rules.n3',
+    //'n3/thermolympics_operator/api.n3',
+    //'n3/thermolympics_teamleader/api.n3',
+    //'n3/thermolympics_teamleader/extra-rules.n3',
     'n3/thermolympics_operator_new/api.n3',
-    'n3/thermolympics_teamleader_new/api.n3'
+    //'n3/thermolympics_teamleader_new/api.n3'
 ];
 
 var input = rulePaths.map(relative);
@@ -160,7 +160,7 @@ function next (req, res)
         cacheKey = req.body.eye.data;
     }
     var rest = new RESTdesc(input, goal, cacheKey);
-    rest.fillInBlanks(map, function () { handleNext(rest, req, res); });
+    rest.fillInBlanks(map, req.body.eye || {}, function () { handleNext(rest, req, res); });
 }
 
 function mapInput (json, eye)
@@ -279,7 +279,7 @@ function handleNext (rest, req, res, output, count)
                         {
                             return res.status(400).json({ error: e});
                         }
-                        rest.fillInBlanks(map, function () { handleNext(rest, req, res, output, count+1); });
+                        rest.fillInBlanks(map, data, function () { handleNext(rest, req, res, output, count+1); });
                     }
                     else
                     {
