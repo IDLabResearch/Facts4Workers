@@ -66,7 +66,7 @@ _:r e:findall (
 ?a :testList ?pp.
 
 
-}=> ?y.
+}=> {[] :validCall ?y}.
 
 
 {
@@ -112,7 +112,7 @@ _:r e:findall ( ?o {?body log:includes {?s ?p ?o}} ?os).
 #Is every object in the body of the call gound?
 #?olist :testList ?ppp.
 
-}=> ?y. #{ ?os :the ?body}.
+}=> {[] :validCall ?y}. #{ ?os :the ?body}.
 
 
 
@@ -153,7 +153,7 @@ _:r2 e:findall (?ooo {?oo log:includes {?sss ?ppp ?ooo}. } ?oos).
 
 ?list :testList ?list999.
 
-}=>  ?y.
+}=>  {[] :validCall ?y}.
 
 
 
@@ -194,7 +194,7 @@ _:r222 e:findall (?ooo2 {?oo2 log:includes {?sss2 ?ppp2 ?ooo2}. } ?oos2).
 
 ?list :testList ?list999.
 
-}=>  ?y.
+}=>  {[] :validCall ?y}.
 
 
 
