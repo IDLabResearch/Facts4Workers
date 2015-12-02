@@ -42,12 +42,12 @@ app.use('/demo/n3', serveIndex(relative('n3'), {icons: true, view: 'details'}));
 
 // TODO: more generic way to load all files?
 var rulePaths = [
-    //'n3/calibration/api1.n3',
-    //'n3/calibration/api2.n3',
-    //'n3/calibration/extra-rules.n3',
-    //'n3/thermolympics_operator/api.n3',
-    //'n3/thermolympics_teamleader/api.n3',
-    //'n3/thermolympics_teamleader/extra-rules.n3',
+    'n3/calibration/api1.n3',
+    'n3/calibration/api2.n3',
+    'n3/calibration/extra-rules.n3',
+    'n3/thermolympics_operator/api.n3',
+    'n3/thermolympics_teamleader/api.n3',
+    'n3/thermolympics_teamleader/extra-rules.n3',
     'n3/thermolympics_operator_new/api.n3',
     'n3/thermolympics_teamleader_new/api.n3'
 ];
@@ -55,9 +55,9 @@ var rulePaths = [
 var input = rulePaths.map(relative);
 
 var goals = {
-    //'calibration': relative('n3/calibration/goal.n3'),
-    //'thermolympics_operator': relative('n3/thermolympics_operator/goal.n3'),
-    //'thermolympics_teamleader': relative('n3/thermolympics_teamleader/goal.n3'),
+    'calibration': relative('n3/calibration/goal.n3'),
+    'thermolympics_operator': relative('n3/thermolympics_operator/goal.n3'),
+    'therolympics_teamleader': relative('n3/thermolympics_teamleader/goal.n3'),
     'thermolympics_operator_new': relative('n3/thermolympics_operator_new/goal.n3'),
     'thermolympics_teamleader_new': relative('n3/thermolympics_teamleader_new/goal.n3')
 };
