@@ -60,6 +60,9 @@ RESTdesc.prototype.back = function (callback, _recursive)
 
 RESTdesc.prototype.handleUserResponse = function (response, json, callback)
 {
+    if (json === undefined)
+        return callback();
+
     this.cache.open();
     this.cache.pop(function (err, val)
     {

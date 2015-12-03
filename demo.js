@@ -142,19 +142,19 @@ app.post('/eye', function (req, res)
 app.post('/next', next);
 function next (req, res)
 {
-    var goal = goals['calibration'];
-    if (req.body && req.body.goal)
-    {
-        goal = goals[req.body.goal];
-        if (!goal)
-            return res.status(400).json({ error: 'Unknown goal ' + req.body.goal });
-    }
+    if (!req.body || !req.body.goal)
+        return res.status(400).json({ error: 'Expected an input body containing at least the goal.'});
+
+    var goal = goals[req.body.goal];
+    if (!goal)
+        return res.status(400).json({ error: 'Unknown goal ' + req.body.goal });
+
     var cacheKey = null;
-    var map = null;
     if (req.body.eye)
         cacheKey = req.body.eye.data;
+
     var rest = new RESTdesc(input, goal, cacheKey);
-    rest.handleUserResponse(req.body.json || {}, req.body.eye || {}, function () { handleNext(rest, req, res); });
+    rest.handleUserResponse(req.body.json, req.body.eye, function () { handleNext(rest, req, res); });
 }
 
 function handleNext (rest, req, res, count)

@@ -78,7 +78,7 @@ ValidCall.prototype.call = function (callback)
 ValidCall.prototype.handleResponse = function (response)
 {
     var map = {};
-    Util.mapJSON(response, this.getResponse(), map);
+    Util.mapJSON(response === undefined ? {} : response, this.getResponse(), map);
     this.jsonld = Util.replaceJSONLDblanks(this.jsonld, map, this.baseURI);
     this.jsonld = Util.skolemizeJSONLD(this.jsonld, this.baseURI, {}); // TODO: try to remember why skolemizeJSONLD acts differently if you give it a blankmap
     this.json = undefined; // need to unset JSON since JSONLD changed
