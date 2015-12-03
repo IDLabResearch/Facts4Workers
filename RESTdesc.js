@@ -69,8 +69,6 @@ RESTdesc.prototype.fillInBlanks = function (map, json, callback)
     {
         if (!val)
             return this.cache.close(callback); // no data (yet)
-        // TODO: how to know which API calls to delete and which to replace blank nodes in?
-        // TODO: pop the last jsonld from the cache, extract the relevent validCall thingy, push that as a new jsonld and then push the original jsonld again (without that validCall) if there are still calls left
         var jsonld = JSON.parse(val);
         var call = this._extractValidCall(jsonld, json);
         call = this._replaceJSONLDblanks(call, map);
@@ -100,11 +98,12 @@ RESTdesc.prototype._extractValidCall = function (jsonld, json)
         var call = calls[i][this.prefix + 'validCall'];
         // find the element in the array corresponding the the API call
         // TODO: some duplication with JSONLD to JSON code
-        if (_.isArray(call))
-            call = _.filter(json, 'http:methodName')[0];
         call = this._JSONLDtoJSON(call);
+        if (_.isArray(call))
+            call = _.filter(call, 'http:methodName')[0];
         // we always provide an empty body in the json, even if there is none in the jsonld, to keep things consistent for the end-user
-        if (call['http:requestURI'] === uri && _.isEqual(call['http:body'] || {}, body))
+        // TODO: another exception due to asktheworker, not clean ...
+        if ((call['http:requestURI'] === uri || call['http:requestURI'] === ('http://askTheWorker/' + uri))&& _.isEqual(call['http:body'] || {}, body))
             break;
     }
     if (i >= calls.length)
@@ -225,21 +224,16 @@ RESTdesc.prototype._handleNext = function (next, callback)
         return _.assign(template, thingy);
     });
 
+    // TODO: what if one call is a real API call and another one is a user call?
     // TODO: currently only taking 1 API, still need to do parallellization
     if (json.length > 1)
         this.calls = json.slice(1);
     json = json.length === 0 ? {} : json[0];
 
     if (!json || !json['http:requestURI'])
-    {
         callback({ status: 'DONE' });
-    }
     else
-    {
-        jsonld = this._skolemizeJSONLD(jsonld);
-        this.cache.push(JSON.stringify(jsonld));
-        callback(json);
-    }
+        this.cache.push(JSON.stringify(jsonld), function () { callback(json); });
 };
 
 RESTdesc.prototype._JSONLDtoJSON = function (jsonld)
