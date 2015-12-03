@@ -41,14 +41,13 @@ ValidCall.prototype.asN3 = function ()
     return parser.parse(this.jsonld, this.baseURI);
 };
 
-ValidCall.prototype.getURL = function () { return this.asJSON()['http:requestURI']; };
-ValidCall.prototype.getMethod = function () { return this.asJSON()['http:methodName']; };
-ValidCall.prototype.getBody = function () { return this.asJSON()['http:body']; };
+ValidCall.prototype.getURL      = function () { return this.asJSON()['http:requestURI']; };
+ValidCall.prototype.getMethod   = function () { return this.asJSON()['http:methodName']; };
+ValidCall.prototype.getBody     = function () { return this.asJSON()['http:body']; };
 ValidCall.prototype.getResponse = function () { return this.asJSON()['http:resp']['http:body']['contains'] || this.asJSON()['http:resp']['http:body']; };
 
 ValidCall.prototype.call = function (callback)
 {
-    var json = this.asJSON();
     var requestParams = {
         url: this.getURL(),
         method: this.getMethod()

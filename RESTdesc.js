@@ -112,7 +112,9 @@ RESTdesc.prototype._handleNext = function (next, callback)
     if (calls.length === 0)
         return callback({ status: 'DONE' });
 
-    // TODO: what if there are multiple askTheWorker calls, or mixed in with other calls? (that one's easier) (best would be to call normal APIs while waiting for user, can be dangerous)
+    // TODO: what if there are multiple askTheWorker calls, or mixed in with other calls? (that one's easier)
+    // TODO: (best would be to call normal APIs while waiting for user, can be dangerous)
+    // TODO: just send the entire N3 string to the user instead?
 
     calls = _.groupBy(calls, function (call)
     {
