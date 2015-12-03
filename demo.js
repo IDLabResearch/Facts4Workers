@@ -33,6 +33,14 @@ app.use(bodyParser.urlencoded({   // to support URL-encoded bodies
     extended: true
 }));
 
+// only accept these content types (http://stackoverflow.com/questions/23190659/expressjs-limit-acceptable-content-types)
+var RE_CONTYPE = /^application\/(?:x-www-form-urlencoded|json)(?:[\s;]|$)/i;
+app.use(function(req, res, next) {
+    if (req.method === 'POST' && !RE_CONTYPE.test(req.headers['content-type']))
+        return res.status(406).send('Only accepting JSON and URL-encoded bodies.');
+    next();
+});
+
 // allow acces to documentation pdf
 app.use('/demo/documentation', express.static(relative('documentation')));
 
@@ -145,72 +153,13 @@ function next (req, res)
     var cacheKey = null;
     var map = null;
     if (req.body.eye)
-    {
-        if (req.body.json)
-        {
-            try
-            {
-                map = mapInput(req.body.json, req.body.eye);
-            }
-            catch (e)
-            {
-                return res.status(400).json({ error: e});
-            }
-        }
         cacheKey = req.body.eye.data;
-    }
     var rest = new RESTdesc(input, goal, cacheKey);
-    rest.fillInBlanks(map, req.body.eye || {}, function () { handleNext(rest, req, res); });
+    rest.fillInBlanks(req.body.json || {}, req.body.eye || {}, function () { handleNext(rest, req, res); });
 }
 
-function mapInput (json, eye)
+function handleNext (rest, req, res, count)
 {
-    if (!eye['http:resp'] || !eye['http:resp']['http:body'])
-        throw "Response body not found.";
-
-    var map = {};
-    var body = eye['http:resp']['http:body']['contains'] || eye['http:resp']['http:body']; // skip 'contains' if it is present
-    mapInputRecurisve(json, body, map);
-
-    return map;
-}
-
-function mapInputRecurisve (json, response, map)
-{
-    if (_.isString(response))
-        map[response] = json;
-    else if (_.isArray(response))
-    {
-        if (!_.isArray(json) || json.length !== response.length)
-            throw 'Expecting array of length ' + response.length + ', got ' + JSON.stringify(json) + ' instead.';
-
-        for (var i = 0; i < response.length; ++i)
-            mapInputRecurisve(json[i], response[i], map);
-    }
-    else
-    {
-        if (!_.isObject(json))
-            throw "JSON not mapping to expected response!\nJSON: " + json + "\nMAPPING: " + JSON.stringify(response);
-        for (var key in response)
-        {
-            if (json[key] === undefined)
-            {
-                // TODO: hardcoded for demo
-                if (key === 'computer')
-                {
-                    mapInputRecurisve(0, response[key], map);
-                    continue;
-                }
-                throw "Missing JSON input key: " + key;
-            }
-            mapInputRecurisve(json[key], response[key], map);
-        }
-    }
-}
-
-function handleNext (rest, req, res, output, count)
-{
-    output = output || "";
     count = count || 0;
 
     // TODO this is simply a check to make sure there is a problem in the demo causing us to accidently DOS an API.
@@ -222,18 +171,8 @@ function handleNext (rest, req, res, output, count)
         var url = data['http:requestURI'];
         var body = data['http:body'];
 
-        output += 'Reasoner result: \n';
-        output += JSON.stringify(data, null, 4);
-        output += '\n';
-
         // give cacheKey to user so they can send it back in the next step
         data.data = rest.cacheKey;
-
-        if (req.body && req.body.output)
-        {
-            data.output = output;
-            data.proofs = rest.proofs;
-        }
 
         if (data.status === 'DONE')
             res.format({json:function () { res.send(data); }});
@@ -247,57 +186,7 @@ function handleNext (rest, req, res, output, count)
         }
         else
         {
-            var requestParams = {
-                url: url,
-                method: data['http:methodName']
-            };
-
-            if (body)
-                requestParams.json = body;
-
-            output += 'Calling: ' + url + '\n';
-            // do call ourselves
-            request(requestParams,
-                function (error, response, body)
-                {
-                    // TODO: error handling
-                    if (!error && response.statusCode < 400)
-                    {
-                        var json = body;
-                        if (_.isString(body))
-                            json = JSON.parse(body);
-
-                        output += 'Response: \n';
-                        output += JSON.stringify(json, null, 4);
-                        output += '\n';
-
-                        try
-                        {
-                            var map = mapInput(json, data);
-                        }
-                        catch (e)
-                        {
-                            return res.status(400).json({ error: e});
-                        }
-                        rest.fillInBlanks(map, data, function () { handleNext(rest, req, res, output, count+1); });
-                    }
-                    else
-                    {
-                        /* TODO: what to do when there is an error? pop last cache entry? prevent API from being called with same data? delete API description (how?)?
-                         *       check if we can find another solution without the API? let the user that calls RESTdesc decide?
-                         */
-                        console.error(error, body);
-
-                        output += 'ERROR!\n';
-                        output += response.statusCode + ' ' + error;
-                        if (req.body && req.body.output)
-                            data.output = output;
-
-                        data.error = { statusCode: response.statusCode, error: error, body: body };
-                        res.format({ json: function () { res.send(data); } });
-                    }
-                }
-            );
+            throw "Normal API calls shouldn't reach this point anymore";
         }
     });
 }
