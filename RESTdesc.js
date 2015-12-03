@@ -58,11 +58,8 @@ RESTdesc.prototype.back = function (callback, _recursive)
     }.bind(this));
 };
 
-// TODO: we can cache the cache in a list ...
-// keys of map are blank nodes, values are their replacements
-RESTdesc.prototype.fillInBlanks = function (response, json, callback)
+RESTdesc.prototype.handleUserResponse = function (response, json, callback)
 {
-    // TODO: should delete this function eventually
     this.cache.open();
     this.cache.pop(function (err, val)
     {
@@ -87,10 +84,6 @@ RESTdesc.prototype.next = function (callback)
 
     this.cache.list(function (err, data)
     {
-        // TODO: how big of a performance hit is it to always convert the jsonld?
-        //var parser = new JSONLDParser();
-        //data = data.map(function (str) { return parser.parse(JSON.parse(str), this.prefix); }.bind(this));
-        // create new eye handler every time so we know when to call destroy function
         this.eye = new EYEHandler();
         this.eye.call(this.dataPaths, data, this.goalPath, true, true, function (proof) { this._handleProof(proof, callback); }.bind(this), this._error);
     }.bind(this));
@@ -98,7 +91,6 @@ RESTdesc.prototype.next = function (callback)
 
 RESTdesc.prototype._handleProof = function (proof, callback)
 {
-    // TODO: singleAnswer true to prevent problems atm, should be changed for parallelization
     this.eye.call([this.list], [proof], this.findPath, false, false, function (body) { this._handleNext(body, callback); }.bind(this), this._error);
 };
 
@@ -140,8 +132,6 @@ RESTdesc.prototype._handleNext = function (next, callback)
             cache.push(this.asN3(), delay);
         }.bind(call));
     }
-
-    // this.cache.push(JSON.stringify(step.jsonld), function () { callback(json); });
 };
 
 RESTdesc.prototype._error = function (error, content)
@@ -150,11 +140,3 @@ RESTdesc.prototype._error = function (error, content)
 };
 
 module.exports = RESTdesc;
-
-//var jsonld = {"@context":{"log":"http://www.w3.org/2000/10/swap/log#","rdf":"http://www.w3.org/1999/02/22-rdf-syntax-ns#","rdfs":"http://www.w3.org/2000/01/rdf-schema#","owl":"http://www.w3.org/2002/07/owl#","list":"http://www.w3.org/2000/10/swap/list#","e":"http://eulersharp.sourceforge.net/2003/03swap/log-rules#","r":"http://www.w3.org/2000/10/swap/reason#","tmpl":"http://purl.org/restdesc/http-template#","http":"http://www.w3.org/2011/http#","out":"http://f4w.restdesc.org/demo/.well-known/genid/f3ed8675-47ce-42f1-ac89-9082b146b6db#","math":"http://www.w3.org/2000/10/swap/math#","string":"http://www.w3.org/2000/10/swap/string#"},"@graph":[{"@id":"_:sk84_1","http:methodName":"GET","tmpl:requestURI":{"@list":["http://mstate.tho.f4w.l0g.in/api/machines/",1,"/last_event"]},"http:resp":{"@id":"_:sk85_1","http:body":{"@id":"_:sk86_1","http://f4w.restdesc.org/demo#contains":{"@graph":[{"@id":"_:sk87_1","http://f4w.restdesc.org/demo#id":{"@id":"_:sk88_1"},"http://f4w.restdesc.org/demo#optional":{"@id":"_:sk89_1"}}]}}}},{"@id":"http://f4w.restdesc.org/demo#2a915060-abb7-48bc-86d7-425611f98a31","http://f4w.restdesc.org/demo#event":{"@id":"_:sk90_1","http://f4w.restdesc.org/demo#id":{"@id":"_:sk88_1"},"http://f4w.restdesc.org/demo#optional":{"@id":"_:sk89_1"}}}]};
-//var rest = new RESTdesc(null, null, 0);
-//var result = rest._replaceJSONLDblanks(jsonld, { '_:sk88_1': 178, '_:sk89_1': null });
-//console.log(JSON.stringify(result, null, 2));
-//var parser = new JSONLDParser(2);
-//var n3 = parser.parse(result, rest.prefix);
-//console.log(n3);

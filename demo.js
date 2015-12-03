@@ -11,7 +11,7 @@ var args = require('minimist')(process.argv.slice(2));
 if (!args.p || args.h || args.help)
 {
     console.error('usage: node demo.js [-p port] [--help]');
-    return process.exit(1);
+    return process.exit((args.h || args.help) ? 0 : 1);
 }
 var port = args.p;
 
@@ -139,7 +139,6 @@ app.post('/eye', function (req, res)
     handleNext(rest, req, res);
 });
 
-app.post('/demo/next', next); // TODO:kept for backwards compatability, should remove this at some point
 app.post('/next', next);
 function next (req, res)
 {
@@ -155,7 +154,7 @@ function next (req, res)
     if (req.body.eye)
         cacheKey = req.body.eye.data;
     var rest = new RESTdesc(input, goal, cacheKey);
-    rest.fillInBlanks(req.body.json || {}, req.body.eye || {}, function () { handleNext(rest, req, res); });
+    rest.handleUserResponse(req.body.json || {}, req.body.eye || {}, function () { handleNext(rest, req, res); });
 }
 
 function handleNext (rest, req, res, count)
