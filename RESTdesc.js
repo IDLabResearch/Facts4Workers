@@ -114,21 +114,40 @@ RESTdesc.prototype._handleNext = function (next, callback)
 
     // TODO: what if there are multiple askTheWorker calls, or mixed in with other calls? (that one's easier) (best would be to call normal APIs while waiting for user, can be dangerous)
 
-    if (calls.length === 1 && _.startsWith(calls[0].getURL(), 'http://askTheWorker/'))
+    calls = _.groupBy(calls, function (call)
     {
-        this.cache.push(calls[0].asN3());
-        return callback(calls[0].asJSON());
+        if (_.startsWith(call.getURL(), 'http://askTheWorker/'))
+            return 'user';
+        return 'api';
+    });
+
+    calls.user = calls.user || [];
+    calls.api = calls.api || [];
+
+    if (calls.user.length > 1)
+        throw 'Multiple parallel user calls not supported yet.';
+
+    if (calls.user.length > 0 && calls.api.length === 0)
+    {
+        this.cache.push(calls.user[0].asN3());
+        return callback(calls.user[0].asJSON());
     }
 
-    var delay = _.after(calls.length, function ()
+    var delay = _.after(calls.api.length, function ()
     {
-        this.next(callback);
+        if (calls.user.length > 0)
+        {
+            this.cache.push(calls.user[0].asN3());
+            callback(calls.user[0].asJSON());
+        }
+        else
+            this.next(callback);
     }.bind(this));
 
     var cache = this.cache;
-    for (var i = 0; i < calls.length; ++i)
+    for (var i = 0; i < calls.api.length; ++i)
     {
-        var call = calls[i];
+        var call = calls.api[i];
         call.call(function (response)
         {
             this.handleResponse(response);
