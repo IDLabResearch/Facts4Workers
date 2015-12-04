@@ -3,14 +3,11 @@
  */
 
 var _ = require('lodash');
-var fs = require('fs');
 var EYEHandler = require('./EYEHandler');
-var N3Parser = require('./N3Parser');
-var JSONLDParser = require('./JSONLDParser');
 var uuid = require('node-uuid');
 var Cache = require('./Cache');
 var path = require('path');
-var ValidCall = require('./ValidCall');
+var Util = require('./Util');
 
 function RESTdesc (dataPaths, goalPath, cacheKey)
 {
@@ -68,9 +65,7 @@ RESTdesc.prototype.handleUserResponse = function (response, json, callback)
     {
         if (!val)
             return this.cache.close(callback); // no data (yet)
-        var parser = new N3Parser(val);
-        var jsonld = parser.parse(val);
-        var call = new ValidCall(jsonld, this.prefix);
+        var call = Util.N3ToValidCall(val);
         call.handleResponse(response);
         this.cache.push(
             call.asN3(),
@@ -99,15 +94,7 @@ RESTdesc.prototype._handleProof = function (proof, callback)
 
 RESTdesc.prototype._handleNext = function (next, callback)
 {
-    var n3Parser = new N3Parser();
-    var jsonld = n3Parser.parse(next);
-    // TODO: validCall might be in its own ontology eventually
-    var calls;
-    if (jsonld[this.prefix + 'validCall'])
-        calls = [jsonld[this.prefix + 'validCall']];
-    else
-        calls = _.map(jsonld['@graph'], function (validCall) { return validCall[this.prefix + 'validCall']; }.bind(this));
-    calls = _.map(calls, function (call) { call['@context'] = jsonld['@context']; return new ValidCall(call, this.prefix); }.bind(this));
+    var calls = Util.N3toValidCalls(next);
 
     if (calls.length === 0)
         return callback({ status: 'DONE' });
