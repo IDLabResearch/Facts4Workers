@@ -7,7 +7,7 @@ var EYEHandler = require('./EYEHandler');
 var uuid = require('node-uuid');
 var Cache = require('./Cache');
 var path = require('path');
-var Util = require('./Util');
+var ValidCallGenerator = require('./ValidCallGenerator');
 
 function RESTdesc (dataPaths, goalPath, cacheKey)
 {
@@ -65,7 +65,7 @@ RESTdesc.prototype.handleUserResponse = function (response, json, callback)
     {
         if (!val)
             return this.cache.close(callback); // no data (yet)
-        var call = Util.N3ToValidCall(val, this.baseURI);
+        var call = ValidCallGenerator.N3ToValidCall(val, this.baseURI);
         call.handleResponse(response);
         this.cache.push(
             call.asN3(),
@@ -94,7 +94,7 @@ RESTdesc.prototype._handleProof = function (proof, callback)
 
 RESTdesc.prototype._handleNext = function (next, callback)
 {
-    var calls = Util.N3toValidCalls(next, this.baseURI);
+    var calls = ValidCallGenerator.N3toValidCalls(next, this.baseURI);
 
     if (calls.length === 0)
         return callback({ status: 'DONE' });

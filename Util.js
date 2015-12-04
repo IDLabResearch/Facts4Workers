@@ -4,8 +4,6 @@
 
 var _ = require('lodash');
 var uuid = require('node-uuid');
-var N3Parser = require('./N3Parser');
-var ValidCall = require('./ValidCall');
 
 // TODO: tbh, these are mostly functions of which I don't know where to put them yet
 function Util() {}
@@ -18,29 +16,6 @@ Util.isLiteral = function (thingy)
 Util.isNonStringLiteral = function (thingy)
 {
     return Util.isLiteral(thingy) && !_.isString(thingy);
-};
-
-Util.N3toValidCalls = function (n3, baseURI)
-{
-    var parser = new N3Parser();
-    var jsonld = parser.parse(next);
-    // TODO: validCall might be in its own ontology eventually
-    var calls;
-    if (jsonld[baseURI + 'validCall'])
-        calls = [jsonld[baseURI + 'validCall']];
-    else
-        calls = _.map(jsonld['@graph'], function (validCall) { return validCall[baseURI + 'validCall']; }.bind(this));
-    calls = _.map(calls, function (call) { call['@context'] = jsonld['@context']; return new ValidCall(call, baseURI); }.bind(this));
-
-    return calls;
-};
-
-// TODO: might need more generic function that can determine what is needed
-Util.N3ToValidCall = function (n3, baseURI)
-{
-    var parser = new N3Parser(n3);
-    var jsonld = parser.parse(n3);
-    return new ValidCall(jsonld, baseURI);
 };
 
 Util.mapJSON = function (json, template, map)
