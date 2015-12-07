@@ -43,7 +43,15 @@ Util.mapJSON = function (json, template, map)
     for (var key in template)
     {
         if (!(key in json))
+        {
+            // TODO: workaround for demo
+            if (key === 'computer')
+            {
+                Util.mapJSON(0, template[key], map);
+                continue;
+            }
             throw 'Key ' + key + ' missing in ' + JSON.stringify(json);
+        }
 
         Util.mapJSON(json[key], template[key], map);
     }
