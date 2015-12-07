@@ -38,7 +38,7 @@ ValidCall.prototype.asJSONLD = function ()
 ValidCall.prototype.asN3 = function ()
 {
     var parser = new JSONLDParser();
-    return parser.parse(this.jsonld, this.baseURI);
+    return parser.toN3(this.jsonld, this.baseURI);
 };
 
 ValidCall.prototype.getURL      = function () { return this.asJSON()['http:requestURI']; };
@@ -62,14 +62,9 @@ ValidCall.prototype.call = function (callback)
         {
             // TODO: error handling
             if (!error && response.statusCode < 400)
-            {
-                // handle response
                 callback(body);
-            }
             else
-            {
                 throw error;
-            }
         }
     );
 };
@@ -79,7 +74,7 @@ ValidCall.prototype.handleResponse = function (response)
     var map = {};
     Util.mapJSON(response === undefined ? {} : response, this.getResponse(), map);
     this.jsonld = Util.replaceJSONLDblanks(this.jsonld, map, this.baseURI);
-    this.jsonld = Util.skolemizeJSONLD(this.jsonld, this.baseURI, {}); // TODO: try to remember why skolemizeJSONLD acts differently if you give it a blankmap
+    this.jsonld = Util.skolemizeJSONLD(this.jsonld, this.baseURI, {});
     this.json = undefined; // need to unset JSON since JSONLD changed
 };
 

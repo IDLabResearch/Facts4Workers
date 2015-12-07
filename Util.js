@@ -186,6 +186,8 @@ Util._replaceJSONLDblanksRecursive = function (jsonld, map)
     return result;
 };
 
+// will add blank node for nodes that don't have an id yet
+// if blankMap is given, will also replace all existing blank node names with skolemized versions
 Util.skolemizeJSONLD = function (jsonld, baseURI, blankMap, parentKey)
 {
     if (Util.isNonStringLiteral(jsonld))

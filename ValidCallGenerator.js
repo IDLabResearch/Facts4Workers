@@ -13,7 +13,7 @@ function ValidCallGenerator() {}
 ValidCallGenerator.N3toValidCalls = function (n3, baseURI)
 {
     var parser = new N3Parser();
-    var jsonld = parser.parse(n3);
+    var jsonld = parser.toJSONLD(n3);
     // TODO: validCall might be in its own ontology eventually
     var calls;
     if (jsonld[baseURI + 'validCall'])
@@ -33,7 +33,7 @@ ValidCallGenerator.N3toValidCalls = function (n3, baseURI)
 ValidCallGenerator.N3ToValidCall = function (n3, baseURI)
 {
     var parser = new N3Parser(n3);
-    var jsonld = parser.parse(n3);
+    var jsonld = parser.toJSONLD(n3);
     return new ValidCall(jsonld, baseURI);
 };
 
