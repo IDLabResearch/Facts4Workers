@@ -117,17 +117,13 @@ RESTdesc.prototype._handleNext = function (next, callback)
         throw 'Multiple parallel user calls not supported yet.';
 
     if (calls.user.length > 0 && calls.api.length === 0)
-    {
-        this.cache.push(calls.user[0].toN3());
-        return callback(calls.user[0].toJSON());
-    }
+        return this.cache.push(calls.user[0].toN3(), function () { callback(calls.user[0].toJSON()); });
 
     var delay = _.after(calls.api.length, function ()
     {
         if (calls.user.length > 0)
         {
-            this.cache.push(calls.user[0].toN3());
-            callback(calls.user[0].toJSON());
+            this.cache.push(calls.user[0].toN3(), function () { callback(calls.user[0].toJSON()); });
         }
         else
             this.next(callback);
