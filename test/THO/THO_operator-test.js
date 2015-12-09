@@ -8,13 +8,11 @@ var stubs = require('./THO_operator-stubs');
 
 ValidCall.prototype.call = function (callback)
 {
-    var error = null;
-    var response = { statusCode: 200 };
     var url = this.getURL();
     if (!(url in stubs))
         throw 'Unsupported URL stub: ' + url;
-    var body = stubs[url]();
-    callback(body);
+    var result = stubs[url](this.getBody());
+    callback(result);
 };
 
 var RESTdesc = proxyquire('../../RESTdesc', { 'ValidCall': ValidCall});
@@ -78,6 +76,19 @@ describe('THO operator use case', function ()
             assert.deepEqual(Object.keys(contains), ['id']);
             result.data = rest.cacheKey;
             rest.handleUserResponse({ "id": 1 }, result, done);
+        });
+    });
+
+    it ('asks for a solution ID', function (done)
+    {
+        var rest = new RESTdesc([relative('n3/thermolympics_operator_new/api.n3')], relative('n3/thermolympics_operator_new/goal.n3'), key);
+        rest.next(function (result)
+        {
+            assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getSolutionID');
+            var contains = result['http:resp']['http:body']['contains'];
+            assert.deepEqual(Object.keys(contains), ['id']);
+            result.data = rest.cacheKey;
+            rest.handleUserResponse({ "id": 3 }, result, done);
         });
     });
 
