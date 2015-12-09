@@ -68,7 +68,7 @@ RESTdesc.prototype.handleUserResponse = function (response, json, callback)
         var call = ValidCallGenerator.N3ToValidCall(val, this.baseURI);
         call.handleResponse(response);
         this.cache.push(
-            call.asN3(),
+            call.toN3(),
             // it's really important to execute the callback after the push is finished or there is a race condition
             function () { this.cache.close(callback); }.bind(this)
         );
@@ -118,16 +118,16 @@ RESTdesc.prototype._handleNext = function (next, callback)
 
     if (calls.user.length > 0 && calls.api.length === 0)
     {
-        this.cache.push(calls.user[0].asN3());
-        return callback(calls.user[0].asJSON());
+        this.cache.push(calls.user[0].toN3());
+        return callback(calls.user[0].toJSON());
     }
 
     var delay = _.after(calls.api.length, function ()
     {
         if (calls.user.length > 0)
         {
-            this.cache.push(calls.user[0].asN3());
-            callback(calls.user[0].asJSON());
+            this.cache.push(calls.user[0].toN3());
+            callback(calls.user[0].toJSON());
         }
         else
             this.next(callback);
@@ -140,7 +140,7 @@ RESTdesc.prototype._handleNext = function (next, callback)
         call.call(function (response)
         {
             this.handleResponse(response);
-            cache.push(this.asN3(), delay);
+            cache.push(this.toN3(), delay);
         }.bind(call));
     }
 };

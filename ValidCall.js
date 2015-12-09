@@ -15,7 +15,7 @@ function ValidCall(jsonld, baseURI)
 }
 
 // apparently 'toJSON' gets used by JSON.stringify
-ValidCall.prototype.asJSON = function ()
+ValidCall.prototype.toJSON = function ()
 {
     if (this.json)
         return this.json;
@@ -30,21 +30,21 @@ ValidCall.prototype.asJSON = function ()
     return this.json;
 };
 
-ValidCall.prototype.asJSONLD = function ()
+ValidCall.prototype.toJSONLD = function ()
 {
     return this.jsonld;
 };
 
-ValidCall.prototype.asN3 = function ()
+ValidCall.prototype.toN3 = function ()
 {
     var parser = new JSONLDParser();
     return parser.toN3(this.jsonld, this.baseURI);
 };
 
-ValidCall.prototype.getURL      = function () { return this.asJSON()['http:requestURI']; };
-ValidCall.prototype.getMethod   = function () { return this.asJSON()['http:methodName']; };
-ValidCall.prototype.getBody     = function () { return this.asJSON()['http:body']; };
-ValidCall.prototype.getResponse = function () { return this.asJSON()['http:resp']['http:body']['contains'] || this.asJSON()['http:resp']['http:body']; };
+ValidCall.prototype.getURL      = function () { return this.toJSON()['http:requestURI']; };
+ValidCall.prototype.getMethod   = function () { return this.toJSON()['http:methodName']; };
+ValidCall.prototype.getBody     = function () { return this.toJSON()['http:body']; };
+ValidCall.prototype.getResponse = function () { return this.toJSON()['http:resp']['http:body']['contains'] || this.toJSON()['http:resp']['http:body']; };
 
 ValidCall.prototype.call = function (callback)
 {
