@@ -9,7 +9,7 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX r: <http://www.w3.org/2000/10/swap/reason#>
 PREFIX tmpl: <http://purl.org/restdesc/http-template#>
 PREFIX http: <http://www.w3.org/2011/http#>
-
+PREFIX prolog: <http://eulersharp.sourceforge.net/2003/03swap/prolog#>
 
 
 
@@ -59,7 +59,7 @@ _:r222 e:findall (?ooo2 {?oo2 log:includes {?sss2 ?ppp2 ?ooo2}. } ?oos2).
 
 #no list, no problem!
 {?a :testList ?p.} <= {
-?a log:rawType ?p. ?p log:notEqualTo rdf:List. 
+?a log:rawType ?p. ?p log:notEqualTo rdf:List. () prolog:cut true.
 }.
 
 
@@ -67,7 +67,7 @@ _:r222 e:findall (?ooo2 {?oo2 log:includes {?sss2 ?ppp2 ?ooo2}. } ?oos2).
 {?a :testList ?p.}<={
 ?a log:rawType ?p. ?p log:equalTo rdf:List.
 #is the list ground?
-?a :groundlist ?l2
+?a :groundlist ?l2. () prolog:cut true
 }.
 
 
@@ -98,15 +98,17 @@ _:r e:findall ( ?o {?body log:includes {?s ?p ?o}} ?os).
 {?l1 :groundlist ?l2}<={(() ?l2) :transpair ?l1}.
 
 
-#{?s :ground ?s1}<={?s e:label ?s1}.
-{?s :ground ?s}<={?s log:rawType ?types. ?types log:notEqualTo rdf:List. ?types log:notEqualTo log:Formula.  ?s e:notLabel ?l1}.
-{?s :ground ?s1.}<={?s log:rawType ?types. ?types log:equalTo rdf:List. ?s :groundlist ?s1.}.
-{?s :ground ?s3.}<={?s log:rawType ?types. ?types log:equalTo log:Formula. ?s e:graphList ?s2.  ?s2 list:rest ?rest. ?rest log:notEqualTo ().  ?s2 :groundlist ?s3}.
-{?s :ground ?s3.}<={?s log:rawType ?types. ?types log:equalTo log:Formula. ?s e:tripleList ?s2. ?s2 :groundlist ?s3}.
+
+{?s :ground ?s}<={  ?s log:rawType ?types. ?types log:notEqualTo rdf:List. ?types log:notEqualTo log:Formula. ?s e:notLabel ?l1. () prolog:cut true}.
+{?s :ground ?s1.}<={?s log:rawType ?types. ?types log:equalTo rdf:List. ?s :groundlist ?s1.  () prolog:cut true}.
+{?s :ground ?s3.}<={?s log:rawType ?types. ?types log:equalTo log:Formula. ?s e:graphList ?s2.  ?s2 list:rest ?rest. ?rest log:notEqualTo ().  ?s2 :groundlist ?s3. () prolog:cut true}.
+{?s :ground ?s3.}<={?s log:rawType ?types. ?types log:equalTo log:Formula. ?s e:tripleList ?s2. ?s2 :groundlist ?s3. () prolog:cut true}.
 
 {(?p ()) :transpair ?p. ?p1 list:in ?p. ?p1 log:rawType ?typep. ?typep log:equalTo rdf:List. } => {(?p1 ()) :transpair ?p1.}.
 {(?p ()) :transpair ?p. ?p1 list:in ?p. ?p1 log:rawType ?typep. ?typep log:equalTo log:Formula. ?p1 e:graphList ?p2. } => {(?p2 ()) :transpair ?p2.}.
 {(?p ()) :transpair ?p. ?p1 list:in ?p. ?p1 log:rawType ?typep. ?typep log:equalTo log:Formula. ?p1 e:tripleList ?p2. } => {(?p2 ()) :transpair ?p2.}.
+
+
 
 #################################################
 # Here I start something new: I want to have all elements in the body of a call
@@ -127,18 +129,19 @@ _:r e:findall ( ?o {?body log:includes {?s ?p ?o}} ?os).
 ###################################################################################
 
 
-{?y :checked :ok.}<={?xx r:gives ?y. ?y log:notIncludes {?x :check ?z}}.
+{?y :checked :ok.}<={?xx r:gives ?y. ?y log:notIncludes {?x :check ?z}. () prolog:cut true}.
 
-{?y :checked :ok.}<={?xx r:gives ?y. ?y log:includes {?x :check ?z}. ?z e:notLabel ?zz. ?z log:rawType ?type. ?type log:notEqualTo   rdf:List
+{?y :checked :ok.}<={?xx r:gives ?y. ?y log:includes {?x :check ?z}. ?z e:notLabel ?zz. ?z log:rawType ?type. ?type log:notEqualTo   rdf:List. () prolog:cut true
 }.
 
-{?y :checked :ok.}<={?xx r:gives ?y. ?y log:includes {?x :check ?z}. ?z log:rawType ?type. ?type log:equalTo   rdf:List. ?z :testList ?z2.}.#
-#{?y :checked ?type.}<={?y log:includes {?x :check ?z}. ?z e:notLabel ?zz. ?z log:rawType ?type. ?type log:notEqualTo   log:List}.
+{?y :checked :ok.}<={?xx r:gives ?y. ?y log:includes {?x :check ?z}. ?z log:rawType ?type. ?type log:equalTo   rdf:List. ?z :testList ?z2. () prolog:cut true}.#
 
 
 {?f r:gives ?y. ?y log:includes {?x :check ?z}. ?z log:rawType rdf:List.}=>{(?z ()) :transpair ?z.}.
 
 
+{  ?x r:gives ?y. 
 
+  ?y :checked :ok.} => { ?y a :Candidate}.
 
 
