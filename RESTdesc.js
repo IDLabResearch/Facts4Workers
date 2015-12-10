@@ -44,9 +44,6 @@ RESTdesc.prototype.back = function (callback, _recursive)
 
     this.cache.pop(function (err, val)
     {
-        if (!_recursive)
-            return this.back(callback, true);
-
         // if val is null the list is empty
         if (!val || _.contains(val, 'askTheWorker'))
             return this.cache.close(callback);

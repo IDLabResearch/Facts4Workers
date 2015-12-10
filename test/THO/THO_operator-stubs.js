@@ -2,13 +2,19 @@
  * Created by joachimvh on 9/12/2015.
  */
 
+var assert = require('assert');
+var _ = require('lodash');
+
 var stubs = {
     'http://mstate.tho.f4w.l0g.in/api/machines': machines,
     'http://skillp.tho.f4w.l0g.in/api/operator_skills/': operators,
-    'http://skillp.tho.f4w.l0g.in/api/operator_skills/3': operator3,
+    'http://skillp.tho.f4w.l0g.in/api/operator_skills/2': operator2,
     'http://defects.tho.f4w.l0g.in/api/defects?part_id=1': defects1,
-    'http://defects.tho.f4w.l0g.in/api/solutions?defect_id=1': solution1,
-    'http://mstate.tho.f4w.l0g.in/api/machines/1/events': postEvent1
+    'http://defects.tho.f4w.l0g.in/api/solutions?defect_id=1': solutions1,
+    'http://mstate.tho.f4w.l0g.in/api/machines/1/events': postEvent1,
+    'http://defects.tho.f4w.l0g.in/api/solutions/1': solution1,
+    'http://defects.tho.f4w.l0g.in/api/solutions/3': solution3,
+    'http://defects.tho.f4w.l0g.in/api/reports': postReport
 };
 
 function machines ()
@@ -44,13 +50,13 @@ function operators ()
                  skills: { tool: 3, machine: 3, computer: 3 } } ];
 }
 
-function operator3 ()
+function operator2 ()
 {
-    return { id: 3,
-             name: "Bob Bones",
-             desc: "Oldest operator in town",
-             role: "Operator",
-             skills: { tool: 3, machine: 3, computer: 3 } };
+    return { id: 2,
+               name: 'Abram Abes',
+               desc: 'Jack of all trades, master of none',
+               role: 'Operator',
+               skills: { tool: 1, machine: 2, computer: 1 } };
 }
 
 function defects1 ()
@@ -88,7 +94,7 @@ function defects1 ()
                  created_at: "2015-11-27T16:45:57.115Z" } ];
 }
 
-function solution1 ()
+function solutions1 ()
 {
     return [ { id: 1,
                  name: "replace color feeder",
@@ -112,7 +118,40 @@ function solution1 ()
 
 function postEvent1 (body)
 {
+    var stop = {name:"Stop the machine",desc:"Stoping the machine after a defect was spotted!",machine_state:"4",operator_id:2,optional:{defect_id:1}};
+    var start = {desc:"Starting the machine after a solution was successfully applied!",machine_state: "1",name:"Starting the machine",operator_id:2};
+    var teamleader = {name:"waiting_for_teamleader",desc:"Stoping the machine. Problem has to be fixed by the team leader.",machine_state:"3",operator_id:2,optional:{defect_id:1,stopped_for_defect_event_id:123}};
+    assert(_.some([stop, start, teamleader], function (thingy) { return _.isEqual(body, thingy); }));
     return { id: 123 };
+}
+
+function solution1 ()
+{
+    return { id: 1,
+        name: "replace color feeder",
+        desc: "do this, fix that, clean all",
+        defect_id: 1,
+        comment: "check product expiry date",
+        skill: { tool: 2, machine: 1 } };
+}
+
+function solution3 ()
+{
+    return { id: 3,
+               name: "change die",
+               desc: "do this, fix that, clean all",
+               defect_id: 1,
+               comment: "replace screws",
+               skill: { tool: 1, machine: 2 } };
+}
+
+function postReport (body)
+{
+    assert.strictEqual(body.event_id, 123);
+    assert.strictEqual(body.operator_id, 2);
+    assert.strictEqual(body.solution_id, 3);
+    assert(_.isBoolean(body.success));
+    return {};
 }
 
 module.exports = stubs;
