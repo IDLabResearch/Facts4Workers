@@ -46,11 +46,11 @@ function operators ()
 
 function operator3 ()
 {
-    return { "id": 3,
-             "name": "Bob Bones",
-             "desc": "Oldest operator in town",
-             "role": "Operator",
-             "skills": { "tool": 3, "machine": 3, "computer": 3 } };
+    return { id: 3,
+             name: "Bob Bones",
+             desc: "Oldest operator in town",
+             role: "Operator",
+             skills: { tool: 3, machine: 3, computer: 3 } };
 }
 
 function defects1 ()
