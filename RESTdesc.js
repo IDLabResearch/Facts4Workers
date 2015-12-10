@@ -30,9 +30,9 @@ function RESTdesc (dataPaths, goalPath, cacheKey)
     this.calls = [];
 }
 
-RESTdesc.prototype.clear = function ()
+RESTdesc.prototype.clear = function (callback)
 {
-    this.cache.clear();
+    this.cache.clear(callback);
 };
 
 RESTdesc.prototype.back = function (callback, _recursive)

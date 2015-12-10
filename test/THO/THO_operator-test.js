@@ -25,7 +25,10 @@ function relative (relativePath)
 describe('THO operator use case', function ()
 {
     var key = 'TESTKEY';
-    new RESTdesc([], '', key).clear();
+    before(function (done)
+    {
+        new RESTdesc([], '', key).clear(done);
+    });
 
     it ('asks for an operator ID', function (done)
     {
@@ -92,5 +95,8 @@ describe('THO operator use case', function ()
         });
     });
 
-    after( RESTdesc.prototype.clear.bind(new RESTdesc([], '', key)) );
+    after(function (done)
+    {
+        new RESTdesc([], '', key).clear(done);
+    });
 });

@@ -2,7 +2,8 @@
  * Created by joachimvh on 6/07/2015.
  */
 
-var redis = require("redis");
+var redis = require('redis');
+var _ = require('lodash');
 
 var EXPIRATION = 24 * 60 * 60; // seconds
 
@@ -23,6 +24,8 @@ Cache.prototype.open = function (callback)
         this.client.select(4, callback);
         return true;
     }
+    if (callback)
+        callback();
     return false;
 };
 
@@ -33,6 +36,8 @@ Cache.prototype.close = function (callback)
         this.client.quit(callback);
         this.client = null;
     }
+    else if (callback)
+        callback();
 };
 
 // handles the open/close for a single call if the connection doesn't need to be kept open
@@ -41,24 +46,41 @@ Cache.prototype._handleCall = function (/*f, args*/)
     var close = this.open();
 
     var f = arguments[0];
-    this.client[f].apply(this.client, Array.prototype.slice.call(arguments, 1));
+    var args = Array.prototype.slice.call(arguments, 1);
+    var callback = args.length > 0 ? args[args.length-1] : null;
 
-    if (close)
-        this.close();
+    // update the callback
+    if (!callback || !_.isFunction(callback))
+        args.push(null);
+    args[args.length-1] = function ()
+    {
+        // necessary since we want the return value of this function, not the close function
+        var returnVal = arguments;
+        function returnArgs () { callback.apply(null, returnVal); }
+        close ? this.close(returnArgs) : returnArgs();
+    }.bind(this);
+
+    this.client[f].apply(this.client, args);
 };
 
-Cache.prototype.clear = function ()
+Cache.prototype.clear = function (callback)
 {
-    this._handleCall('del', this.key);
+    this._handleCall('del', this.key, callback);
 };
 
 Cache.prototype.push = function (val, callback)
 {
     var close = this.open();
-    this._handleCall('lpush', this.key, val);
-    this._handleCall('expire', this.key, EXPIRATION, callback); // reset expiration value if new data is added
-    if (close)
-        this.close();
+    this._handleCall('lpush', this.key, val,
+        function ()
+        {
+            // reset expiration value if new data is added
+            this._handleCall('expire', this.key, EXPIRATION,
+                function ()
+                {
+                    close ? this.close(callback) : callback.call();
+                }.bind(this));
+        }.bind(this));
 };
 
 Cache.prototype.pop = function (callback)
