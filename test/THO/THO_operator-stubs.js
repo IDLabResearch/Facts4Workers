@@ -55,12 +55,59 @@ function operator3 ()
 
 function defects1 ()
 {
-    return [{"id":1,"name":"Bad color","desc":"Color of the product has not the correct RAL value","part_id":"1","media_url":"http://machinesandparts.surge.sh/part1/part1_bad_color.jpg","comment":"Consider the color only of the lower vertex","taxonomy":null,"created_at":"2015-11-27T16:45:57.076Z"},{"id":2,"name":"Craked","desc":"The product present a large crack","part_id":"1","media_url":"http://machinesandparts.surge.sh/part1/part1_craked.jpg","comment":"Crack is critical only when dimension is larger than 2 mm2","taxonomy":null,"created_at":"2015-11-27T16:45:57.090Z"},{"id":3,"name":"Hole","desc":"Hole on the border of the product","part_id":"1","media_url":"http://machinesandparts.surge.sh/part1/part1_hole.jpg","comment":"The product has a hole on the side, critical when wider than 1 mm","taxonomy":null,"created_at":"2015-11-27T16:45:57.101Z"},{"id":4,"name":"Missing part","desc":"A part of the product is missing","part_id":"1","media_url":"http://machinesandparts.surge.sh/part1/part1_missing_part.jpg","comment":"Note the number of the figure of the die","taxonomy":null,"created_at":"2015-11-27T16:45:57.115Z"}];
+    return [ { id: 1,
+                 name: "Bad color",
+                 desc: "Color of the product has not the correct RAL value",
+                 part_id: "1",
+                 media_url: "http://machinesandparts.surge.sh/part1/part1_bad_color.jpg",
+                 comment: "Consider the color only of the lower vertex",
+                 taxonomy: null, created_at: "2015-11-27T16:45:57.076Z" },
+             { id: 2,
+                 name: "Craked",
+                 desc: "The product present a large crack",
+                 part_id: "1",
+                 media_url: "http://machinesandparts.surge.sh/part1/part1_craked.jpg",
+                 comment: "Crack is critical only when dimension is larger than 2 mm2",
+                 taxonomy: null,
+                 created_at:"2015-11-27T16:45:57.090Z" },
+             { id: 3,
+                 name: "Hole",
+                 desc: "Hole on the border of the product",
+                 part_id: "1",
+                 media_url: "http://machinesandparts.surge.sh/part1/part1_hole.jpg",
+                 comment: "The product has a hole on the side, critical when wider than 1 mm",
+                 taxonomy: null,
+                 created_at: "2015-11-27T16:45:57.101Z" },
+             { id: 4,
+                 name: "Missing part",
+                 desc: "A part of the product is missing",
+                 part_id: "1",
+                 media_url: "http://machinesandparts.surge.sh/part1/part1_missing_part.jpg",
+                 comment: "Note the number of the figure of the die",
+                 taxonomy:null,
+                 created_at: "2015-11-27T16:45:57.115Z" } ];
 }
 
 function solution1 ()
 {
-    return [{ "id": 1, "name": "replace color feeder", "desc": "do this, fix that, clean all", "defect_id": 1, "comment": "check product expiry date", "skill": { "tool": 2, "machine": 1 } }, { "id": 2, "name": "clean product feeder", "desc": "do this, fix that, clean all", "defect_id": 1, "comment": "use_XXX for cleaning", "skill": { "tool": 2, "machine": 1 } }, { "id": 3, "name": "change die", "desc": "do this, fix that, clean all", "defect_id": 1, "comment": "replace screws", "skill": { "tool": 1, "machine": 2 } }];
+    return [ { id: 1,
+                 name: "replace color feeder",
+                 desc: "do this, fix that, clean all",
+                 defect_id: 1,
+                 comment: "check product expiry date",
+                 skill: { tool: 2, machine: 1 } },
+             { id: 2,
+                 name: "clean product feeder",
+                 desc: "do this, fix that, clean all",
+                 defect_id: 1,
+                 comment: "use_XXX for cleaning",
+                 skill: { tool: 2, machine: 1 } },
+             { id: 3,
+                 name: "change die",
+                 desc: "do this, fix that, clean all",
+                 defect_id: 1,
+                 comment: "replace screws",
+                 skill: { tool: 1, machine: 2 } } ];
 }
 
 function postEvent1 (body)
