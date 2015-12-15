@@ -19,7 +19,20 @@ ValidCall.prototype.toJSON = function ()
 {
     if (this.json)
         return this.json;
-    var json = Util.JSONLDtoJSON(this.jsonld, this.baseURI);
+
+    var jsonld = _.cloneDeep(this.jsonld);
+    // if the body is also referenced in the postcondition we might get some extra referenced data in the body we don't want the user to see
+    // this can not happen with actual body contents since these are in a separate subgraph
+    var resp = Util.findFirstDeep(jsonld, 'http:resp');
+    if (resp && 'http:body' in resp['http:resp'])
+    {
+        var body = resp['http:resp']['http:body'];
+        for (var key in body)
+            if (key !== '@id' && key !== this.baseURI + 'contains') // TODO: contains might be in its own ontology later
+                delete body[key];
+    }
+
+    var json = Util.JSONLDtoJSON(jsonld, this.baseURI);
 
     if (_.isArray(json))
         json = _.filter(json, 'http:methodName')[0];

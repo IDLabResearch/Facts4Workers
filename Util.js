@@ -18,6 +18,34 @@ Util.isNonStringLiteral = function (thingy)
     return Util.isLiteral(thingy) && !_.isString(thingy);
 };
 
+Util.findFirstDeep = function (o, findKey)
+{
+    if (Util.isLiteral(o))
+        return undefined;
+    var result;
+    if (_.isArray(o))
+    {
+        for (var i = 0; i < o.length; ++i)
+        {
+            result = Util.findFirstDeep(o[i], findKey);
+            if (result)
+                return result;
+        }
+        return undefined;
+    }
+
+    if (findKey in o)
+        return o;
+
+    for (var key in o)
+    {
+        result = Util.findFirstDeep(o[key], findKey);
+        if (result)
+            return result;
+    }
+    return undefined;
+};
+
 Util.mapJSON = function (json, template, map)
 {
     map = map || {};
@@ -110,8 +138,8 @@ Util.JSONLDtoJSON = function (jsonld, baseURI)
             continue;
 
         // TODO: this is already interpreting the content so shouldn't actually happen here (but later we lose the blank nodes)
-        if (key === 'http:body' && Object.keys(jsonld[key]).length > 1 && jsonld[key]['@id'] && !jsonld[key][baseURI + 'contains'])
-            return { 'http:body': jsonld[key]['@id'] };
+        //if (key === 'http:body' && Object.keys(jsonld[key]).length > 1 && jsonld[key]['@id'] && !jsonld[key][baseURI + 'contains'])
+        //    return { 'http:body': jsonld[key]['@id'] };
 
         // this might produce invalid URIs, but we don't care since the output is JSON, not JSON-lD
         var val = Util.JSONLDtoJSON(jsonld[key], baseURI);
