@@ -129,17 +129,12 @@ Util.JSONLDtoJSON = function (jsonld, baseURI)
             return result;
         }
 
-        // TODO: special cases where graph/array/@id are subject
         if ((key === '@list' || key === '@graph' || key === '@id') && keys.length === 1)
             return Util.JSONLDtoJSON(jsonld[key], baseURI);
 
         // ignore URIs for now
         if (key === '@id')
             continue;
-
-        // TODO: this is already interpreting the content so shouldn't actually happen here (but later we lose the blank nodes)
-        //if (key === 'http:body' && Object.keys(jsonld[key]).length > 1 && jsonld[key]['@id'] && !jsonld[key][baseURI + 'contains'])
-        //    return { 'http:body': jsonld[key]['@id'] };
 
         // this might produce invalid URIs, but we don't care since the output is JSON, not JSON-lD
         var val = Util.JSONLDtoJSON(jsonld[key], baseURI);
