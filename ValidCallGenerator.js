@@ -22,6 +22,8 @@ ValidCallGenerator.N3toValidCalls = function (n3, baseURI)
         calls = _.map(jsonld['@graph'], function (validCall) { return validCall[baseURI + 'validCall']; });
     calls = _.map(calls, function (call)
     {
+        if (call['@graph'].length === 1)
+            call = call['@graph'][0];
         call['@context'] = jsonld['@context'];
         return new ValidCall(call, baseURI);
     });
