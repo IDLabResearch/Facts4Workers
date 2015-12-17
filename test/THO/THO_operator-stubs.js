@@ -7,6 +7,7 @@ var _ = require('lodash');
 
 var stubs = {
     'http://mstate.tho.f4w.l0g.in/api/machines': machines,
+    'http://machinesandparts.surge.sh/api/parts.json': parts,
     'http://skillp.tho.f4w.l0g.in/api/operator_skills/': operators,
     'http://skillp.tho.f4w.l0g.in/api/operator_skills/2': operator2,
     'http://defects.tho.f4w.l0g.in/api/defects?part_id=1': defects1,
@@ -29,6 +30,32 @@ function machines ()
                  desc: 'Machine used for cooling purposes',
                  state: 1,
                  optional: { media_url: 'http://machinesandparts.surge.sh/machines/grey_machine.jpg' } } ];
+}
+
+function parts ()
+{
+    return [
+        {
+            id: 1,
+            name: "Pinion",
+            image_url: "http://machinesandparts.surge.sh/part1/part1_ok.jpg"
+        },
+        {
+            id: 2,
+            name: "Carter",
+            image_url: "http://machinesandparts.surge.sh/part2/part2_ok.jpg"
+        },
+        {
+            id: 3,
+            name: "Handle",
+            image_url: "http://machinesandparts.surge.sh/part3/part3_ok.jpg"
+        },
+        {
+            id: 4,
+            name: "Flange",
+            image_url: "http://machinesandparts.surge.sh/part4/part4_ok.jpg"
+        }
+    ]
 }
 
 function operators ()
