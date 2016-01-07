@@ -57,7 +57,7 @@ var rulePaths = [
     //'n3/thermolympics_teamleader/api.n3',
     //'n3/thermolympics_teamleader/extra-rules.n3',
     'n3/thermolympics_operator_new/api.n3',
-    //'n3/thermolympics_teamleader_new/api.n3'
+    'n3/thermolympics_teamleader_new/api.n3'
 ];
 
 var input = rulePaths.map(relative);
