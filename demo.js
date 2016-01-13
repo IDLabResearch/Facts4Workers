@@ -50,9 +50,9 @@ app.use('/demo/n3', serveIndex(relative('n3'), {icons: true, view: 'details'}));
 
 // TODO: more generic way to load all files?
 var rulePaths = [
-    //'n3/calibration/api1.n3',
-    //'n3/calibration/api2.n3',
-    //'n3/calibration/extra-rules.n3',
+    'n3/calibration/api1.n3',
+    'n3/calibration/api2.n3',
+    'n3/calibration/extra-rules.n3',
     //'n3/thermolympics_operator/api.n3',
     //'n3/thermolympics_teamleader/api.n3',
     //'n3/thermolympics_teamleader/extra-rules.n3',
