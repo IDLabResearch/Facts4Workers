@@ -32,7 +32,7 @@
               tmpl:requestURI ("http://askTheWorker/getOperatorID");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {[
-                  :operators ?list
+                  :sendList ?list
               ]};
               http:resp [
                   http:body _:body
