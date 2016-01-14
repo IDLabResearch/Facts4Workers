@@ -8,6 +8,8 @@ var uuid = require('node-uuid');
 // TODO: tbh, these are mostly functions of which I don't know where to put them yet
 function Util() {}
 
+Util.BASE = '#base';
+
 Util.isLiteral = function (thingy)
 {
     return _.isString(thingy) || _.isNumber(thingy) || _.isBoolean(thingy);
@@ -87,14 +89,14 @@ Util.mapJSON = function (json, template, map)
     return map;
 };
 
-Util.JSONLDtoJSON = function (jsonld, baseURI)
+Util.JSONLDtoJSON = function (jsonld)
 {
     // TODO: what about lang/datatype?
     if (Util.isLiteral(jsonld))
         return jsonld;
 
     if (_.isArray(jsonld))
-        return jsonld.map(function (thingy) { return Util.JSONLDtoJSON(thingy, baseURI); });
+        return jsonld.map(function (thingy) { return Util.JSONLDtoJSON(thingy); });
 
     var json = {};
     if (jsonld['tmpl:requestURI'])
@@ -120,7 +122,7 @@ Util.JSONLDtoJSON = function (jsonld, baseURI)
 
         if (key === '@graph')
         {
-            var result = Util.JSONLDtoJSON(jsonld[key], baseURI);
+            var result = Util.JSONLDtoJSON(jsonld[key]);
             // will always be a list, but often with only 1 element
             if (result.length === 0)
                 return {};
@@ -130,23 +132,23 @@ Util.JSONLDtoJSON = function (jsonld, baseURI)
         }
 
         if ((key === '@list' || key === '@graph' || key === '@id') && keys.length === 1)
-            return Util.JSONLDtoJSON(jsonld[key], baseURI);
+            return Util.JSONLDtoJSON(jsonld[key]);
 
         // ignore URIs for now
         if (key === '@id')
             continue;
 
         // this might produce invalid URIs, but we don't care since the output is JSON, not JSON-lD
-        var val = Util.JSONLDtoJSON(jsonld[key], baseURI);
-        if (_.startsWith(key, baseURI))
-            key = key.substr(baseURI.length);
+        var val = Util.JSONLDtoJSON(jsonld[key]);
+        if (_.startsWith(key, Util.BASE + ':'))
+            key = key.substr(Util.BASE.length+1);
 
         json[key] = val;
     }
     return json;
 };
 
-Util.JSONtoJSONLD = function (json, baseURI)
+Util.JSONtoJSONLD = function (json)
 {
     if (json === null)
         return { '@id': 'rdf:nil' };
@@ -155,22 +157,21 @@ Util.JSONtoJSONLD = function (json, baseURI)
         return json;
 
     if (_.isArray(json))
-        return { '@list': json.map(function (thingy) { return Util.JSONtoJSONLD(thingy, baseURI); }) };
+        return { '@list': json.map(function (thingy) { return Util.JSONtoJSONLD(thingy); }) };
 
-    baseURI = baseURI || '';
     var jsonld = {};
     for (var key in json)
-        jsonld[baseURI + key] = Util.JSONtoJSONLD(json[key], baseURI);
+        jsonld[Util.BASE + ':' + key] = Util.JSONtoJSONLD(json[key]);
 
     // represent all json objects as graphs ('@graph' always expects a list as value)
     return {'@graph': [jsonld]};
 };
 
-Util.replaceJSONLDblanks = function (jsonld, map, baseURI)
+Util.replaceJSONLDblanks = function (jsonld, map)
 {
     var jsonLDMap = {};
     for (var key in map)
-        jsonLDMap[key] = Util.skolemizeJSONLD(Util.JSONtoJSONLD(map[key], baseURI), baseURI);
+        jsonLDMap[key] = Util.skolemizeJSONLD(Util.JSONtoJSONLD(map[key]));
 
     return Util._replaceJSONLDblanksRecursive(jsonld, jsonLDMap);
 };
@@ -219,7 +220,7 @@ Util._replaceJSONLDblanksRecursive = function (jsonld, map)
 
 // will add blank node for nodes that don't have an id yet
 // if blankMap is given, will also replace all existing blank node names with skolemized versions
-Util.skolemizeJSONLD = function (jsonld, baseURI, blankMap, parentKey)
+Util.skolemizeJSONLD = function (jsonld, blankMap, parentKey)
 {
     if (Util.isNonStringLiteral(jsonld))
         return jsonld;
@@ -233,7 +234,7 @@ Util.skolemizeJSONLD = function (jsonld, baseURI, blankMap, parentKey)
         if (_.startsWith(jsonld, '_:') && blankMap)
         {
             if (!blankMap[jsonld])
-                blankMap[jsonld] = baseURI + uuid.v4();
+                blankMap[jsonld] = Util.BASE + ':' + uuid.v4();
             return blankMap[jsonld];
         }
 
@@ -241,18 +242,18 @@ Util.skolemizeJSONLD = function (jsonld, baseURI, blankMap, parentKey)
     }
 
     if (_.isArray(jsonld))
-        return jsonld.map(function (child) { return Util.skolemizeJSONLD(child, baseURI, blankMap, parentKey); }, this);
+        return jsonld.map(function (child) { return Util.skolemizeJSONLD(child, blankMap, parentKey); }, this);
 
     var result = {};
     for (var key in jsonld)
     {
-        var predicate = Util.skolemizeJSONLD(key, baseURI, blankMap, '@id'); // treat predicates as though they are in a @id field
-        result[predicate] = Util.skolemizeJSONLD(jsonld[key], baseURI, blankMap, key);
+        var predicate = Util.skolemizeJSONLD(key, blankMap, '@id'); // treat predicates as though they are in a @id field
+        result[predicate] = Util.skolemizeJSONLD(jsonld[key], blankMap, key);
     }
 
     // all these don't need to be skolemized for eye/n3, all the others are blank nodes
     if (!result['@id'] && !result['@graph'] && !result['@value'] && !result['@list'] && parentKey !== '@context')
-        result['@id'] = baseURI + uuid.v4();
+        result['@id'] = Util.BASE + ':' + uuid.v4();
 
     return result;
 };

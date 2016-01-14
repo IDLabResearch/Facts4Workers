@@ -8,10 +8,9 @@ var Util = require('./Util');
 var N3Parser = require('./N3Parser');
 var JSONLDParser = require('./JSONLDParser');
 
-function ValidCall(jsonld, baseURI)
+function ValidCall(jsonld)
 {
     this.jsonld = jsonld;
-    this.baseURI = baseURI;
 }
 
 // apparently 'toJSON' gets used by JSON.stringify
@@ -28,11 +27,11 @@ ValidCall.prototype.toJSON = function ()
     {
         var body = resp['http:resp']['http:body'];
         for (var key in body)
-            if (key !== '@id' && key !== this.baseURI + 'contains') // TODO: contains might be in its own ontology later
+            if (key !== '@id' && key !== N3Parser.BASE + ':contains') // TODO: contains might be in its own ontology later
                 delete body[key];
     }
 
-    var json = Util.JSONLDtoJSON(jsonld, this.baseURI);
+    var json = Util.JSONLDtoJSON(jsonld);
 
     if (_.isArray(json))
         json = _.filter(json, 'http:methodName')[0];
@@ -51,7 +50,7 @@ ValidCall.prototype.toJSONLD = function ()
 ValidCall.prototype.toN3 = function ()
 {
     var parser = new JSONLDParser();
-    return parser.toN3(this.jsonld, this.baseURI);
+    return parser.toN3(this.jsonld);
 };
 
 ValidCall.prototype.getURL      = function () { return this.toJSON()['http:requestURI']; };
@@ -86,8 +85,8 @@ ValidCall.prototype.handleResponse = function (response)
 {
     var map = {};
     Util.mapJSON(response === undefined ? {} : response, this.getResponse(), map);
-    this.jsonld = Util.replaceJSONLDblanks(this.jsonld, map, this.baseURI);
-    this.jsonld = Util.skolemizeJSONLD(this.jsonld, this.baseURI, {});
+    this.jsonld = Util.replaceJSONLDblanks(this.jsonld, map);
+    this.jsonld = Util.skolemizeJSONLD(this.jsonld, {});
     this.json = undefined; // need to unset JSON since JSONLD changed
 };
 

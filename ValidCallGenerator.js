@@ -10,33 +10,33 @@ var ValidCall = require('./ValidCall');
 
 function ValidCallGenerator() {}
 
-ValidCallGenerator.N3toValidCalls = function (n3, baseURI)
+ValidCallGenerator.N3toValidCalls = function (n3)
 {
     var parser = new N3Parser();
     var jsonld = parser.toJSONLD(n3);
     // TODO: validCall might be in its own ontology eventually
     var calls;
-    if (jsonld[baseURI + 'validCall'])
-        calls = [jsonld[baseURI + 'validCall']];
+    if (jsonld[N3Parser.BASE + ':validCall'])
+        calls = [jsonld[N3Parser.BASE + ':validCall']];
     else
-        calls = _.map(jsonld['@graph'], function (validCall) { return validCall[baseURI + 'validCall']; });
+        calls = _.map(jsonld['@graph'], function (validCall) { return validCall[N3Parser.BASE + ':validCall']; });
     calls = _.map(calls, function (call)
     {
         if (call['@graph'].length === 1)
             call = call['@graph'][0];
         call['@context'] = jsonld['@context'];
-        return new ValidCall(call, baseURI);
+        return new ValidCall(call);
     });
 
     return calls;
 };
 
 // TODO: might need more generic function that can determine what is needed
-ValidCallGenerator.N3ToValidCall = function (n3, baseURI)
+ValidCallGenerator.N3ToValidCall = function (n3)
 {
     var parser = new N3Parser(n3);
     var jsonld = parser.toJSONLD(n3);
-    return new ValidCall(jsonld, baseURI);
+    return new ValidCall(jsonld);
 };
 
 module.exports = ValidCallGenerator;

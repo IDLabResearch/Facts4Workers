@@ -24,9 +24,6 @@ function RESTdesc (dataPaths, goalPath, cacheKey)
 
     this.eye = null;
 
-    // TODO: generalize
-    this.baseURI = 'http://f4w.restdesc.org/demo#';
-
     this.calls = [];
 }
 
@@ -62,7 +59,7 @@ RESTdesc.prototype.handleUserResponse = function (response, json, callback)
     {
         if (!val)
             return this.cache.close(callback); // no data (yet)
-        var call = ValidCallGenerator.N3ToValidCall(val, this.baseURI);
+        var call = ValidCallGenerator.N3ToValidCall(val);
         call.handleResponse(response);
         this.cache.push(
             call.toN3(),
@@ -91,7 +88,7 @@ RESTdesc.prototype._handleProof = function (proof, callback)
 
 RESTdesc.prototype._handleNext = function (next, callback)
 {
-    var calls = ValidCallGenerator.N3toValidCalls(next, this.baseURI);
+    var calls = ValidCallGenerator.N3toValidCalls(next);
 
     if (calls.length === 0)
         return callback({ status: 'DONE' });
