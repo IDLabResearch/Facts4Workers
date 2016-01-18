@@ -22,6 +22,7 @@ function relative (relativePath)
     return path.join(path.join(__dirname, '../..'), relativePath);
 }
 
+// TODO: check intermediate URIs?
 describe('THO operator use case', function ()
 {
     var key = 'TESTKEY';
