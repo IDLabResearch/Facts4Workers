@@ -12,6 +12,7 @@ var EXPIRATION = 24 * 60 * 60; // seconds
 function Cache (key)
 {
     this.key = key;
+    this.queueKey = key + '_queue';
 }
 
 
@@ -56,7 +57,7 @@ Cache.prototype._handleCall = function (/*f, args*/)
     {
         // necessary since we want the return value of this function, not the close function
         var returnVal = arguments;
-        function returnArgs () { callback.apply(null, returnVal); }
+        function returnArgs () { if (callback) callback.apply(null, returnVal); }
         close ? this.close(returnArgs) : returnArgs();
     }.bind(this);
 
@@ -65,7 +66,7 @@ Cache.prototype._handleCall = function (/*f, args*/)
 
 Cache.prototype.clear = function (callback)
 {
-    this._handleCall('del', this.key, callback);
+    this._handleCall('del', this.key, function () { this._handleCall('del', this.queueKey, callback); }.bind(this));
 };
 
 Cache.prototype.push = function (val, callback)
@@ -75,11 +76,7 @@ Cache.prototype.push = function (val, callback)
         function ()
         {
             // reset expiration value if new data is added
-            this._handleCall('expire', this.key, EXPIRATION,
-                function ()
-                {
-                    close ? this.close(callback) : callback.call();
-                }.bind(this));
+            this._handleCall('expire', this.key, EXPIRATION, function () { close ? this.close(callback) : callback.call(); }.bind(this));
         }.bind(this));
 };
 
@@ -92,6 +89,52 @@ Cache.prototype.pop = function (callback)
 Cache.prototype.list = function (callback)
 {
     this._handleCall('lrange', this.key, 0, -1, callback);
+};
+
+Cache.prototype.setSingle = function (key, val, callback)
+{
+    var close = this.open();
+    this._handleCall('set', key, val,
+        function ()
+        {
+            // setex is not working? so doing this for now
+            this._handleCall('expire', key, EXPIRATION, function () { close ? this.close(callback) : callback.call(); }.bind(this));
+        }.bind(this));
+};
+
+Cache.prototype.popSingle = function (key, callback)
+{
+    var close = this.open();
+    this._handleCall('get', key,
+        function (err, val)
+        {
+            var callbackVal = function (err) { callback(err, val); };
+            this._handleCall('del', key, function () { close ? this.close(callbackVal) : callbackVal(); }.bind(this));
+        }.bind(this));
+};
+
+Cache.prototype.addToQueue = function (vals, callback)
+{
+    var close = this.open();
+    var cache = this;
+    push();
+    function push ()
+    {
+        if (vals.length > 0)
+            cache._handleCall('lpush', cache.queueKey, vals.pop(), push);
+        else
+            cache._handleCall('expire', cache.queueKey, EXPIRATION, function () { close ? cache.close(callback) : callback.call(); }.bind(this));
+    }
+};
+
+Cache.prototype.popQueue = function (callback)
+{
+    this._handleCall('lpop', this.queueKey, callback);
+};
+
+Cache.prototype.queueLength = function (callback)
+{
+    this._handleCall('llen', this.queueKey, callback);
 };
 
 module.exports = Cache;

@@ -61,10 +61,10 @@ function parts ()
 function operators ()
 {
     return [ { id: 1,
-                 name: 'Johnny Jones',
-                 desc: 'Good old Jimmy\'s brother, expert at nothing',
-                 role: 'Operator',
-                 skills: { tool: 1, machine: 1 } },
+        name: 'Johnny Jones',
+        desc: 'Good old Jimmy\'s brother, expert at nothing',
+        role: 'Operator',
+        skills: { tool: 1, machine: 1 } },
              { id: 2,
                  name: 'Abram Abes',
                  desc: 'Jack of all trades, master of none',
@@ -74,6 +74,11 @@ function operators ()
                  name: 'Bob Bones',
                  desc: 'Oldest operator in town',
                  role: 'Operator',
+                 skills: { tool: 3, machine: 3, computer: 3 } },
+             { id: 4,
+                 name: 'Carl Cheese',
+                 desc: 'The old Carl',
+                 role: 'Team Leader',
                  skills: { tool: 3, machine: 3, computer: 3 } } ];
 }
 
@@ -148,7 +153,12 @@ function postEvent1 (body)
     var stop = {name:"Stop the machine",desc:"Stoping the machine after a defect was spotted!",machine_state:"4",operator_id:2,optional:{defect_id:1}};
     var start = {desc:"Starting the machine after a solution was successfully applied!",machine_state: "1",name:"Starting the machine",operator_id:2};
     var teamleader = {name:"waiting_for_teamleader",desc:"Stoping the machine. Problem has to be fixed by the team leader.",machine_state:"3",operator_id:2,optional:{defect_id:1,stopped_for_defect_event_id:123}};
-    assert(_.some([stop, start, teamleader], function (thingy) { return _.isEqual(body, thingy); }));
+    if (body.machine_state === '1')
+        assert.deepEqual(body, start);
+    else if (body.machine_state === '3')
+        assert.deepEqual(body, teamleader);
+    else if (body.machine_state === '4')
+        assert.deepEqual(body, stop);
     return { id: 123 };
 }
 

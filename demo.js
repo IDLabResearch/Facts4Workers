@@ -80,8 +80,10 @@ app.post('/clear', function (req, res)
     if (!req.body || !req.body.data)
         return res.status(400).json({ error: 'Expected a JSON object with a "data" field.'});
     var rest = new RESTdesc(null, null, req.body.data);
-    rest.clear();
-    res.sendStatus(200);
+    rest.clear(function ()
+    {
+        res.sendStatus(200);
+    });
 });
 
 app.post('/back', function (req, res)
