@@ -67,7 +67,7 @@ Util.mapJSON = function (json, template, map)
         return;
     }
 
-    if (Util.isLiteral(json))
+    if (Util.isLiteral(json) || !json)
         throw 'Expecting an object matching ' + JSON.stringify(template) +', got ' + JSON.stringify(json) + ' instead.';
 
     for (var key in template)
