@@ -3,9 +3,9 @@
 @prefix log: <http://www.w3.org/2000/10/swap/log#>.
 
 {
-    ?report a :report;
-            :state :resolved.
+    ?problem a :problem;
+             :state :resolved.
 }=>{
-    ?report a :report;
-            :state :resolved.
+    ?problem a :problem;
+             :state :resolved.
 }.

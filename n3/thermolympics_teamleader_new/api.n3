@@ -128,6 +128,51 @@
     :defect :id ?did.
     :original :id ?oid.
 }.
+{
+    ?problem :event ?event.
+    ?event :optional ?optional.
+    ?optional e:notLabel ?label. # important so it doesn't match when it's still a blank node
+    ?optional log:notIncludes { ?x :defect_id ?did; :stopped_for_defect_event_id ?oid }.
+}
+=>
+{
+    ?problem :state :ok.
+}.
+
+# get all events if there is no actual problem with the machine
+{
+    ?problem a :problem;
+             :state :ok;
+             :machine ?machine.
+    ?machine :id ?machine_id.
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?machine_id "/events");
+              http:resp [
+                  http:body _:list
+              ].
+    ?machine :events _:list.
+}.
+
+# send all events to the worker if there is nothing to do
+{
+    ?problem a :problem;
+             :state :ok;
+             :machine ?machine.
+    ?machine :events ?events.
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://askTheWorker/events");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              http:body {[
+                  :events ?events
+              ]}.
+    ?problem :state :resolved.
+}.
 
 # get solutions
 {
@@ -196,7 +241,7 @@
     ?report a :report;
             :event ?original;
             :success ?success;
-            :state :posted.
+            :state :posted. # TODO: @Doerthe how do I make sure I don't get a result with find_executable_calls if this value doesn't exist?
     ?success e:whenGround false.
 }
 =>
@@ -275,12 +320,12 @@
     _:request http:methodName "POST";
               tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?machine_id "/events/");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
-              :check ?report;
+              :check ?success; # TODO: a bit annoying
               http:body {[
                   :name "Teamleader maintenance finished.";
                   :desc "Machine fixed.";
                   :machine_state 4;
                   :operator_id ?operator_id
               ]}.
-    ?report :state :resolved.
+    ?problem :state :resolved.
 }.
