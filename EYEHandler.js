@@ -60,6 +60,8 @@ EYEHandler.prototype.call = function (dataPaths, data, queryPath, proof, singleA
         {
             cache.cacheFromString(data[i], function (error, fileName)
             {
+                if (error)
+                    throw error;
                 args.push(fileName);
                 if (++count >= data.length)
                     execute();

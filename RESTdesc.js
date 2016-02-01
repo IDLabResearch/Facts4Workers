@@ -92,7 +92,7 @@ RESTdesc.prototype.next = function (callback)
             {
                 // put this outside of popQueue to prevent race condition
                 callback = this.callback;
-                this.callback = null;
+                this.callback = undefined;
                 this.cache.popQueue(function (err, val)
                 {
                     var call = ValidCallGenerator.N3ToValidCall(val);
@@ -150,7 +150,6 @@ RESTdesc.prototype._handleNext = function (next)
     // TODO: can't do this, not stateless...
     if (calls.user.length > 0)
         this.cache.addToQueue(_.invokeMap(calls.user, 'toN3'), function () { this.next(); }.bind(this));
-
 
     this.running = calls.api.length > 0;
 
