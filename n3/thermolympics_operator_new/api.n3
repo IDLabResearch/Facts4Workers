@@ -1,6 +1,7 @@
 # https://thermolympic-demo.herokuapp.com/api_doc/
 
 @prefix : <http://f4w.restdesc.org/demo#>.
+@prefix rest: <http://f4w.restdesc.org/restdesc#>.
 @prefix http: <http://www.w3.org/2011/http#>.
 @prefix tmpl: <http://purl.org/restdesc/http-template#>.
 @prefix log: <http://www.w3.org/2000/10/swap/log#>.
@@ -38,10 +39,10 @@
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/getOperatorID");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
-              http:body {[
+              http:body { rest:json
                   :message "Who are you? Please send your id from the list.";
                   :sendList ?list
-              ]};
+              };
               http:resp [
                   http:body _:body
               ].
@@ -77,10 +78,10 @@
               tmpl:requestURI ("http://askTheWorker/getMachineID");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               :check ?operator;
-              http:body {[
+              http:body { rest:json
                   :message "On what machine are you working?";
                   :sendList ?list
-              ]};
+              };
               http:resp [
                   http:body _:body
               ].
@@ -116,17 +117,17 @@
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/getPartID");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
-              http:body {[
+              http:body { rest:json
                   :message "Please provide the ID of the part on which the problem occurred.";
                   :machine ?n;
                   :parts ?list
-              ]};
+              };
               http:resp [
                   http:body _:body
               ].
-    _:body :contains {[
+    _:body :contains { rest:json
         :id _:n
-    ]}.
+    }.
     ?problem :occurredOnPartWithID _:n.
 }.
 
@@ -155,16 +156,16 @@
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/getDefectID");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
-              http:body {[
+              http:body { rest:json
                   :message "Please report the defect.";
                   :sendList ?list
-              ]};
+              };
               http:resp [
                   http:body _:body
               ].
-    _:body :contains {[
+    _:body :contains { rest:json
         :id _:d;
-    ]}.
+    }.
     ?problem :defect _:d. 
 }.
 
@@ -192,16 +193,16 @@
               :check ?sol;
               tmpl:requestURI ("http://askTheWorker/getSolutionID");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
-              http:body {[
+              http:body { rest:json
                   :message "Choose one of the following solutions.";
                   :sendList ?list
-              ]};
+              };
               http:resp [
                   http:body _:body
               ].
-    _:body :contains {[
+    _:body :contains { rest:json
         :id _:d;
-    ]}.
+    }.
     ?sol :solutionId _:d.
 }.
 
@@ -228,12 +229,12 @@
               http:resp [
                   http:body _:body
               ].
-    _:body :contains {[
+    _:body :contains { rest:json
         :name _:name;
         :desc _:desc;
         :role _:role;
-        :skills {[ :machine _:m; :tool _:t; :computer _:c]}
-    ]}.
+        :skills { rest:json :machine _:m; :tool _:t; :computer _:c }
+    }.
     ?operator :machineSkills _:m;
         :toolSkills _:t;
         :computerSkills _:c.
@@ -254,12 +255,12 @@
               http:resp [
                   http:body _:body
               ].
-    _:body :contains {[
+    _:body :contains { rest:json
         :name _:name;
         :desc _:desc;
         :comment _:comment;
-        :skill {[ :machine _:m; :tool _:t; :computer _:c]}
-    ]}.
+        :skill { rest:json :machine _:m; :tool _:t; :computer _:c }
+    }.
     ?solution :reqMachineSkills _:m;
          :reqToolSkills _:t;
          :reqComputerSkills _:c. #problem: sometimes no computer value
@@ -311,19 +312,19 @@
 {
     _:request http:methodName "POST";
               tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?machineID "/events");
-              http:body {[
+              http:body { rest:json
                   :name "Stop the machine";
                   :desc "Stoping the machine after a defect was spotted!";
                   :machine_state "4";
                   :operator_id ?wid;
-                  :optional {[ :defect_id ?defectID ]}
-              ]};
+                  :optional { rest:json :defect_id ?defectID }
+              };
               http:resp [
                   http:body _:body
               ].
-    _:body :contains {[
+    _:body :contains { rest:json
         :id _:e
-    ]}.
+    }.
     {?m :state "stopped1".} :eventId _:e.
     ?m :state _:stopped1. #please put "stopped1" here when grounding.
 }.
@@ -375,30 +376,30 @@
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/getReport");
               :check (?wm ?ms);
-              http:body {[
+              http:body { rest:json
                   :message "Report the outcome.";
-                  :solution {[
+                  :solution { rest:json
                       :id ?id;
                       :name ?s_name;
                       :desc ?s_desc;
                       :comment ?s_comment
-                  ]};
-                  :operator {[
+                  };
+                  :operator { rest:json
                       :id ?wid;
                       :name ?w_name;
                       :desc ?w_desc;
                       :role ?w_role
-                  ]};
+                  };
                   :machineId ?machineID;
                   :eventId ?e
-              ]};
+              };
               http:resp [
                   http:body _:body
               ].
-    _:body :contains {[
+    _:body :contains { rest:json
         :solved _:yn;
         :comment _:comment
-    ]}.
+    }.
     ?solution :worked _:yn;
               :report_comment _:comment.
 }.
@@ -458,14 +459,14 @@
 {
     _:request http:methodName "POST";
               tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/reports");
-              http:body {[
+              http:body { rest:json
                      #I am not sure, but maybe this answers to the machine stopped event?
                     :event_id ?eid;
                     :operator_id ?wid;
                     :solution_id ?sid;
                     :success ?tf;
                     :comment ?comment
-              ]}.
+              }.
     ?solution :triedAndReported _:yes. #put "yes"
     ?solution :new :triple.
 }.
@@ -486,14 +487,14 @@
 {
     _:request http:methodName "POST";
               tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/reports");
-              http:body {[
+              http:body { rest:json
                      #I am not sure, but maybe this answers to the machine stopped event?
                     :event_id ?eid;
                     :operator_id ?wid;
                     :solution_id ?sid;
                     :success false;
                     :comment ?comment
-              ]}.
+              }.
     ?solution :triedAndReported _:yes. #put "yes"
     ?solution :tryNewSolution true.
     ?solution :new :triple.
@@ -540,13 +541,13 @@
     _:request http:methodName "POST";
               :check (?tf ?yes);
               tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?mid "/events");
-              http:body {[
+              http:body { rest:json
                      #I am not sure, but maybe this answers to the machine stopped event?
                     :name "Starting the machine";
                     :desc "Starting the machine after a solution was successfully applied!";
                     :operator_id ?wid;
                     :machine_state "1"
-              ]}.
+              }.
      ?machine :newState _:state.
     ?problem :finalState :solved. 
 }.
@@ -581,20 +582,20 @@
     _:request http:methodName "POST";
               :check (?wm ?m);
               tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?mid "/events");
-              http:body {[
+              http:body { rest:json
                   :name "waiting_for_teamleader";
                   :desc "Stoping the machine. Problem has to be fixed by the team leader.";
                   #TODO: put the right machine state
                   :machine_state "3";
                   :operator_id ?wid;
-                  :optional {[ :defect_id ?defect; :stopped_for_defect_event_id ?eid].}
-              ].};
+                  :optional { rest:json :defect_id ?defect; :stopped_for_defect_event_id ?eid }
+              };
               http:resp [
                   http:body _:body
               ].
-    _:body :contains {[
+    _:body :contains { rest:json
         :id _:e
-    ]}.
+    }.
 
     {?machine :state _:stopped2.} :eventId _:e.
     ?machine :state _:stopped2. #please put "stopped2" here when grounding.
@@ -611,11 +612,9 @@
 _:request http:methodName "GET";
 tmpl:requestURI ("http://askTheWorker/YouAreDone");
               :check ?state;
-              http:body {[
+              http:body { rest:json
                   :message "Problem Solved."
-
-           
-              ]}.
+              }.
 
 ?problem :tellTheWorker "solved".
 }.
@@ -629,10 +628,9 @@ tmpl:requestURI ("http://askTheWorker/YouAreDone");
 _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/SentToTeamLeader");
               :check ?tl;
-              http:body {[
+              http:body { rest:json
                   :message "Teamleader was notified."
-           
-              ]}.
+              }.
 
 ?problem :tellTheWorker ?stopped2.
 }.

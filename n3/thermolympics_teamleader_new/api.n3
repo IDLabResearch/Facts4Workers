@@ -1,6 +1,7 @@
 # http://facts4workers.surge.sh/
 
 @prefix : <http://f4w.restdesc.org/demo#>.
+@prefix rest: <http://f4w.restdesc.org/restdesc#>.
 @prefix http: <http://www.w3.org/2011/http#>.
 @prefix tmpl: <http://purl.org/restdesc/http-template#>.
 @prefix log: <http://www.w3.org/2000/10/swap/log#>.
@@ -33,15 +34,15 @@
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/getOperatorID");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
-              http:body {[
+              http:body { rest:json
                   :sendList ?list
-              ]};
+              };
               http:resp [
                   http:body _:body
               ].
-    _:body :contains {[
+    _:body :contains { rest:json
         :id _:id
-    ]}.
+    }.
     _:problem a :problem;
               :operator [ :id _:id ]
 }.
@@ -73,15 +74,15 @@
               tmpl:requestURI ("http://askTheWorker/getMachineID");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               :check ?problem;
-              http:body {[
+              http:body { rest:json
                   :sendList ?list
-              ]};
+              };
               http:resp [
                   http:body _:body
               ].
-    _:body :contains {[
+    _:body :contains { rest:json
         :id _:id
-    ]}.
+    }.
     ?problem :machine [ :id _:id ].
 }.
 
@@ -98,11 +99,11 @@
               http:resp [
                   http:body _:body
               ].
-    _:body :contains {[
+    _:body :contains { rest:json
         :id _:id;
         # TODO: same problem as other APIs with multiple options: optional could be empty (if machine is not stopped for example)
         :optional _:optional
-    ]}.
+    }.
     ?problem :event [ :id _:id;
                       :optional _:optional ].
 }.
@@ -170,9 +171,9 @@
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/events");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
-              http:body {[
+              http:body { rest:json
                   :events ?events
-              ]}.
+              }.
     ?problem :state :resolved.
 }.
 
@@ -223,14 +224,14 @@
                   http:body _:body
               ].
 
-    _:body :contains {[
+    _:body :contains { rest:json
         :name _:name;
         :desc _:desc;
         :part_id _:part_id;
         :media_url _:media_url;
         :comment _:comment;
         :created_at _:created_at
-    ]}.
+    }.
     # TODO: @doerthe: an easier way to copy like this?
     ?defect  :name _:name;
              :desc _:desc;
@@ -294,9 +295,9 @@
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/solutionsReports");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
-              http:body {[
+              http:body { rest:json
                   :part ?part;
-                  :defect { :json
+                  :defect { rest:json
                       :name ?name;
                       :desc ?desc;
                       :media_url ?media_url;
@@ -305,7 +306,7 @@
                   };
                   :solutions ?solutions;
                   :reports ?reports
-              ]}.
+              }.
     # dummy report to trigger next rule
     _:report a :report;
              :event ?original;
@@ -321,7 +322,7 @@
     ?report a :report;
             :event ?original;
             :success ?success;
-            :state :posted. # TODO: @Doerthe how do I make sure I don't get a result with find_executable_calls if this value doesn't exist?
+            :state :posted.
     ?success e:whenGround false.
 }
 =>
@@ -333,11 +334,11 @@
               http:resp [
                   http:body _:body
               ].
-    _:body :contains {[
+    _:body :contains { rest:json
         :solution_id _:solution_id;
         :success _:success;
         :comment _:comment
-    ]}.
+    }.
     _:report a :report;
              :event ?original;
              :operator ?operator;
@@ -364,19 +365,19 @@
     _:request http:methodName "POST";
               tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/reports");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
-              http:body {[
+              http:body { rest:json
                   :event_id ?event_id;
                   :operator_id ?operator_id;
                   :solution_id ?solution_id;
                   :success ?success;
                   :comment ?comment
-              ]};
+              };
               http:resp [
                   http:body _:body
               ].
-    _:body :contains {[
+    _:body :contains { rest:json
         :id _:id
-    ]}.
+    }.
     ?report :id _:id;
             :state :posted.
     # TODO: append to list of reports? (always send those to worker?)
@@ -402,11 +403,11 @@
               tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?machine_id "/events/");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               :check ?success; # TODO: a bit annoying
-              http:body {[
+              http:body { rest:json
                   :name "Teamleader maintenance finished.";
                   :desc "Machine fixed.";
                   :machine_state 4;
                   :operator_id ?operator_id
-              ]}.
+              }.
     ?problem :state :resolved.
 }.

@@ -21,19 +21,19 @@
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/" "doMeasurement");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
-              http:body {[
+              http:body { rest:json
                   :message "Please measure a new part with the following settings.";
                   :part_number ?n;
                   :suggested_parameters (?p1 ?p2 ?p3 ?p4);
                   :tolerances ( ?t1 ?t2 )
-              ]};
+              };
               http:resp [
                   http:body _:body
               ].
-    _:body :contains {[
+    _:body :contains { rest:json
         :geometrical_dimension (_:d1 _:d2);
         :used_machine_parameters (_:pp1 _:pp2 _:pp3 _:pp4)
-    ]}.
+    }.
     ?x :geometrical_dimension (_:d1 _:d2);
        :machine_parameters (_:pp1 _:pp2 _:pp3 _:pp4).
 }.
@@ -53,20 +53,20 @@
     _:request http:methodName "POST";
               tmpl:requestURI ("http://pacific-shore-4503.herokuapp.com/calibrations");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
-              http:body {[
+              http:body { rest:json
                   :operator "Arnold";
                   :part_number ?n;
                   :machine_parameters (?p1 ?p2 ?p3 ?p4);
                   :tolerances ( ?t1 ?t2 );
                   :geometrical_dimension (?d1 ?d2)
-              ]};
+              };
               http:resp [
                   http:body _:body
               ].
-    _:body :contains {[
+    _:body :contains { rest:json
         :result _:ok;
         :suggested_parameters (_:pp1 _:pp2 _:pp3 _:pp4)
-    ]}.
+    }.
     ?x :result _:ok.
     _:c a :potential_calibration;
         :previous_calibration ?x;
