@@ -1,7 +1,6 @@
 
 var assert = require('assert');
 var _ = require('lodash');
-var proxyquire = require('proxyquire');
 var path = require('path');
 var ValidCall = require('../../ValidCall');
 var RESTdesc = require('../../RESTdesc');
@@ -23,6 +22,8 @@ function relative (relativePath)
 
 describe('THO teamleader use case', function ()
 {
+    var files = [relative('n3/thermolympics_teamleader_new/api.n3'), relative('n3/util.n3')];
+    var goal = relative('n3/thermolympics_teamleader_new/goal.n3');
     var key = 'TESTKEY';
     var oldCall = null;
     before(function (done)
@@ -34,7 +35,7 @@ describe('THO teamleader use case', function ()
 
     it ('asks for an operator ID', function (done)
     {
-        var rest = new RESTdesc([relative('n3/thermolympics_teamleader_new/api.n3')], relative('n3/thermolympics_teamleader_new/goal.n3'), key);
+        var rest = new RESTdesc(files, goal, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getOperatorID');
@@ -46,7 +47,7 @@ describe('THO teamleader use case', function ()
 
     it ('asks for a machine ID (choose 1)', function (done)
     {
-        var rest = new RESTdesc([relative('n3/thermolympics_teamleader_new/api.n3')], relative('n3/thermolympics_teamleader_new/goal.n3'), key);
+        var rest = new RESTdesc(files, goal, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getMachineID');
@@ -58,7 +59,7 @@ describe('THO teamleader use case', function ()
 
     it ('returns all events to the user', function (done)
     {
-        var rest = new RESTdesc([relative('n3/thermolympics_teamleader_new/api.n3')], relative('n3/thermolympics_teamleader_new/goal.n3'), key);
+        var rest = new RESTdesc(files, goal, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/events');
@@ -70,7 +71,7 @@ describe('THO teamleader use case', function ()
 
     it ('is finished', function (done)
     {
-        var rest = new RESTdesc([relative('n3/thermolympics_teamleader_new/api.n3')], relative('n3/thermolympics_teamleader_new/goal.n3'), key);
+        var rest = new RESTdesc(files, goal, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['status'], 'DONE');
@@ -80,7 +81,7 @@ describe('THO teamleader use case', function ()
 
     it('can be rolled back to get a new machine ID', function (done)
     {
-        var rest = new RESTdesc([relative('n3/thermolympics_teamleader_new/api.n3')], relative('n3/thermolympics_teamleader_new/goal.n3'), key);
+        var rest = new RESTdesc(files, goal, key);
         rest.back(function ()
         {
             rest.back(function ()
@@ -92,7 +93,7 @@ describe('THO teamleader use case', function ()
 
     it ('asks for a machine ID (choose 2)', function (done)
     {
-        var rest = new RESTdesc([relative('n3/thermolympics_teamleader_new/api.n3')], relative('n3/thermolympics_teamleader_new/goal.n3'), key);
+        var rest = new RESTdesc(files, goal, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getMachineID');
@@ -104,7 +105,7 @@ describe('THO teamleader use case', function ()
 
     it ('informs the user of the solutions and the attempts', function (done)
     {
-        var rest = new RESTdesc([relative('n3/thermolympics_teamleader_new/api.n3')], relative('n3/thermolympics_teamleader_new/goal.n3'), key);
+        var rest = new RESTdesc(files, goal, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/solutionsReports');
@@ -116,7 +117,7 @@ describe('THO teamleader use case', function ()
 
     it ('asks for a new report', function (done)
     {
-        var rest = new RESTdesc([relative('n3/thermolympics_teamleader_new/api.n3')], relative('n3/thermolympics_teamleader_new/goal.n3'), key);
+        var rest = new RESTdesc(files, goal, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getReport');
@@ -128,7 +129,7 @@ describe('THO teamleader use case', function ()
 
     it ('asks for a new report if the previous one failed', function (done)
     {
-        var rest = new RESTdesc([relative('n3/thermolympics_teamleader_new/api.n3')], relative('n3/thermolympics_teamleader_new/goal.n3'), key);
+        var rest = new RESTdesc(files, goal, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getReport');
@@ -140,7 +141,7 @@ describe('THO teamleader use case', function ()
 
     it ('is really finished', function (done)
     {
-        var rest = new RESTdesc([relative('n3/thermolympics_teamleader_new/api.n3')], relative('n3/thermolympics_teamleader_new/goal.n3'), key);
+        var rest = new RESTdesc(files, goal, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['status'], 'DONE');
