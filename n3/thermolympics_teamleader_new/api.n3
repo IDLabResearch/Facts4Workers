@@ -5,6 +5,7 @@
 @prefix tmpl: <http://purl.org/restdesc/http-template#>.
 @prefix log: <http://www.w3.org/2000/10/swap/log#>.
 @prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
+@prefix list: <http://www.w3.org/2000/10/swap/list#>.
 
 # get teamleader operator ( TODO: probably should use same rule as worker part)
 {
@@ -206,13 +207,83 @@
     ?original :reports _:list.
 }.
 
+# get defect information to send to user
+{
+    ?problem a :problem;
+               :event ?event.
+    ?event :defect ?defect.
+    ?defect :id ?defect_id.
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/defects/" ?defect_id);
+              http:resp [
+                  http:body _:body
+              ].
+
+    _:body :contains {[
+        :name _:name;
+        :desc _:desc;
+        :part_id _:part_id;
+        :media_url _:media_url;
+        :comment _:comment;
+        :created_at _:created_at
+    ]}.
+    # TODO: @doerthe: an easier way to copy like this?
+    ?defect  :name _:name;
+             :desc _:desc;
+             :part_id _:part_id;
+             :media_url _:media_url;
+             :comment _:comment;
+             :created_at _:created_at.
+}.
+
+# TODO: copied from operator, need 1 building block, also, no way currently to get info for 1 part
+{
+    ?problem a :problem;
+             :machine ?machine.
+    ?machine :id ?machine_id.
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://machinesandparts.surge.sh/api/parts.json");
+              http:resp [
+                  http:body _:list
+              ].
+    _:list a :partList.
+}.
+
+{
+    ?problem a :problem.
+    ?event :defect ?defect.
+    ?defect :part_id ?part_id.
+
+    ?list a :partList.
+
+    _:x e:findall (?e {?e list:in ?list. ?e log:includes {?s :id ?part_id}} ?parts).
+    ?parts log:conjunction ?part. # TODO: @Doerthe: this is not really getting the first element
+}
+=>
+{
+    ?problem :part ?part.
+}.
+
 # send solutions and reports to teamleader
 {
     ?problem :event ?event;
              :operator ?operator.
+    ?problem :part ?part.
 
     ?event :defect ?defect.
     ?defect :solutions ?solutions.
+
+    ?defect  :name ?name;
+             :desc ?desc;
+             :media_url ?media_url;
+             :comment ?comment;
+             :created_at ?created.
 
     ?event :original ?original.
     ?original :reports ?reports.
@@ -223,6 +294,14 @@
               tmpl:requestURI ("http://askTheWorker/solutionsReports");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {[
+                  :part ?part;
+                  :defect { :json
+                      :name ?name;
+                      :desc ?desc;
+                      :media_url ?media_url;
+                      :comment ?comment;
+                      :created_at ?created
+                  };
                   :solutions ?solutions;
                   :reports ?reports
               ]}.
