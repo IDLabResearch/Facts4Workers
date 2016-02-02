@@ -345,6 +345,30 @@
              :comment _:comment.
 }.
 
+# TODO: can this create an infinite loop? (or are we safe because the URI will always be 'DUMMY'?)
+{
+    # give the ungrounded reports a temporary uri so the reasoner can use them with the existing path tactic
+    ?report a :report;
+            e:label ?label.
+    ?bla log:uri "DUMMY".
+
+    ?report a :report;
+              :event ?original;
+              :operator ?operator;
+              :solution ?solution;
+              :success ?success;
+              :comment ?comment.
+}
+=>
+{
+    ?bla a :report;
+         :event ?original;
+         :operator ?operator;
+         :solution ?solution;
+         :success ?success;
+         :comment ?comment.
+}.
+
 # POST report
 {
     ?report a :report;
