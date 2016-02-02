@@ -1,9 +1,0 @@
-@prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
-@prefix : <http://f4w.restdesc.org/demo#>.
-@prefix log: <http://www.w3.org/2000/10/swap/log#>.
-
-{
-    ?report :is :posted.
-}=>{
-    ?report :is :posted.
-}.
