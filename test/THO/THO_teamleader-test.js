@@ -4,18 +4,17 @@ var _ = require('lodash');
 var proxyquire = require('proxyquire');
 var path = require('path');
 var ValidCall = require('../../ValidCall');
+var RESTdesc = require('../../RESTdesc');
 var stubs = require('./THO_teamleader-stubs');
 
-ValidCall.prototype.call = function (callback)
+function callStub (callback)
 {
     var url = this.getURL();
     if (!(url in stubs))
         throw 'Unsupported URL stub: ' + url;
     var result = stubs[url](this.getBody());
     callback(result);
-};
-
-var RESTdesc = proxyquire('../../RESTdesc', { 'ValidCall': ValidCall});
+}
 
 function relative (relativePath)
 {
@@ -25,8 +24,11 @@ function relative (relativePath)
 describe('THO teamleader use case', function ()
 {
     var key = 'TESTKEY';
+    var oldCall = null;
     before(function (done)
     {
+        oldCall = ValidCall.prototype.call;
+        ValidCall.prototype.call = callStub;
         new RESTdesc([], '', key).clear(done);
     });
 
@@ -149,5 +151,6 @@ describe('THO teamleader use case', function ()
     after(function (done)
     {
         new RESTdesc([], '', key).clear(done);
+        ValidCall.prototype.call = oldCall;
     });
 });
