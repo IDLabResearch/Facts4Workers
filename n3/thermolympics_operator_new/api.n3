@@ -1,6 +1,7 @@
 # https://thermolympic-demo.herokuapp.com/api_doc/
 
 @prefix : <http://f4w.restdesc.org/demo#>.
+@prefix operator: <http://f4w.restdesc.org/demo/operator#>.
 @prefix rest: <http://f4w.restdesc.org/restdesc#>.
 @prefix http: <http://www.w3.org/2011/http#>.
 @prefix tmpl: <http://purl.org/restdesc/http-template#>.
@@ -10,7 +11,7 @@
 @prefix math: <http://www.w3.org/2000/10/swap/math#>.
 @prefix string: <http://www.w3.org/2000/10/swap/string#>.
 
-:thereIsADefect a :problem.
+:thereIsADefect a operator:problem.
 :thereIsADefect :trySolution :firstTry.
 :firstTry :solutionNo 1.
 
@@ -32,7 +33,7 @@
 
 {
     ?list a :operatorlist.
-    ?problem a :problem.
+    ?problem a operator:problem.
 }
 =>
 {
@@ -133,7 +134,7 @@
 
 #Problem is HERE
 #get defect id list
-{  
+{
 ?problem :occurredOnPartWithID ?p
 }
 =>
@@ -166,7 +167,7 @@
     _:body :contains { rest:json
         :id _:d;
     }.
-    ?problem :defect _:d. 
+    ?problem :defect _:d.
 }.
 
 
@@ -283,7 +284,7 @@
 }.
 
 
-{?solution :solutionId ?sid. ?solution2 :solutionId ?sid. 
+{?solution :solutionId ?sid. ?solution2 :solutionId ?sid.
  ?solution :reqMachineSkills ?ms; :reqToolSkills ?t; :reqComputerSkills ?c. ?solution :requiredSkillsKnown "yes"
 }=>{?solution2 :reqMachineSkills ?ms; :reqToolSkills ?t; :reqComputerSkills ?c. ?solution2 :requiredSkillsKnown "yes"}.
 
@@ -549,7 +550,7 @@
                     :machine_state "1"
               }.
      ?machine :newState _:state.
-    ?problem :finalState :solved. 
+    ?problem :finalState :solved.
 }.
 
 

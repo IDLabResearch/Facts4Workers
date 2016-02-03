@@ -22,7 +22,7 @@ function relative (relativePath)
 
 describe('THO teamleader use case', function ()
 {
-    var files = [relative('n3/thermolympics_teamleader_new/api.n3'), relative('n3/util.n3')];
+    var files = [relative('n3/thermolympics_teamleader_new/api.n3'), relative('n3/util.n3'), relative('n3/thermolympics_operator_new/api.n3')];
     var goal = relative('n3/thermolympics_teamleader_new/goal.n3');
     var key = 'TESTKEY';
     var oldCall = null;
