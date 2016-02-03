@@ -1,6 +1,7 @@
 # http://docs.dummytest.apiary.io/#
 
 @prefix : <http://f4w.restdesc.org/demo#>.
+@prefix rest: <http://f4w.restdesc.org/demo#>.
 @prefix http: <http://www.w3.org/2011/http#>.
 @prefix tmpl: <http://purl.org/restdesc/http-template#>.
 @prefix math: <http://www.w3.org/2000/10/swap/math#>.
@@ -30,7 +31,7 @@
               http:resp [
                   http:body _:body
               ].
-    _:body :contains { rest:json
+    _:body rest:contains { rest:json
         :geometrical_dimension (_:d1 _:d2);
         :used_machine_parameters (_:pp1 _:pp2 _:pp3 _:pp4)
     }.
@@ -63,7 +64,7 @@
               http:resp [
                   http:body _:body
               ].
-    _:body :contains { rest:json
+    _:body rest:contains { rest:json
         :result _:ok;
         :suggested_parameters (_:pp1 _:pp2 _:pp3 _:pp4)
     }.
