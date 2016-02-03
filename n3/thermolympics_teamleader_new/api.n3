@@ -1,6 +1,7 @@
 # http://facts4workers.surge.sh/
 
 @prefix : <http://f4w.restdesc.org/demo#>.
+@prefix teamleader: <http://f4w.restdesc.org/demo/teamleader#>.
 @prefix rest: <http://f4w.restdesc.org/restdesc#>.
 @prefix http: <http://www.w3.org/2011/http#>.
 @prefix tmpl: <http://purl.org/restdesc/http-template#>.
@@ -21,13 +22,13 @@
               http:resp [
                   http:body _:list
               ].
-    _:list a :operatorSkillList.
+    _:list a teamleader:operatorSkillList.
 }.
 
 # TODO: extra rule :operatorSkillList -> :operatorList ?
 
 {
-    ?list a :operatorSkillList
+    ?list a teamleader:operatorSkillList
 }
 =>
 {
@@ -43,8 +44,8 @@
     _:body :contains { rest:json
         :id _:id
     }.
-    _:problem a :problem;
-              :operator [ :id _:id ]
+    _:problem a teamleader:problem;
+              teamleader:operator [ teamleader:id _:id ]
 }.
 
 # TODO: some copy/paste here from other THO api rules
@@ -59,14 +60,14 @@
               http:resp [
                   http:body _:list
               ].
-    _:list a :machineList.
+    _:list a teamleader:machineList.
 }.
 
 # get machine ID from operator
 {
-    ?problem a :problem;
-             :operator ?operator.
-    ?list a :machineList.
+    ?problem a teamleader:problem;
+             teamleader:operator ?operator.
+    ?list a teamleader:machineList.
 }
 =>
 {
@@ -83,14 +84,14 @@
     _:body :contains { rest:json
         :id _:id
     }.
-    ?problem :machine [ :id _:id ].
+    ?problem teamleader:machine [ teamleader:id _:id ].
 }.
 
 # get last event for given machine
 {
-    ?problem a :problem;
-             :machine ?machine.
-    ?machine :id ?machine_id.
+    ?problem a teamleader:problem;
+             teamleader:machine ?machine.
+    ?machine teamleader:id ?machine_id.
 }
 =>
 {
@@ -104,50 +105,50 @@
         # TODO: same problem as other APIs with multiple options: optional could be empty (if machine is not stopped for example)
         :optional _:optional
     }.
-    ?problem :event [ :id _:id;
-                      :optional _:optional ].
+    ?problem teamleader:event [ teamleader:id _:id;
+                                teamleader:optional _:optional ].
 }.
 # TODO: problem with 'optional' being, well, optional
 {
-    ?problem :event ?event.
-    ?event :optional ?optional.
+    ?problem teamleader:event ?event.
+    ?event teamleader:optional ?optional.
     ?optional e:label ?label.
 }
 =>
 {
-    ?event :defect [ :id _:defect_id ];
-           :original [ :id _:original_id ].
+    ?event teamleader:defect [ teamleader:id _:defect_id ];
+           teamleader:original [ teamleader:id _:original_id ].
 }.
 {
-    ?problem :event ?event.
-    ?event :optional ?optional.
-    ?optional log:includes { ?x :defect_id ?did; :stopped_for_defect_event_id ?oid }.
+    ?problem teamleader:event ?event.
+    ?event teamleader:optional ?optional.
+    ?optional log:includes { ?x :defect_id ?did; :stopped_for_defect_event_id ?oid }. # TODO: can't use teamleader prefix here since it's coming from JSON...
 }
 =>
 {
     # TODO: do these need to be grounded at this point? can be created at the end of another rule to force grounding?
-    ?event :defect :defect;
-           :original :original.
-    :defect :id ?did.
-    :original :id ?oid.
+    ?event teamleader:defect teamleader:defect;
+           teamleader:original teamleader:original.
+    teamleader:defect teamleader:id ?did.
+    teamleader:original teamleader:id ?oid.
 }.
 {
-    ?problem :event ?event.
-    ?event :optional ?optional.
+    ?problem teamleader:event ?event.
+    ?event teamleader:optional ?optional.
     ?optional e:notLabel ?label. # important so it doesn't match when it's still a blank node
-    ?optional log:notIncludes { ?x :defect_id ?did; :stopped_for_defect_event_id ?oid }.
+    ?optional log:notIncludes { ?x :defect_id ?did; :stopped_for_defect_event_id ?oid }. # TODO: can't use teamleader prefix here since it's coming from JSON...
 }
 =>
 {
-    ?problem :state :ok.
+    ?problem teamleader:state teamleader:ok.
 }.
 
 # get all events if there is no actual problem with the machine
 {
-    ?problem a :problem;
-             :state :ok;
-             :machine ?machine.
-    ?machine :id ?machine_id.
+    ?problem a teamleader:problem;
+             teamleader:state teamleader:ok;
+             teamleader:machine ?machine.
+    ?machine teamleader:id ?machine_id.
 }
 =>
 {
@@ -156,15 +157,15 @@
               http:resp [
                   http:body _:list
               ].
-    ?machine :events _:list.
+    ?machine teamleader:events _:list.
 }.
 
 # send all events to the worker if there is nothing to do
 {
-    ?problem a :problem;
-             :state :ok;
-             :machine ?machine.
-    ?machine :events ?events.
+    ?problem a teamleader:problem;
+             teamleader:state teamleader:ok;
+             teamleader:machine ?machine.
+    ?machine teamleader:events ?events.
 }
 =>
 {
@@ -174,14 +175,14 @@
               http:body { rest:json
                   :events ?events
               }.
-    ?problem :state :resolved.
+    ?problem teamleader:state teamleader:resolved.
 }.
 
 # get solutions
 {
-    ?problem :event ?event.
-    ?event :defect ?defect.
-    ?defect :id ?defect_id.
+    ?problem teamleader:event ?event.
+    ?event teamleader:defect ?defect.
+    ?defect teamleader:id ?defect_id.
 }
 =>
 {
@@ -190,14 +191,14 @@
               http:resp [
                   http:body _:list
               ].
-    ?defect :solutions _:list.
+    ?defect teamleader:solutions _:list.
 }.
 
 # get corresponding reports
 {
-    ?problem :event ?event.
-    ?event :original ?original.
-    ?original :id ?original_id.
+    ?problem teamleader:event ?event.
+    ?event teamleader:original ?original.
+    ?original teamleader:id ?original_id.
 }
 =>
 {
@@ -206,15 +207,15 @@
               http:resp [
                   http:body _:list
               ].
-    ?original :reports _:list.
+    ?original teamleader:reports _:list.
 }.
 
 # get defect information to send to user
 {
-    ?problem a :problem;
-               :event ?event.
-    ?event :defect ?defect.
-    ?defect :id ?defect_id.
+    ?problem a teamleader:problem;
+               teamleader:event ?event.
+    ?event teamleader:defect ?defect.
+    ?defect teamleader:id ?defect_id.
 }
 =>
 {
@@ -233,19 +234,19 @@
         :created_at _:created_at
     }.
     # TODO: @doerthe: an easier way to copy like this?
-    ?defect  :name _:name;
-             :desc _:desc;
-             :part_id _:part_id;
-             :media_url _:media_url;
-             :comment _:comment;
-             :created_at _:created_at.
+    ?defect  teamleader:name _:name;
+             teamleader:desc _:desc;
+             teamleader:part_id _:part_id;
+             teamleader:media_url _:media_url;
+             teamleader:comment _:comment;
+             teamleader:created_at _:created_at.
 }.
 
 # TODO: copied from operator, need 1 building block, also, no way currently to get info for 1 part
 {
-    ?problem a :problem;
-             :machine ?machine.
-    ?machine :id ?machine_id.
+    ?problem a teamleader:problem;
+             teamleader:machine ?machine.
+    ?machine teamleader:id ?machine_id.
 }
 =>
 {
@@ -254,41 +255,41 @@
               http:resp [
                   http:body _:list
               ].
-    _:list a :partList.
+    _:list a teamleader:partList.
 }.
 
 {
-    ?problem a :problem.
-    ?event :defect ?defect.
-    ?defect :part_id ?part_id.
+    ?problem a teamleader:problem.
+    ?event teamleader:defect ?defect.
+    ?defect teamleader:part_id ?part_id.
 
-    ?list a :partList.
+    ?list a teamleader:partList.
 
-    _:x e:findall (?e {?e list:in ?list. ?e log:includes {?s :id ?part_id}} ?parts).
+    _:x e:findall (?e {?e list:in ?list. ?e log:includes {?s teamleader:id ?part_id}} ?parts).
     ?parts log:conjunction ?part. # TODO: @Doerthe: this is not really getting the first element
 }
 =>
 {
-    ?problem :part ?part.
+    ?problem teamleader:part ?part.
 }.
 
 # send solutions and reports to teamleader
 {
-    ?problem :event ?event;
-             :operator ?operator.
-    ?problem :part ?part.
+    ?problem teamleader:event ?event;
+             teamleader:operator ?operator.
+    ?problem teamleader:part ?part.
 
-    ?event :defect ?defect.
-    ?defect :solutions ?solutions.
+    ?event teamleader:defect ?defect.
+    ?defect teamleader:solutions ?solutions.
 
-    ?defect  :name ?name;
-             :desc ?desc;
-             :media_url ?media_url;
-             :comment ?comment;
-             :created_at ?created.
+    ?defect  teamleader:name ?name;
+             teamleader:desc ?desc;
+             teamleader:media_url ?media_url;
+             teamleader:comment ?comment;
+             teamleader:created_at ?created.
 
-    ?event :original ?original.
-    ?original :reports ?reports.
+    ?event teamleader:original ?original.
+    ?original teamleader:reports ?reports.
 }
 =>
 {
@@ -308,21 +309,21 @@
                   :reports ?reports
               }.
     # dummy report to trigger next rule
-    _:report a :report;
-             :event ?original;
-             :success false;
-             :state :posted.
+    _:report a teamleader:report;
+             teamleader:event ?original;
+             teamleader:success false;
+             teamleader:state teamleader:posted.
 }.
 
 # request report if the previous report failed
 {
-    ?problem :event ?event;
-             :operator ?operator.
-    ?event :original ?original.
-    ?report a :report;
-            :event ?original;
-            :success ?success;
-            :state :posted.
+    ?problem teamleader:event ?event;
+             teamleader:operator ?operator.
+    ?event teamleader:original ?original.
+    ?report a teamleader:report;
+            teamleader:event ?original;
+            teamleader:success ?success;
+            teamleader:state teamleader:posted.
     ?success e:whenGround false.
 }
 =>
@@ -339,26 +340,26 @@
         :success _:success;
         :comment _:comment
     }.
-    _:report a :report;
-             :event ?original;
-             :operator ?operator;
-             :solution [ :id _:solution_id ];
-             :success _:success;
-             :comment _:comment.
+    _:report a teamleader:report;
+             teamleader:event ?original;
+             teamleader:operator ?operator;
+             teamleader:solution [ teamleader:id _:solution_id ];
+             teamleader:success _:success;
+             teamleader:comment _:comment.
     _:report util:loop true.
 }.
 
 # POST report
 {
-    ?report a :report;
-            :event ?event;
-            :operator ?operator;
-            :solution ?solution;
-            :success ?success;
-            :comment ?comment.
-    ?event :id ?event_id.
-    ?operator :id ?operator_id.
-    ?solution :id ?solution_id.
+    ?report a teamleader:report;
+            teamleader:event ?event;
+            teamleader:operator ?operator;
+            teamleader:solution ?solution;
+            teamleader:success ?success;
+            teamleader:comment ?comment.
+    ?event teamleader:id ?event_id.
+    ?operator teamleader:id ?operator_id.
+    ?solution teamleader:id ?solution_id.
 }
 =>
 {
@@ -378,24 +379,24 @@
     _:body :contains { rest:json
         :id _:id
     }.
-    ?report :id _:id;
-            :state :posted.
+    ?report teamleader:id _:id;
+            teamleader:state teamleader:posted.
     # TODO: append to list of reports? (always send those to worker?)
 }.
 
 # update machine status if there was a succesful report
 {
-    ?problem :operator ?operator;
-             :machine ?machine;
-             :event ?event.
-    ?machine :id ?machine_id.
-    ?event :original ?original.
-    ?report a :report;
-            :event ?original;
-            :state :posted;
-            :success ?success.
+    ?problem teamleader:operator ?operator;
+             teamleader:machine ?machine;
+             teamleader:event ?event.
+    ?machine teamleader:id ?machine_id.
+    ?event teamleader:original ?original.
+    ?report a teamleader:report;
+            teamleader:event ?original;
+            teamleader:state teamleader:posted;
+            teamleader:success ?success.
     ?success e:whenGround true.
-    ?operator :id ?operator_id.
+    ?operator teamleader:id ?operator_id.
 }
 =>
 {
@@ -409,5 +410,5 @@
                   :machine_state 4;
                   :operator_id ?operator_id
               }.
-    ?problem :state :resolved.
+    ?problem teamleader:state teamleader:resolved.
 }.
