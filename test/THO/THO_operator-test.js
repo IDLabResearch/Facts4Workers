@@ -1,7 +1,6 @@
 
 var assert = require('assert');
 var _ = require('lodash');
-var path = require('path');
 var ValidCall = require('../../ValidCall');
 var RESTdesc = require('../../RESTdesc');
 var stubs = require('./THO_operator-stubs');
@@ -15,15 +14,8 @@ function callStub (callback)
     callback(result);
 }
 
-function relative (relativePath)
-{
-    return path.join(path.join(__dirname, '../..'), relativePath);
-}
-
 describe('THO operator use case', function ()
 {
-    var files = [relative('n3/util.n3'), relative('n3/thermolympics_teamleader_new/api.n3'), relative('n3/thermolympics_operator_new/api.n3')];
-    var goal = relative('n3/thermolympics_operator_new/goal.n3');
     var key = 'TESTKEY';
     var oldCall = null;
     before(function (done)
@@ -35,7 +27,7 @@ describe('THO operator use case', function ()
 
     it ('asks for an operator ID', function (done)
     {
-        var rest = new RESTdesc(files, goal, key);
+        var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getOperatorID');
@@ -47,7 +39,7 @@ describe('THO operator use case', function ()
 
     it ('asks for a machine ID', function (done)
     {
-        var rest = new RESTdesc(files, goal, key);
+        var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getMachineID');
@@ -59,7 +51,7 @@ describe('THO operator use case', function ()
 
     it ('asks for a part ID', function (done)
     {
-        var rest = new RESTdesc(files, goal, key);
+        var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getPartID');
@@ -71,7 +63,7 @@ describe('THO operator use case', function ()
 
     it ('asks for a defect ID', function (done)
     {
-        var rest = new RESTdesc(files, goal, key);
+        var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getDefectID');
@@ -83,7 +75,7 @@ describe('THO operator use case', function ()
 
     it ('asks for a solution ID', function (done)
     {
-        var rest = new RESTdesc(files, goal, key);
+        var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getSolutionID');
@@ -95,7 +87,7 @@ describe('THO operator use case', function ()
 
     it ('asks for a report', function (done)
     {
-        var rest = new RESTdesc(files, goal, key);
+        var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getReport');
@@ -107,7 +99,7 @@ describe('THO operator use case', function ()
 
     it ('asks for a solution ID if the report failed', function (done)
     {
-        var rest = new RESTdesc(files, goal, key);
+        var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getSolutionID');
@@ -119,7 +111,7 @@ describe('THO operator use case', function ()
 
     it ('asks for a report again', function (done)
     {
-        var rest = new RESTdesc(files, goal, key);
+        var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getReport');
@@ -131,7 +123,7 @@ describe('THO operator use case', function ()
 
     it ('updates the user that he is finished', function (done)
     {
-        var rest = new RESTdesc(files, goal, key);
+        var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/YouAreDone');
@@ -141,7 +133,7 @@ describe('THO operator use case', function ()
 
     it ('is finished', function (done)
     {
-        var rest = new RESTdesc(files, goal, key);
+        var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['status'], 'DONE');
@@ -151,7 +143,7 @@ describe('THO operator use case', function ()
 
     it('can be rolled back to getSolutionID', function (done)
     {
-        var rest = new RESTdesc(files, goal, key);
+        var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
         rest.back(function ()
         {
             rest.back(function ()
@@ -166,7 +158,7 @@ describe('THO operator use case', function ()
 
     it('asks for a solution ID (again)', function (done)
     {
-        var rest = new RESTdesc(files, goal, key);
+        var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getSolutionID');
@@ -178,7 +170,7 @@ describe('THO operator use case', function ()
 
     it ('updates the user that he is unqualified', function (done)
     {
-        var rest = new RESTdesc(files, goal, key);
+        var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/SentToTeamLeader');
@@ -188,7 +180,7 @@ describe('THO operator use case', function ()
 
     it ('is (really) finished', function (done)
     {
-        var rest = new RESTdesc(files, goal, key);
+        var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
         rest.next(function (result)
         {
             assert.strictEqual(result['status'], 'DONE');
