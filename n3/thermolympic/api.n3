@@ -7,6 +7,7 @@
 @prefix log: <http://www.w3.org/2000/10/swap/log#>.
 @prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
 
+# GET operators
 {
     log:Truth.
 }
@@ -19,4 +20,19 @@
                   http:body _:list
               ].
    _:list a tho:operatorList.
+}.
+
+# GET machines
+{
+    log:Truth.
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              http:resp [
+                  http:body _:list
+              ].
+    _:list a tho:machineList.
 }.

@@ -32,26 +32,11 @@
               teamleader:operator [ teamleader:id _:id ]
 }.
 
-# TODO: some copy/paste here from other THO api rules
-#get machine id list
-{
-    log:Truth.
-}
-=>
-{
-    _:request http:methodName "GET";
-              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines");
-              http:resp [
-                  http:body _:list
-              ].
-    _:list a teamleader:machineList.
-}.
-
 # get machine ID from operator
 {
     ?problem a teamleader:problem;
              teamleader:operator ?operator.
-    ?list a teamleader:machineList.
+    ?list a tho:machineList.
 }
 =>
 {

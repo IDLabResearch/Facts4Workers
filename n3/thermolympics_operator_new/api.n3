@@ -40,22 +40,9 @@
         :foundProblem ?problem.
 }.
 
-#get machine id list
-{
-    log:Truth.
-}
-=>{
-    _:request http:methodName "GET";
-              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines");
-              http:resp [
-                  http:body _:list
-              ].
-    _:list a :machineList.
-}.
-
 #get machine id
 {
-    ?list a :machineList.
+    ?list a tho:machineList.
     ?operator :foundProblem ?problem.
 }
 =>
