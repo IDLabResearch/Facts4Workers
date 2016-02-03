@@ -36,15 +36,19 @@ EYEHandler.prototype.call = function (dataPaths, data, queryPath, proof, singleA
         // http://stackoverflow.com/questions/17516772/using-nodejss-spawn-causes-unknown-option-and-error-spawn-enoent-err
         var proc = spawn(process.platform === "win32" ? "eye.cmd" : "eye", args);
         var output = "";
+        var error = "";
         proc.stdout.on('data', function (data) {
             output += data.toString();
             //console.log(data.toString());
         });
         proc.stderr.on('data', function (data) {
+            error += data;
             //console.error(data.toString());
         });
         proc.on('close', function (code) {
             // TODO: check exit code?
+            if (code !== 0)
+                throw 'EYE error:\n' + error;
             cache.destroy();
             callback(output);
         });

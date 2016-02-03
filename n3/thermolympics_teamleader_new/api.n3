@@ -265,7 +265,8 @@
 
     ?list a teamleader:partList.
 
-    _:x e:findall (?e {?e list:in ?list. ?e log:includes {?s teamleader:id ?part_id}} ?parts).
+    (?list {?s teamleader:id ?part_id}) util:filter ?parts.
+
     ?parts log:conjunction ?part. # TODO: @Doerthe: this is not really getting the first element
 }
 =>
