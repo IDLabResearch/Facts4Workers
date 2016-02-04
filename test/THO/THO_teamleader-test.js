@@ -14,6 +14,7 @@ function callStub (callback)
     callback(result);
 }
 
+// TODO: check if request body is also correct
 describe('THO teamleader use case', function ()
 {
     var key = 'TESTKEY';

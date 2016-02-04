@@ -89,14 +89,45 @@ Util.mapJSON = function (json, template, map)
     return map;
 };
 
+
 Util.JSONLDtoJSON = function (jsonld)
+{
+    var literals = Util._findJSONLiterals(jsonld);
+    console.log(literals);
+    return Util._JSONLDtoJSON(jsonld, literals);
+};
+
+Util._findJSONLiterals = function (jsonld)
+{
+    if (Util.isLiteral(jsonld))
+        return {};
+
+    if (_.isArray(jsonld))
+        return jsonld.reduce(function (acc, thingy) { return _.assign(acc, Util._findJSONLiterals(thingy)); }, {});
+
+    var literals = {};
+
+    // literal nodes
+    if (Object.keys(jsonld).length === 2 && '@value' in jsonld && '@id' in jsonld)
+    {
+        literals[jsonld['@id']] = jsonld['@value'];
+        return literals;
+    }
+
+    for (var key in jsonld)
+        _.assign(literals, Util._findJSONLiterals(jsonld[key]));
+
+    return literals
+};
+
+Util._JSONLDtoJSON = function (jsonld, literals)
 {
     // TODO: what about lang/datatype?
     if (Util.isLiteral(jsonld))
         return jsonld;
 
     if (_.isArray(jsonld))
-        return jsonld.map(function (thingy) { return Util.JSONLDtoJSON(thingy); });
+        return _.filter(jsonld.map(function (thingy) { return Util._JSONLDtoJSON(thingy, literals); }), function (thingy) { return thingy !== undefined; });
 
     var json = {};
     if (jsonld['tmpl:requestURI'])
@@ -113,6 +144,10 @@ Util.JSONLDtoJSON = function (jsonld)
         json['http:requestURI'] = uriList.join('');
     }
 
+    // literal nodes can be ignored now
+    if (Object.keys(jsonld).length === 2 && '@value' in jsonld && '@id' in jsonld)
+        return undefined;
+
     var keys = _.without(Object.keys(jsonld), '@context');
     for (var key in jsonld)
     {
@@ -122,7 +157,7 @@ Util.JSONLDtoJSON = function (jsonld)
 
         if (key === '@graph')
         {
-            var result = Util.JSONLDtoJSON(jsonld[key]);
+            var result = Util._JSONLDtoJSON(jsonld[key], literals);
             // will always be a list, but often with only 1 element
             if (result.length === 0)
                 return {};
@@ -132,22 +167,25 @@ Util.JSONLDtoJSON = function (jsonld)
         }
 
         if ((key === '@list' || key === '@graph' || key === '@id') && keys.length === 1)
-            return Util.JSONLDtoJSON(jsonld[key]);
+            return Util._JSONLDtoJSON(jsonld[key], literals);
 
         // ignore URIs for now
         if (key === '@id')
             continue;
 
         // this might produce invalid URIs, but we don't care since the output is JSON, not JSON-lD
-        var val = Util.JSONLDtoJSON(jsonld[key]);
+        var val = Util._JSONLDtoJSON(jsonld[key], literals);
         if (_.startsWith(key, Util.BASE + ':'))
             key = key.substr(Util.BASE.length+1);
+        if (key in literals)
+            key = literals[key];
 
         json[key] = val;
     }
     return json;
 };
 
+// TODO: predicate literals
 Util.JSONtoJSONLD = function (json)
 {
     if (json === null)
