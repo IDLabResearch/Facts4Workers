@@ -93,7 +93,6 @@ Util.mapJSON = function (json, template, map)
 Util.JSONLDtoJSON = function (jsonld)
 {
     var literals = Util._findJSONLiterals(jsonld);
-    console.log(literals);
     return Util._JSONLDtoJSON(jsonld, literals);
 };
 
