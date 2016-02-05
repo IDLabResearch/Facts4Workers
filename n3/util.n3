@@ -3,6 +3,7 @@
 @prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
 @prefix string: <http://www.w3.org/2000/10/swap/string#>.
 @prefix list: <http://www.w3.org/2000/10/swap/list#>.
+@prefix prolog: <http://eulersharp.sourceforge.net/2003/03swap/prolog#>.
 
 # LOOPING
 {
@@ -20,9 +21,69 @@
 
 # FILTERING
 {
+    ( ?list ?pattern ) :filter ?e.
+}
+<=
+{
+    ?list e:label ?label.
+    ?e e:tuple :dummy.
+}.
+
+{
+    ( () ?pattern ) :filter ().
+}
+<=
+{}.
+
+{
     ( ?list ?pattern ) :filter ?result.
 }
 <=
 {
-    _:x e:findall (?e {?e list:in ?list. ?e log:equalTo ?pattern} ?result).
+    ?list e:notLabel ?label.
+    ?list list:first ?first.
+    ({({?first log:includes ?pattern.}) prolog:not_provable true.}) prolog:not_provable true. # do not ask
+    ?list list:rest ?rest.
+    ( ?rest ?pattern ) :filter ?filteredRest.
+
+    ((?first) ?filteredRest) list:append ?result.
+}.
+
+{
+    ( ?list ?pattern  ) :filter ?result.
+}
+<=
+{
+    ?list e:notLabel ?label.
+    ?list list:first ?first.
+    ?first log:notIncludes ?pattern.
+
+    ?list list:rest ?rest.
+    ( ?rest ?pattern ) :filter ?result.
+}.
+
+# SELECTING
+{
+    (?list ?idx) :select ?e.
+}
+<=
+{
+    ?list e:label ?label.
+    ?e e:tuple :dummy.
+}.
+
+{
+    (() ?idx) :select ?e.
+}
+<=
+{
+    ?e e:tuple :dummy.
+}.
+
+{
+    (?list ?idx) :select ?e.
+}
+<=
+{
+    (?idx ?list ?e) prolog:nth0 true.
 }.

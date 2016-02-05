@@ -234,9 +234,9 @@
 
     ?list a teamleader:partList.
 
-    (?list {?s teamleader:id ?part_id}) util:filter ?parts.
+    (?list {?s :id ?part_id}) util:filter ?parts.
 
-    ?parts log:conjunction ?part. # TODO: @Doerthe: this is not really getting the first element
+    (?parts 0) util:select ?part.
 }
 =>
 {
