@@ -24,6 +24,7 @@ PREFIX prolog: <http://eulersharp.sourceforge.net/2003/03swap/prolog#>
 
 ?x r:rule ?rule.
 ?rule r:gives {?pre=>?post}.
+?post e:labelvars ?post.
 ?post log:includes {?z2 tmpl:requestURI ?a2. ?z2 http:methodName ?n2.}.
 
 
@@ -32,7 +33,8 @@ PREFIX prolog: <http://eulersharp.sourceforge.net/2003/03swap/prolog#>
 ?y :bodyCheck ?post.
 ?y :check ?post.
 }=> 
-{[] :validCall ?y}. 
+{[] :validCall ?y. 
+}. 
 
 
 

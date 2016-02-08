@@ -13,22 +13,20 @@ PREFIX prolog: <http://eulersharp.sourceforge.net/2003/03swap/prolog#>
 
 
 #Body is simple 
-{?body :test ?body2} 
+{?body1 :test ?body2} 
 <=
 {
-?body2 e:label ?l.
-?body e:notLabel ?o.
+?body2 e:label ?l1.
+?body1 e:notLabel ?l2.
 }.
 
-{?body :test ?body2} 
+{?body1 :test ?body2} 
 <=
 {
-?body2 e:notLabel ?l.
+?body2 e:notLabel ?l1.
 ?body2 log:rawType ?type.
 ?type log:notEqualTo log:Formula, rdf:List.
 }.
-
-
 
 #Body is a list
 
@@ -69,6 +67,7 @@ PREFIX prolog: <http://eulersharp.sourceforge.net/2003/03swap/prolog#>
 <=
 {
 ?body2 log:rawType log:Formula.
+?body log:rawType log:Formula.
 () prolog:cut true.
 ?body2 e:graphList ?rc.
 ?body e:graphList ?gc.
@@ -78,7 +77,7 @@ PREFIX prolog: <http://eulersharp.sourceforge.net/2003/03swap/prolog#>
 
 
 {
-() :checkGraphList ?x.
+() :checkGraphList ().
 }
 <=
 {
@@ -143,6 +142,7 @@ PREFIX prolog: <http://eulersharp.sourceforge.net/2003/03swap/prolog#>
 {
 ?b2 e:notLabel ?l.
 ?b2 log:rawType log:Formula.
+?b1 log:rawType log:Formula.
 () prolog:cut true.
 ?b2 e:graphList ?rc.
 ?b1 e:graphList ?gc.
@@ -169,16 +169,21 @@ PREFIX prolog: <http://eulersharp.sourceforge.net/2003/03swap/prolog#>
 
 {?y :bodyCheck ?post.}
 <={
-?y log:includes {?z http:body ?body}.
+?y log:includes {?z http:body ?body. ?z http:methodName ?n1}.
 () prolog:cut true.
-?post log:includes {?zz http:body ?body2}.
+?post log:includes {?zz http:body ?body2. ?zz http:methodName ?n2}.
 ?body :test ?body2.
 }.
 
 {?y :bodyCheck ?post.}
 <={
-?y log:notIncludes {?z http:body ?body}.
+?y log:notIncludes {?z http:body ?body. ?z http:methodName ?n1}.
 () prolog:cut true.
 }.
+
+
+
+
+
 
 
