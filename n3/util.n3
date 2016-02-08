@@ -20,6 +20,7 @@
 
 
 # FILTERING
+# TODO: what if the ?list is ground but some parts of ?pattern haven't been filled in correctly yet?
 {
     ( ?list ?pattern ) :filter ?e.
 }
