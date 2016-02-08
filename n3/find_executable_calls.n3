@@ -11,179 +11,28 @@ PREFIX prolog: <http://eulersharp.sourceforge.net/2003/03swap/prolog#>
 
 
 
-#This file will only output executable calls. It also keeps information about one call together
-
 {
- ?y a :Candidate.
+?x r:gives ?y.
+?x a r:Inference.
 
 
-  ?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n. #?z :root ?root. 
-  ?z http:body ?body. }.
 
-  _:r e:findall ( 
-                 {?body ?pr ?ob}  
-                 {?x r:gives ?y. 
-                 ?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n.  #?z :root ?root. 
-                 ?z http:body ?body.?body ?pr ?ob }.
-                 }                                    
-                 ?list 
-                ).
+?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n. }.
 
-                #test: are there no existentials in the important positions of the call?
-                #Is the URI sufficiently instanciated?
-                ?a e:notLabel ?aa.
-                ?a :testList ?pp.
 
-                #get all objects in the body
-                ?z :bodyObjects ?olist.
 
-                #Is every object in the body of the call gound?
-                ?olist :testList ?ppp.
 
+?x r:rule ?rule.
+?rule r:gives {?pre=>?post}.
+?post log:includes {?z2 tmpl:requestURI ?a2. ?z2 http:methodName ?n2.}.
 
-}=> ?y.
 
-#new rule: No body
-{
- ?y a :Candidate.
-#does ?y include an http-call?
-?y log:includes {?z tmpl:requestURI ?a. 
-?z http:methodName ?n. #?z :root ?root. 
- }.
 
-?y log:notIncludes {?z http:body ?body.}.
-
-#test: are there no existentials in the important positions of the call?
-#Is the URI sufficiently instanciated?
-?a e:notLabel ?aa.
-?a :testList ?pp.
-
-
-}=> {[] :validCall ?y}.
-
-
-{
- ?y a :Candidate.
-
-#does ?y include an http-call?
-?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n. #?z :root ?root. 
-?z http:body ?body. }.
-
-
-
-
-#is this all ground?
-?a e:notLabel ?aa.
-?a :testList ?pp.
-
-?n e:notLabel ?m.
-?n :testList ?mm.
-
-#is the body ground?
-?body e:notLabel ?bodylabel.
-
-#Are all objects in the body ground?
-
-_:r e:findall ( ?o {?body log:includes {?s ?p ?o}} ?os).
-
-?os :testList ?oos.
-
-#_:r e:findall ( 
-#{?body ?pr ?ob}  {?x r:gives ?y. 
-#?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n.  #?z :root ?root. 
-#?z http:body ?body. }.}  ?list ).
-
-
-#?a e:notLabel ?aa.
-#?a :testList ?pp.
-
-#get all objects in the body
-#?z :bodyObjects ?olist.
-
-#Is every object in the body of the call gound?
-#?olist :testList ?ppp.
-
-}=> {[] :validCall ?y}. #{ ?os :the ?body}.
-
-
-
-######################################
-#added for the thermolympics use case
-##########################################
-
-
-{
- ?y a :Candidate.
-
-#does ?y include an http-call?
-?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n. #?z :root ?root. 
-?z http:body ?body. }.
-
-
-
-
-#is this all ground?
-?a e:notLabel ?aa.
-?a :testList ?pp.
-
-?n e:notLabel ?m.
-?n :testList ?mm.
-
-#is the body ground?
-?body e:notLabel ?bodylabel.
-
-#Are all objects in the body ground?
-
-_:r e:findall ( ?o {?body log:includes {?s ?p ?o}. ?p log:notEqualTo :optional} ?os).
-?body log:includes {?s2 :optional ?oo}. 
-_:r2 e:findall (?ooo {?oo log:includes {?sss ?ppp ?ooo}. } ?oos).
-
-(?os ?oos) list:append ?list. 
-
-?list :testList ?list999.
-
-}=>  {[] :validCall ?y}.
-
-
-
-{
- ?y a :Candidate.
-
-#does ?y include an http-call?
-?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n. #?z :root ?root. 
-?z http:body ?body. }.
-
-
-
-
-#is this all ground?
-?a e:notLabel ?aa.
-?a :testList ?pp.
-
-?n e:notLabel ?m.
-?n :testList ?mm.
-
-#is the body ground?
-?body e:notLabel ?bodylabel.
-
-#Are all objects in the body ground?
-
-_:r e:findall ( ?o {?body log:includes {?s ?p ?o}. ?p log:notEqualTo :solution. ?p log:notEqualTo :operator} ?os).
-?body log:includes {?s2 :solution ?oo}. 
-_:r2 e:findall (?ooo {?oo log:includes {?sss ?ppp ?ooo}. } ?oos).
-
-
-?body log:includes {?s22 :solution ?oo2}. 
-_:r222 e:findall (?ooo2 {?oo2 log:includes {?sss2 ?ppp2 ?ooo2}. } ?oos2).
-
-
-(?os ?oos ?oos2 ) list:append ?list. 
-
-?list :testList ?list999.
-
-}=>  {[] :validCall ?y}.
-
-
+(?a ?n) :test ( ?a2 ?n2 ).
+?y :bodyCheck ?post.
+?y :check ?post.
+}=> 
+{[] :validCall ?y}. 
 
 
 

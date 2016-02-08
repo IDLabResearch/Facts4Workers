@@ -12,136 +12,173 @@ PREFIX http: <http://www.w3.org/2011/http#>
 PREFIX prolog: <http://eulersharp.sourceforge.net/2003/03swap/prolog#>
 
 
-
-##########################
-#rule added to make the thermolympic use case work
-###################################
+#Body is simple 
+{?body :test ?body2} 
+<=
 {
-?x r:gives ?y. 
+?body2 e:label ?l.
+?body e:notLabel ?o.
+}.
 
-
-?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n. 
-?z http:body ?body. }.
-
-_:r e:findall ( ?o {?body log:includes {?s ?p ?o}. ?p log:notEqualTo :optional} ?os).
-?body log:includes {?s2 :optional ?oo}. 
-_:r2 e:findall (?ooo {?oo log:includes {?sss ?ppp ?ooo}. } ?oos).
-
-(?os ?oos) list:append ?list. 
-
-#?os :testList ?oos.
-
-}=>{(?list ()) :transpair ?list}.
-
+{?body :test ?body2} 
+<=
 {
-?x r:gives ?y. 
-?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n. 
-?z http:body ?body. }.
-
-_:r e:findall ( ?o {?body log:includes {?s ?p ?o}. ?p log:notEqualTo :solution. ?p log:notEqualTo :operator} ?os).
-?body log:includes {?s2 :solution ?oo}. 
-_:r2 e:findall (?ooo {?oo log:includes {?sss ?ppp ?ooo}. } ?oos).
-
-
-?body log:includes {?s22 :solution ?oo2}. 
-_:r222 e:findall (?ooo2 {?oo2 log:includes {?sss2 ?ppp2 ?ooo2}. } ?oos2).
-
-
-(?os ?oos ?oos2 ) list:append ?list. 
-
-
-
-}=>{(?list ()) :transpair ?list}.
-
-
-####################################################################################################
-
-
-#no list, no problem!
-{?a :testList ?p.} <= {
-?a log:rawType ?p. ?p log:notEqualTo rdf:List. () prolog:cut true.
+?body2 e:notLabel ?l.
+?body2 log:rawType ?type.
+?type log:notEqualTo log:Formula, rdf:List.
 }.
 
 
-#test list elements
-{?a :testList ?p.}<={
-?a log:rawType ?p. ?p log:equalTo rdf:List.
-#is the list ground?
-?a :groundlist ?l2. () prolog:cut true
+
+#Body is a list
+
+{?body :test ?body2} 
+<=
+{
+?body2 log:rawType rdf:List.
+() prolog:cut true.
+?body :groundCopy ?body2.
 }.
 
 
-{?x r:gives ?y. ?y log:includes {?z tmpl:requestURI ?a.} . 
-?a log:rawType ?p. ?p log:equalTo rdf:List.
-}=>{
- (?a ()) :transpair ?a.
-}.
-
-{?z :bodyObjects ?olist}=>{
- (?olist ()) :transpair ?olist.
-}.
-
-{?x r:gives ?y. ?y log:includes {?z http:body ?body} . 
-_:r e:findall ( ?o {?body log:includes {?s ?p ?o}} ?os).
-}=>{
- (?os ()) :transpair ?os.
-}.
-
-
-{(?list1 ?list2) :transpair ?firstlist.  
-?list1 rdf:first ?a. ?a :ground ?al. ?list1 rdf:rest ?rest. ( ?list2 (?al)) list:append ?list.  
-
-}=>{
-(?rest ?list) :transpair ?firstlist.} .
-
-
-{?l1 :groundlist ?l2}<={(() ?l2) :transpair ?l1}.
-
-
-
-{?s :ground ?s}<={  ?s log:rawType ?types. ?types log:notEqualTo rdf:List. ?types log:notEqualTo log:Formula. ?s e:notLabel ?l1. () prolog:cut true}.
-{?s :ground ?s1.}<={?s log:rawType ?types. ?types log:equalTo rdf:List. ?s :groundlist ?s1.  () prolog:cut true}.
-{?s :ground ?s3.}<={?s log:rawType ?types. ?types log:equalTo log:Formula. ?s e:graphList ?s2.  ?s2 list:rest ?rest. ?rest log:notEqualTo ().  ?s2 :groundlist ?s3. () prolog:cut true}.
-{?s :ground ?s3.}<={?s log:rawType ?types. ?types log:equalTo log:Formula. ?s e:tripleList ?s2. ?s2 :groundlist ?s3. () prolog:cut true}.
-
-{(?p ()) :transpair ?p. ?p1 list:in ?p. ?p1 log:rawType ?typep. ?typep log:equalTo rdf:List. } => {(?p1 ()) :transpair ?p1.}.
-{(?p ()) :transpair ?p. ?p1 list:in ?p. ?p1 log:rawType ?typep. ?typep log:equalTo log:Formula. ?p1 e:graphList ?p2. } => {(?p2 ()) :transpair ?p2.}.
-{(?p ()) :transpair ?p. ?p1 list:in ?p. ?p1 log:rawType ?typep. ?typep log:equalTo log:Formula. ?p1 e:tripleList ?p2. } => {(?p2 ()) :transpair ?p2.}.
-
-
-
-#################################################
-# Here I start something new: I want to have all elements in the body of a call
-#########################################################
+{() :groundCopy ().}
+<=
+{}.
 
 {
-?x r:gives ?y.
-?y log:includes {?z tmpl:requestURI ?a. ?z http:methodName ?n. ?z http:body ?body. ?body ?p ?o. }.
-}=> {
-?z a :call.
-?z :hasBodyObject ?o}.
+?body :groundCopy ?body2.
+}
+<=
+{
+?body2 list:first ?fst2.
+?body list:first ?fst.
 
-{?z a :call. _:f e:findall (?o {?z :hasBodyObject ?o} ?olist).}=>{ ?z :bodyObjects ?olist}.
+?fst2 :predcheck ?fst.
 
+() prolog:cut true.
 
-#################################################################################
-# check
-###################################################################################
+?body2 list:rest ?rest2.
+?body  list:rest ?rest.
 
-
-{?y :checked :ok.}<={?xx r:gives ?y. ?y log:notIncludes {?x :check ?z}. () prolog:cut true}.
-
-{?y :checked :ok.}<={?xx r:gives ?y. ?y log:includes {?x :check ?z}. ?z e:notLabel ?zz. ?z log:rawType ?type. ?type log:notEqualTo   rdf:List. () prolog:cut true
+?rest :groundCopy ?rest2. 
 }.
 
-{?y :checked :ok.}<={?xx r:gives ?y. ?y log:includes {?x :check ?z}. ?z log:rawType ?type. ?type log:equalTo   rdf:List. ?z :testList ?z2. () prolog:cut true}.#
+
+#case: body is a graph
+{?body :test ?body2} 
+<=
+{
+?body2 log:rawType log:Formula.
+() prolog:cut true.
+?body2 e:graphList ?rc.
+?body e:graphList ?gc.
+?rc :checkGraphList ?gc.
+
+}.
 
 
-{?f r:gives ?y. ?y log:includes {?x :check ?z}. ?z log:rawType rdf:List.}=>{(?z ()) :transpair ?z.}.
+{
+() :checkGraphList ?x.
+}
+<=
+{
+}.
 
 
-{  ?x r:gives ?y. 
+{
+?rc :checkGraphList ?gc.
+}
+<=
+{
+?rc list:first  ?fst2.
+?rc list:rest  ?rest2.
 
-  ?y :checked :ok.} => { ?y a :Candidate}.
+?gc list:first  ?fst.
+?gc list:rest  ?rest.
+
+
+
+?fst2 log:equalTo {?a ?b ?c}.
+?fst log:equalTo {?a1 ?b1 ?c1}.
+
+?b :predcheck ?b1.
+?a :predcheck ?a1.
+?c :predcheck ?c1.
+
+() prolog:cut true.
+?rest2 :checkGraphList ?rest.
+}.
+
+#checking predicate
+
+{?b2 :predcheck ?b1}
+<=
+{
+?b2 e:notLabel ?l.
+?b2 log:rawType ?type.
+?type log:notEqualTo log:Formula, rdf:List.
+() prolog:cut true.
+}.
+
+{?b2 :predcheck ?b1}
+<=
+{
+?b2 e:label ?l.
+() prolog:cut true.
+?b1 e:notLabel ?o.
+}.
+
+{?b2 :predcheck ?b1}
+<=
+{
+?b2 e:notLabel ?l.
+?b2 log:rawType rdf:List.
+() prolog:cut true.
+?b1 :groundCopy ?b2.
+}.
+
+
+{?b2 :predcheck ?b1}
+<=
+{
+?b2 e:notLabel ?l.
+?b2 log:rawType log:Formula.
+() prolog:cut true.
+?b2 e:graphList ?rc.
+?b1 e:graphList ?gc.
+?rc :checkGraphList ?gc.
+}.
+
+
+{?y :check ?post}
+<=
+{?y log:notIncludes {?x :check ?z}. () prolog:cut true}.
+
+
+{?y :check ?post}
+<=
+{
+?y log:includes {?x :check ?z}. 
+() prolog:cut true. 
+?post log:includes {?xx :check ?zz}.
+?z :test ?zz.
+}.
+
+
+
+
+{?y :bodyCheck ?post.}
+<={
+?y log:includes {?z http:body ?body}.
+() prolog:cut true.
+?post log:includes {?zz http:body ?body2}.
+?body :test ?body2.
+}.
+
+{?y :bodyCheck ?post.}
+<={
+?y log:notIncludes {?z http:body ?body}.
+() prolog:cut true.
+}.
 
 
