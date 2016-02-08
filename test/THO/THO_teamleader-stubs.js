@@ -66,8 +66,8 @@ function last_event1 ()
         desc: "Something else",
         machine_state: 1,
         machine: 1,
-        operator: 1,
-        optional: { defect_id: 1 } };
+        operator: "1",
+        optional: { defect_id: "1" } };
 }
 
 function last_event2 ()
@@ -91,7 +91,7 @@ function defect1 ()
     return { id: 1,
              name: "Bad color",
              desc: "Color of the product has not the correct RAL value",
-             part_id: 1,
+             part_id: "1",
              media_url: "http://machinesandparts.surge.sh/part1/part1_bad_color.jpg",
              comment: "Consider the color only of the lower vertex",
              taxonomy: null,
@@ -150,9 +150,9 @@ function solutions1 ()
 function reports307 ()
 {
     return [ { id: 666,
-               event_id: 307,
+               event_id: "307",
                solution_id: 3,
-               operator_id: 3,
+               operator_id: "3",
                success: false,
                comment: "not solved!" } ];
 }
