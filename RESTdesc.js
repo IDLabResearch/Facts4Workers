@@ -38,7 +38,7 @@ function RESTdesc (dataPaths, goalPath, cacheKey)
     this.eye = null;
 
     this.running = false;
-    this.callback = false;
+    this.callback = undefined;
 }
 
 RESTdesc.prototype.clear = function (callback)
@@ -71,13 +71,15 @@ RESTdesc.prototype.handleUserResponse = function (response, json, callback)
     this.cache.open();
     this.cache.popSingle(json.callID, function (err, val) {
         if (!val)
-            return this.cache.close(callback); // TODO: error
+            return this.cache.close(function () { callback(new Error('Unable to find callID ' + json.callID)); });
         var call = ValidCallGenerator.N3ToValidCall(val);
-        call.handleResponse(response);
+        var error = undefined;
+        try { call.handleResponse(response); }
+        catch (e) { error = e; }
         this.cache.push(
             call.toN3(),
             // it's really important to execute the callback after the push is finished or there is a race condition
-            function () { this.cache.close(callback); }.bind(this)
+            function () { this.cache.close(function () { callback(error); }); }.bind(this)
         );
     }.bind(this));
 };
@@ -98,7 +100,7 @@ RESTdesc.prototype.next = function (callback)
                     var call = ValidCallGenerator.N3ToValidCall(val);
                     var json = call.toJSON();
                     json.callID = uuid.v4();
-                    this.cache.setSingle(json.callID, call.toN3(), function () { callback(json); }.bind(this));
+                    this.cache.setSingle(json.callID, call.toN3(), function () { callback(null, json); }.bind(this));
                 }.bind(this));
             }
             // else: just an API ending
@@ -113,7 +115,7 @@ RESTdesc.prototype.next = function (callback)
                 this.cache.list(function (err, data)
                 {
                     this.eye = new EYEHandler();
-                    this.eye.call(this.dataPaths, data, this.goalPath, true, true, function (proof) { this._handleProof(proof); }.bind(this), this._error);
+                    this.eye.call(this.dataPaths, data, this.goalPath, true, true, function (error, proof) { if (error) this._stop(); else this._handleProof(proof); }.bind(this));
                 }.bind(this));
             }
             else if (!this.running)
@@ -124,18 +126,17 @@ RESTdesc.prototype.next = function (callback)
 
 RESTdesc.prototype._handleProof = function (proof)
 {
-    this.eye.call([this.list], [proof], this.findPath, false, false, function (body) { this._handleNext(body); }.bind(this), this._error);
+    this.eye.call([this.list], [proof], this.findPath, false, false, function (error, body) { if (error) this._stop(); else this._handleNext(body); }.bind(this));
 };
 
 RESTdesc.prototype._handleNext = function (next)
 {
-    var calls = ValidCallGenerator.N3toValidCalls(next);
+    var calls = [];
+    try { calls = ValidCallGenerator.N3toValidCalls(next); }
+    catch (error) { return this._stop(error); }
 
     if (calls.length === 0)
-    {
-        this.running = false;
-        return this.callback({ status: 'DONE' });
-    }
+        return this._stop(null, { status: 'DONE' });
 
     calls = _.groupBy(calls, function (call)
     {
@@ -157,20 +158,29 @@ RESTdesc.prototype._handleNext = function (next)
 
     // TODO: one of the API responses might already lead to a user request...
     var cache = this.cache;
+    var self = this;
     for (var i = 0; i < calls.api.length; ++i)
     {
         var call = calls.api[i];
-        call.call(function (response)
+        call.call(function (error, response)
         {
-            this.handleResponse(response); // 'this' references call now
+            try { this.handleResponse(response); } // 'this' references call now
+            catch (e) { error = e; }
+            if (error)
+                return self._stop(error);
+
             cache.push(this.toN3(), delay);
         }.bind(call));
     }
 };
 
-RESTdesc.prototype._error = function (error, content)
+RESTdesc.prototype._stop = function (error, response)
 {
-    console.error(error);
+    this.running = false;
+    var callback = this.callback;
+    this.callback = undefined;
+    if (callback)
+        callback(error, response);
 };
 
 module.exports = RESTdesc;

@@ -9,9 +9,9 @@ function callStub (callback)
 {
     var url = this.getURL();
     if (!(url in stubs))
-        throw 'Unsupported URL stub: ' + url;
+        throw new Error('Unsupported URL stub: ' + url);
     var result = stubs[url](this.getBody());
-    callback(result);
+    callback(null, result);
 }
 
 describe('THO operator use case', function ()
@@ -28,8 +28,10 @@ describe('THO operator use case', function ()
     it ('asks for an operator ID', function (done)
     {
         var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
-        rest.next(function (result)
+        rest.next(function (error, result)
         {
+            if (error)
+                throw error;
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getOperatorID');
             var contains = result['http:resp']['http:body']['contains'];
             assert.deepEqual(Object.keys(contains), ['id']);
@@ -40,8 +42,10 @@ describe('THO operator use case', function ()
     it ('asks for a machine ID', function (done)
     {
         var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
-        rest.next(function (result)
+        rest.next(function (error, result)
         {
+            if (error)
+                throw error;
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getMachineID');
             var contains = result['http:resp']['http:body']['contains'];
             assert.deepEqual(Object.keys(contains), ['id']);
@@ -52,8 +56,10 @@ describe('THO operator use case', function ()
     it ('asks for a part ID', function (done)
     {
         var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
-        rest.next(function (result)
+        rest.next(function (error, result)
         {
+            if (error)
+                throw error;
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getPartID');
             var contains = result['http:resp']['http:body']['contains'];
             assert.deepEqual(Object.keys(contains), ['id']);
@@ -64,8 +70,10 @@ describe('THO operator use case', function ()
     it ('asks for a defect ID', function (done)
     {
         var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
-        rest.next(function (result)
+        rest.next(function (error, result)
         {
+            if (error)
+                throw error;
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getDefectID');
             var contains = result['http:resp']['http:body']['contains'];
             assert.deepEqual(Object.keys(contains), ['id']);
@@ -76,8 +84,10 @@ describe('THO operator use case', function ()
     it ('asks for a solution ID', function (done)
     {
         var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
-        rest.next(function (result)
+        rest.next(function (error, result)
         {
+            if (error)
+                throw error;
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getSolutionID');
             var contains = result['http:resp']['http:body']['contains'];
             assert.deepEqual(Object.keys(contains), ['id']);
@@ -88,8 +98,10 @@ describe('THO operator use case', function ()
     it ('asks for a report', function (done)
     {
         var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
-        rest.next(function (result)
+        rest.next(function (error, result)
         {
+            if (error)
+                throw error;
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getReport');
             var contains = result['http:resp']['http:body']['contains'];
             assert.deepEqual(Object.keys(contains), ['solved', 'comment']);
@@ -100,8 +112,10 @@ describe('THO operator use case', function ()
     it ('asks for a solution ID if the report failed', function (done)
     {
         var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
-        rest.next(function (result)
+        rest.next(function (error, result)
         {
+            if (error)
+                throw error;
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getSolutionID');
             var contains = result['http:resp']['http:body']['contains'];
             assert.deepEqual(Object.keys(contains), ['id']);
@@ -112,8 +126,10 @@ describe('THO operator use case', function ()
     it ('asks for a report again', function (done)
     {
         var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
-        rest.next(function (result)
+        rest.next(function (error, result)
         {
+            if (error)
+                throw error;
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getReport');
             var contains = result['http:resp']['http:body']['contains'];
             assert.deepEqual(Object.keys(contains), ['solved', 'comment']);
@@ -124,8 +140,10 @@ describe('THO operator use case', function ()
     it ('updates the user that he is finished', function (done)
     {
         var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
-        rest.next(function (result)
+        rest.next(function (error, result)
         {
+            if (error)
+                throw error;
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/YouAreDone');
             rest.handleUserResponse({}, result, done);
         });
@@ -134,8 +152,10 @@ describe('THO operator use case', function ()
     it ('is finished', function (done)
     {
         var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
-        rest.next(function (result)
+        rest.next(function (error, result)
         {
+            if (error)
+                throw error;
             assert.strictEqual(result['status'], 'DONE');
             done();
         });
@@ -159,8 +179,10 @@ describe('THO operator use case', function ()
     it('asks for a solution ID (again)', function (done)
     {
         var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
-        rest.next(function (result)
+        rest.next(function (error, result)
         {
+            if (error)
+                throw error;
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getSolutionID');
             var contains = result['http:resp']['http:body']['contains'];
             assert.deepEqual(Object.keys(contains), ['id']);
@@ -171,8 +193,10 @@ describe('THO operator use case', function ()
     it ('updates the user that he is unqualified', function (done)
     {
         var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
-        rest.next(function (result)
+        rest.next(function (error, result)
         {
+            if (error)
+                throw error;
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/SentToTeamLeader');
             rest.handleUserResponse({}, result, done);
         });
@@ -181,8 +205,10 @@ describe('THO operator use case', function ()
     it ('is (really) finished', function (done)
     {
         var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
-        rest.next(function (result)
+        rest.next(function (error, result)
         {
+            if (error)
+                throw error;
             assert.strictEqual(result['status'], 'DONE');
             done();
         });

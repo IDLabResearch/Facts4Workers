@@ -9,7 +9,7 @@ var _ = require('lodash');
 function EYEHandler () {}
 
 // TODO: better way of passing all these parameters?
-EYEHandler.prototype.call = function (dataPaths, data, queryPath, proof, singleAnswer, callback, errorCallback)
+EYEHandler.prototype.call = function (dataPaths, data, queryPath, proof, singleAnswer, callback)
 {
     var cache = new ResourceCache();
     var args = [].concat(dataPaths);
@@ -36,21 +36,22 @@ EYEHandler.prototype.call = function (dataPaths, data, queryPath, proof, singleA
         // http://stackoverflow.com/questions/17516772/using-nodejss-spawn-causes-unknown-option-and-error-spawn-enoent-err
         var proc = spawn(process.platform === "win32" ? "eye.cmd" : "eye", args);
         var output = "";
-        var error = "";
+        var errorOutput = "";
         proc.stdout.on('data', function (data) {
             output += data.toString();
             //console.log(data.toString());
         });
         proc.stderr.on('data', function (data) {
-            error += data;
+            errorOutput += data;
             //console.error(data.toString());
         });
         proc.on('close', function (code) {
             // TODO: check exit code?
+            var error = null;
             if (code !== 0)
-                throw 'EYE error:\n' + error;
+                error = new Error('EYE error\n' + errorOutput);
             cache.destroy();
-            callback(output);
+            callback(error, output);
         });
     };
 
@@ -60,15 +61,24 @@ EYEHandler.prototype.call = function (dataPaths, data, queryPath, proof, singleA
     {
         // TODO: error handling
         var count = 0;
+        var errorObj = null;
         for (var i = 0; i < data.length; ++i)
         {
             cache.cacheFromString(data[i], function (error, fileName)
             {
                 if (error)
-                    throw error;
+                    errorObj = error;
                 args.push(fileName);
                 if (++count >= data.length)
-                    execute();
+                {
+                    if (errorObj)
+                    {
+                        cache.destroy();
+                        callback(errorObj, null);
+                    }
+                    else
+                        execute();
+                }
             });
         }
     }

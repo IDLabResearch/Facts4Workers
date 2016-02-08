@@ -143,6 +143,11 @@ app.post('/eye', function (req, res)
     handleNext(rest, req, res);
 });
 
+function errorToJSON (error)
+{
+    return JSON.stringify(error, Object.getOwnPropertyNames(error));
+}
+
 app.post('/next', next);
 function next (req, res)
 {
@@ -158,7 +163,17 @@ function next (req, res)
         cacheKey = req.body.eye.data;
 
     var rest = new RESTdesc(input, goal, cacheKey);
-    rest.handleUserResponse(req.body.json, req.body.eye, function () { handleNext(rest, req, res); });
+    rest.handleUserResponse(
+        req.body.json,
+        req.body.eye,
+        function (error)
+        {
+            if (error)
+                res.status(400).json({ error: errorToJSON(error) });
+            else
+                handleNext(rest, req, res);
+        }
+    );
 }
 
 function handleNext (rest, req, res, count)
@@ -169,8 +184,11 @@ function handleNext (rest, req, res, count)
     if (count >= 5)
         return res.format({ json:function () { res.send({status:'Too many automated API calls in a row. Aborting to prevent infinte loop.'}); } });
 
-    rest.next(function (data)
+    rest.next(function (error, data)
     {
+        if (error)
+            return res.status(500).json({ error: errorToJSON(error) });
+
         var url = data['http:requestURI'];
         var body = data['http:body'];
 
@@ -189,7 +207,7 @@ function handleNext (rest, req, res, count)
         }
         else
         {
-            throw "Normal API calls shouldn't reach this point anymore";
+            res.status(500).json({ error: "This shouldn't happen."});
         }
     });
 }

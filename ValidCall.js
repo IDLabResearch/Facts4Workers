@@ -74,9 +74,11 @@ ValidCall.prototype.call = function (callback)
         {
             // TODO: error handling
             if (!error && response.statusCode < 400)
-                callback(body);
+                callback(null, body);
+            else if (response && response.statusCode && response.url)
+                callback(new Error('Status code ' + response.statusCode + ' when calling ' + response.url + ' (' + error.message + ')'));
             else
-                throw error;
+                callback(error);
         }
     );
 };
