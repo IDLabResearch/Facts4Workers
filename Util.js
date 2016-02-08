@@ -83,6 +83,10 @@ Util.mapJSON = function (json, template, map)
             throw 'Key ' + key + ' missing in ' + JSON.stringify(json);
         }
 
+        // TODO: hotfix for data inconsistency breaking filtering
+        if (key === 'part_id' && _.isString(json[key]))
+            json[key] = parseInt(json[key]);
+
         Util.mapJSON(json[key], template[key], map);
     }
 
