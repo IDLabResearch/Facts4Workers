@@ -46,6 +46,7 @@ RESTdesc.prototype.clear = function (callback)
     this.cache.clear(callback);
 };
 
+// TODO: probably should also clear queue here
 RESTdesc.prototype.back = function (callback, _recursive)
 {
     // remove items from the cache until it is empty or we find the previous askTheWorker call
@@ -70,8 +71,10 @@ RESTdesc.prototype.handleUserResponse = function (response, json, callback)
 
     this.cache.open();
     this.cache.popSingle(json.callID, function (err, val) {
+        // TODO: fixed problem but not completely correct...
         if (!val)
-            return this.cache.close(function () { callback(new Error('Unable to find callID ' + json.callID)); });
+            // return this.cache.close(function () { callback(new Error('Unable to find callID ' + json.callID)); });
+            return callback();
         var call = ValidCallGenerator.N3ToValidCall(val);
         var error = undefined;
         try { call.handleResponse(response); }

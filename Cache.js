@@ -91,6 +91,7 @@ Cache.prototype.list = function (callback)
     this._handleCall('lrange', this.key, 0, -1, callback);
 };
 
+// TODO: should get rid of these when clearing cache...
 Cache.prototype.setSingle = function (key, val, callback)
 {
     var close = this.open();

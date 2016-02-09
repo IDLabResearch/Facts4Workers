@@ -145,7 +145,8 @@ app.post('/eye', function (req, res)
 
 function errorToJSON (error)
 {
-    return JSON.stringify(error, Object.getOwnPropertyNames(error));
+    //return _.pick(error, Object.getOwnPropertyNames(error));
+    return error.message;
 }
 
 app.post('/next', next);
