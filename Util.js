@@ -59,7 +59,7 @@ Util.mapJSON = function (json, template, map)
     if (_.isArray(template))
     {
         if (!_.isArray(json) || json.length !== template.length)
-            throw 'Expecting array of length ' + template.length + ', got ' + JSON.stringify(json) + ' instead.';
+            throw new Error('Expecting array of length ' + template.length + ', got ' + JSON.stringify(json) + ' instead.');
 
         for (var i = 0; i < template.length; ++i)
             Util.mapJSON(json[i], template[i], map);
@@ -68,19 +68,19 @@ Util.mapJSON = function (json, template, map)
     }
 
     if (Util.isLiteral(json) || !json)
-        throw 'Expecting an object matching ' + JSON.stringify(template) +', got ' + JSON.stringify(json) + ' instead.';
+        throw new Error('Expecting an object matching ' + JSON.stringify(template) +', got ' + JSON.stringify(json) + ' instead.');
 
     for (var key in template)
     {
         if (!(key in json))
         {
             // TODO: workaround for demo
-            if (key === 'computer')
+            if (key === 'computer' || key === 'machine' || key === 'tool')
             {
                 Util.mapJSON(0, template[key], map);
                 continue;
             }
-            throw 'Key ' + key + ' missing in ' + JSON.stringify(json);
+            throw new Error('Key ' + key + ' missing in ' + JSON.stringify(json));
         }
 
         // TODO: hotfix for data inconsistency breaking filtering

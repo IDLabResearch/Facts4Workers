@@ -14,6 +14,7 @@ function callStub (callback)
     callback(null, result);
 }
 
+// TODO: check through demo.js?
 // TODO: check if request body is also correct
 describe('THO teamleader use case', function ()
 {
