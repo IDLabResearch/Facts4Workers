@@ -104,8 +104,8 @@ describe('THO operator use case', function ()
                 throw error;
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getReport');
             var contains = result['http:resp']['http:body']['contains'];
-            assert.deepEqual(Object.keys(contains), ['solved', 'comment']);
-            rest.handleUserResponse({ solved: false, comment: 'not solved!' }, result, done);
+            assert.deepEqual(Object.keys(contains), ['success', 'comment']);
+            rest.handleUserResponse({ success: false, comment: 'not solved!' }, result, done);
         });
     });
 
@@ -132,8 +132,8 @@ describe('THO operator use case', function ()
                 throw error;
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getReport');
             var contains = result['http:resp']['http:body']['contains'];
-            assert.deepEqual(Object.keys(contains), ['solved', 'comment']);
-            rest.handleUserResponse({ solved: true, comment: 'not solved!' }, result, done);
+            assert.deepEqual(Object.keys(contains), ['success', 'comment']);
+            rest.handleUserResponse({ success: true, comment: 'not solved!' }, result, done);
         });
     });
 

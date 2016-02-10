@@ -107,17 +107,31 @@ describe('THO teamleader use case', function ()
         });
     });
 
-    it ('informs the user of the solutions and the attempts', function (done)
+    it ('informs the user of the attempts so far', function (done)
     {
         var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
         rest.next(function (error, result)
         {
             if (error)
                 throw error;
-            assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/solutionsReports');
+            assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/solutions');
             var contains = result['http:resp']['http:body']['contains'];
             assert.strictEqual(contains, undefined);
             rest.handleUserResponse(undefined, result, done);
+        });
+    });
+
+    it ('asks for a solution', function (done)
+    {
+        var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
+        rest.next(function (error, result)
+        {
+            if (error)
+                throw error;
+            assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getSolutionID');
+            var contains = result['http:resp']['http:body']['contains'];
+            assert.deepEqual(Object.keys(contains), ['id']);
+            rest.handleUserResponse({ id: 333 }, result, done);
         });
     });
 
@@ -130,12 +144,26 @@ describe('THO teamleader use case', function ()
                 throw error;
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getReport');
             var contains = result['http:resp']['http:body']['contains'];
-            assert.deepEqual(Object.keys(contains), ['solution_id', 'success', 'comment']);
-            rest.handleUserResponse({ solution_id: 333, success: false, comment: 'not solved!' }, result, done);
+            assert.deepEqual(Object.keys(contains), ['success', 'comment']);
+            rest.handleUserResponse({ success: false, comment: 'not solved!' }, result, done);
         });
     });
 
-    it ('asks for a new report if the previous one failed', function (done)
+    it ('asks for a new solution if the previous one failed', function (done)
+    {
+        var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
+        rest.next(function (error, result)
+        {
+            if (error)
+                throw error;
+            assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getSolutionID');
+            var contains = result['http:resp']['http:body']['contains'];
+            assert.deepEqual(Object.keys(contains), ['id']);
+            rest.handleUserResponse({ id: 334 }, result, done);
+        });
+    });
+
+    it ('also asks for a new report', function (done)
     {
         var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
         rest.next(function (error, result)
@@ -144,8 +172,8 @@ describe('THO teamleader use case', function ()
                 throw error;
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getReport');
             var contains = result['http:resp']['http:body']['contains'];
-            assert.deepEqual(Object.keys(contains), ['solution_id', 'success', 'comment']);
-            rest.handleUserResponse({ solution_id: 334, success: true, comment: 'solved!' }, result, done);
+            assert.deepEqual(Object.keys(contains), ['success', 'comment']);
+            rest.handleUserResponse({ success: true, comment: 'solved!' }, result, done);
         });
     });
 

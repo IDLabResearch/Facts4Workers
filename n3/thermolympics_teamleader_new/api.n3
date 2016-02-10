@@ -264,7 +264,7 @@
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://askTheWorker/solutionsReports");
+              tmpl:requestURI ("http://askTheWorker/solutions");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body { rest:json
                   :part ?part;
@@ -285,11 +285,14 @@
              teamleader:state teamleader:posted.
 }.
 
-# request report if the previous report failed
+
+# request solution if the previous report failed
 {
     ?problem teamleader:event ?event;
              teamleader:operator ?operator.
-    ?event teamleader:original ?original.
+    ?event teamleader:original ?original;
+           teamleader:defect ?defect.
+    ?defect teamleader:solutions ?solutions.
     ?report a teamleader:report;
             teamleader:event ?original;
             teamleader:success ?success;
@@ -299,24 +302,48 @@
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://askTheWorker/getReport");
+              tmpl:requestURI ("http://askTheWorker/getSolutionID");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               rest:check ?report;
+              http:body { rest:json
+                  :message "Choose one of the following solutions.";
+                  :sendList ?solutions
+              };
               http:resp [
                   http:body _:body
               ].
     _:body rest:contains { rest:json
-        :solution_id _:solution_id;
+        :id _:id;
+    }.
+    _:report a teamleader:report;
+               teamleader:event ?original;
+               teamleader:operator ?operator;
+               teamleader:solution [ teamleader:id _:id ].
+
+    _:report util:loop true.
+}.
+
+# TODO: extend precondition?
+# request report if the previous report failed
+{
+    ?report a teamleader:report;
+            teamleader:solution ?sol.
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://askTheWorker/getReport");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              rest:check ?sol;
+              http:resp [
+                  http:body _:body
+              ].
+    _:body rest:contains { rest:json
         :success _:success;
         :comment _:comment
     }.
-    _:report a teamleader:report;
-             teamleader:event ?original;
-             teamleader:operator ?operator;
-             teamleader:solution [ teamleader:id _:solution_id ];
-             teamleader:success _:success;
-             teamleader:comment _:comment.
-    _:report util:loop true.
+    ?report teamleader:success _:success;
+            teamleader:comment _:comment.
 }.
 
 # POST report

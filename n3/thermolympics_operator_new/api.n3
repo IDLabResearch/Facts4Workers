@@ -370,7 +370,7 @@
                   http:body _:body
               ].
     _:body rest:contains { rest:json
-        :solved _:yn;
+        :success _:yn;
         :comment _:comment
     }.
     ?solution :worked _:yn;
