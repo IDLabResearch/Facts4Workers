@@ -396,7 +396,7 @@
               http:body { rest:json
                   :name "Teamleader maintenance finished.";
                   :desc "Machine fixed.";
-                  :machine_state 4;
+                  :machine_state 1;
                   :operator_id ?operator_id
               }.
     ?problem teamleader:state teamleader:resolved.
