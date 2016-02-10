@@ -243,58 +243,40 @@
     ?problem teamleader:part ?part.
 }.
 
-# send solutions and reports to teamleader
+# TODO: should be able to do looping without this rule
+# create dummy report to trigger first instance of rule
 {
-    ?problem teamleader:event ?event;
-             teamleader:operator ?operator.
-    ?problem teamleader:part ?part.
-
-    ?event teamleader:defect ?defect.
-    ?defect teamleader:solutions ?solutions.
-
-    ?defect  teamleader:name ?name;
-             teamleader:desc ?desc;
-             teamleader:media_url ?media_url;
-             teamleader:comment ?comment;
-             teamleader:created_at ?created.
-
+    ?problem a teamleader:problem;
+             teamleader:event ?event.
     ?event teamleader:original ?original.
-    ?original teamleader:reports ?reports.
 }
 =>
 {
-    _:request http:methodName "GET";
-              tmpl:requestURI ("http://askTheWorker/solutions");
-              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
-              http:body { rest:json
-                  :part ?part;
-                  :defect { rest:json
-                      :name ?name;
-                      :desc ?desc;
-                      :media_url ?media_url;
-                      :comment ?comment;
-                      :created_at ?created
-                  };
-                  :solutions ?solutions;
-                  :reports ?reports
-              }.
-    # dummy report to trigger next rule
-    _:report a teamleader:report;
-             teamleader:event ?original;
-             teamleader:success false;
-             teamleader:state teamleader:posted.
+    :dummy_report a teamleader:report;
+                  teamleader:success false;
+                  teamleader:state teamleader:posted.
 }.
 
 
 # request solution if the previous report failed
 {
     ?problem teamleader:event ?event;
-             teamleader:operator ?operator.
-    ?event teamleader:original ?original;
-           teamleader:defect ?defect.
-    ?defect teamleader:solutions ?solutions.
+             teamleader:operator ?operator;
+             teamleader:part ?part.
+
+    ?event teamleader:defect ?defect;
+           teamleader:original ?original.
+
+    ?defect  teamleader:name ?name;
+             teamleader:desc ?desc;
+             teamleader:media_url ?media_url;
+             teamleader:comment ?comment;
+             teamleader:created_at ?created;
+             teamleader:solutions ?solutions.
+
+    ?original teamleader:reports ?reports.
+
     ?report a teamleader:report;
-            teamleader:event ?original;
             teamleader:success ?success;
             teamleader:state teamleader:posted.
     ?success e:whenGround false.
@@ -307,7 +289,16 @@
               rest:check ?report;
               http:body { rest:json
                   :message "Choose one of the following solutions.";
-                  :sendList ?solutions
+                  :part ?part;
+                  :defect { rest:json
+                      :name ?name;
+                      :desc ?desc;
+                      :media_url ?media_url;
+                      :comment ?comment;
+                      :created_at ?created
+                  };
+                  :solutions ?solutions;
+                  :reports ?reports
               };
               http:resp [
                   http:body _:body
@@ -315,6 +306,7 @@
     _:body rest:contains { rest:json
         :id _:id;
     }.
+
     _:report a teamleader:report;
                teamleader:event ?original;
                teamleader:operator ?operator;

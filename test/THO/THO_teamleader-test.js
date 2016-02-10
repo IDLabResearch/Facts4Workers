@@ -107,19 +107,19 @@ describe('THO teamleader use case', function ()
         });
     });
 
-    it ('informs the user of the attempts so far', function (done)
-    {
-        var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
-        rest.next(function (error, result)
-        {
-            if (error)
-                throw error;
-            assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/solutions');
-            var contains = result['http:resp']['http:body']['contains'];
-            assert.strictEqual(contains, undefined);
-            rest.handleUserResponse(undefined, result, done);
-        });
-    });
+    //it ('informs the user of the attempts so far', function (done)
+    //{
+    //    var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
+    //    rest.next(function (error, result)
+    //    {
+    //        if (error)
+    //            throw error;
+    //        assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/solutions');
+    //        var contains = result['http:resp']['http:body']['contains'];
+    //        assert.strictEqual(contains, undefined);
+    //        rest.handleUserResponse(undefined, result, done);
+    //    });
+    //});
 
     it ('asks for a solution', function (done)
     {
@@ -135,7 +135,7 @@ describe('THO teamleader use case', function ()
         });
     });
 
-    it ('asks for a new report', function (done)
+    it ('asks for a report', function (done)
     {
         var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
         rest.next(function (error, result)
@@ -163,7 +163,7 @@ describe('THO teamleader use case', function ()
         });
     });
 
-    it ('also asks for a new report', function (done)
+    it ('asks for a new report', function (done)
     {
         var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
         rest.next(function (error, result)
