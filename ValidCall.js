@@ -77,7 +77,7 @@ ValidCall.prototype.call = function (callback)
             if (!error && response.statusCode < 400)
             {
                 // TODO: hardcode fix for big list for now
-                if (_.endsWith(url, '/events'))
+                if (_.endsWith(url, '/events') && _.isArray(body))
                     body = body.slice(-20);
                 callback(null, body);
             }
