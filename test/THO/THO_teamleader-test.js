@@ -11,6 +11,9 @@ function callStub (callback)
     if (!(url in stubs))
         throw new Error('Unsupported URL stub: ' + url);
     var result = stubs[url](this.getBody());
+    // TODO: hardcode fix for big list for now
+    if (_.endsWith(url, '/events'))
+        result = result.slice(-20);
     callback(null, result);
 }
 
@@ -107,19 +110,19 @@ describe('THO teamleader use case', function ()
         });
     });
 
-    //it ('informs the user of the attempts so far', function (done)
-    //{
-    //    var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
-    //    rest.next(function (error, result)
-    //    {
-    //        if (error)
-    //            throw error;
-    //        assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/solutions');
-    //        var contains = result['http:resp']['http:body']['contains'];
-    //        assert.strictEqual(contains, undefined);
-    //        rest.handleUserResponse(undefined, result, done);
-    //    });
-    //});
+    it ('returns all events to the user', function (done)
+    {
+        var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
+        rest.next(function (error, result)
+        {
+            if (error)
+                throw error;
+            assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/events');
+            var contains = result['http:resp']['http:body']['contains'];
+            assert.strictEqual(contains, undefined);
+            rest.handleUserResponse(undefined, result, done);
+        });
+    });
 
     it ('asks for a solution', function (done)
     {

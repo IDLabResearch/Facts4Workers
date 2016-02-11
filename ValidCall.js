@@ -60,8 +60,9 @@ ValidCall.prototype.getResponse = function () { return this.toJSON()['http:resp'
 
 ValidCall.prototype.call = function (callback)
 {
+    var url = this.getURL();
     var requestParams = {
-        url: this.getURL(),
+        url: url,
         method: this.getMethod()
     };
 
@@ -74,7 +75,12 @@ ValidCall.prototype.call = function (callback)
         {
             // TODO: error handling
             if (!error && response.statusCode < 400)
+            {
+                // TODO: hardcode fix for big list for now
+                if (_.endsWith(url, '/events'))
+                    body = body.slice(-20);
                 callback(null, body);
+            }
             else if (response && response.statusCode && response.url)
                 callback(new Error('Status code ' + response.statusCode + ' when calling ' + response.url + ' (' + error.message + ')'));
             else

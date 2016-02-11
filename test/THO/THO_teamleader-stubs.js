@@ -12,6 +12,7 @@ var stubs = {
     'http://mstate.tho.f4w.l0g.in/api/machines/1/last_event': last_event1,
     'http://mstate.tho.f4w.l0g.in/api/machines/2/last_event': last_event2,
     'http://mstate.tho.f4w.l0g.in/api/machines/1/events': events,
+    'http://mstate.tho.f4w.l0g.in/api/machines/2/events': events,
     'http://defects.tho.f4w.l0g.in/api/defects/1': defect1,
     'http://machinesandparts.surge.sh/api/parts.json': parts,
     'http://defects.tho.f4w.l0g.in/api/solutions?defect_id=1': solutions1,
@@ -83,7 +84,10 @@ function last_event2 ()
 
 function events ()
 {
-    return [last_event1()];
+    var events = [];
+    for (var i = 0; i < 100; ++i)
+        events.push(last_event1());
+    return events;
 }
 
 function defect1 ()
@@ -168,7 +172,7 @@ function reports (report)
 
 function events2 (status)
 {
-    assert.deepEqual(status, { name: 'Teamleader maintenance finished.', desc: 'Machine fixed.', machine_state: 4, operator_id: 2 });
+    assert.deepEqual(status, { name: 'Teamleader maintenance finished.', desc: 'Machine fixed.', machine_state: 1, operator_id: 2 });
 }
 
 module.exports = stubs;

@@ -115,7 +115,6 @@
 # get all events if there is no actual problem with the machine
 {
     ?problem a teamleader:problem;
-             teamleader:state teamleader:ok;
              teamleader:machine ?machine.
     ?machine teamleader:id ?machine_id.
 }
@@ -132,7 +131,6 @@
 # send all events to the worker if there is nothing to do
 {
     ?problem a teamleader:problem;
-             teamleader:state teamleader:ok;
              teamleader:machine ?machine.
     ?machine teamleader:events ?events.
 }
@@ -144,8 +142,21 @@
               http:body { rest:json
                   :events ?events
               }.
+    ?problem teamleader:state teamleader:sentEvents.
+}.
+
+
+# if the machine is working we are done after sending the events
+{
+    ?problem a teamleader:problem;
+             teamleader:state teamleader:ok;
+             teamleader:state teamleader:sentEvents.
+}
+=>
+{
     ?problem teamleader:state teamleader:resolved.
 }.
+
 
 # get solutions
 {
@@ -262,7 +273,8 @@
 {
     ?problem teamleader:event ?event;
              teamleader:operator ?operator;
-             teamleader:part ?part.
+             teamleader:part ?part;
+             teamleader:state teamleader:sentEvents. # need to send the events first...
 
     ?event teamleader:defect ?defect;
            teamleader:original ?original.
