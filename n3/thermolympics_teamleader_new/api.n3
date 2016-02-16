@@ -131,7 +131,8 @@
 # send all events to the worker if there is nothing to do
 {
     ?problem a teamleader:problem;
-             teamleader:machine ?machine.
+             teamleader:machine ?machine;
+             teamleader:state teamleader:ok.
     ?machine teamleader:events ?events.
 }
 =>
@@ -257,9 +258,7 @@
 # TODO: should be able to do looping without this rule
 # create dummy report to trigger first instance of rule
 {
-    ?problem a teamleader:problem;
-             teamleader:event ?event.
-    ?event teamleader:original ?original.
+    ?problem a teamleader:problem.
 }
 =>
 {
@@ -269,12 +268,15 @@
 }.
 
 
-# request solution if the previous report failed
+# TODO: duplication due to 2 different situations
+# send all events to the worker if there is nothing to do
 {
-    ?problem teamleader:event ?event;
-             teamleader:operator ?operator;
-             teamleader:part ?part;
-             teamleader:state teamleader:sentEvents. # need to send the events first...
+    ?problem a teamleader:problem;
+             teamleader:machine ?machine;
+             teamleader:event ?event;
+             teamleader:part ?part.
+
+    ?machine teamleader:events ?events.
 
     ?event teamleader:defect ?defect;
            teamleader:original ?original.
@@ -283,10 +285,40 @@
              teamleader:desc ?desc;
              teamleader:media_url ?media_url;
              teamleader:comment ?comment;
-             teamleader:created_at ?created;
-             teamleader:solutions ?solutions.
+             teamleader:created_at ?created.
 
     ?original teamleader:reports ?reports.
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://askTheWorker/events");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              http:body { rest:json
+                  :part ?part;
+                  :defect { rest:json
+                      :name ?name;
+                      :desc ?desc;
+                      :media_url ?media_url;
+                      :comment ?comment;
+                      :created_at ?created
+                  };
+                  :reports ?reports;
+                  :events ?events
+              }.
+    ?problem teamleader:state teamleader:sentEvents;
+             teamleader:hack _:hack. # TODO: ...
+}.
+
+# request solution if the previous report failed
+{
+    ?problem teamleader:event ?event;
+             teamleader:operator ?operator;
+             teamleader:hack ?hack.
+
+    ?event teamleader:defect ?defect;
+           teamleader:original ?original.
+    ?defect teamleader:solutions ?solutions.
 
     ?report a teamleader:report;
             teamleader:success ?success;
@@ -298,19 +330,11 @@
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/getSolutionID");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              rest:check ?hack;
               rest:check ?report;
               http:body { rest:json
                   :message "Choose one of the following solutions.";
-                  :part ?part;
-                  :defect { rest:json
-                      :name ?name;
-                      :desc ?desc;
-                      :media_url ?media_url;
-                      :comment ?comment;
-                      :created_at ?created
-                  };
-                  :solutions ?solutions;
-                  :reports ?reports
+                  :solutions ?solutions
               };
               http:resp [
                   http:body _:body
