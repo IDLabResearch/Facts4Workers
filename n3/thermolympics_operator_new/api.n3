@@ -424,7 +424,6 @@
 
               :worked ?tf;
               :report_comment ?comment.
-    ?tf e:whenGround true.
     {?machine :state ?stopped.} :eventId ?eid.
 
 }
@@ -441,38 +440,24 @@
                     :comment ?comment
               }.
     ?solution :triedAndReported _:yes. #put "yes"
+    #this triple is to make the rule get fired when using existing path
     ?solution :new :triple.
 }.
 
 
-# POST solution intent
+
+
 {
-    ?operator :foundProblem ?problem;
-              :operatorId ?wid.
-    ?problem :trySolution ?solution.
-    ?solution :solutionId ?sid;
-              :worked false;
-              :report_comment ?comment.
-    #?tf e:whenGround false.
-    {?machine :state ?stopped.} :eventId ?eid.
-}
-=>
-{
-    _:request http:methodName "POST";
-              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/reports");
-              http:body { rest:json
-                     #I am not sure, but maybe this answers to the machine stopped event?
-                    :event_id ?eid;
-                    :operator_id ?wid;
-                    :solution_id ?sid;
-                    :success false;
-                    :comment ?comment
-              }.
-    ?solution :triedAndReported _:yes. #put "yes"
+?problem :trySolution ?solution.
+ ?solution :solutionId ?sid;
+           :worked false.
+
+}=>{
     ?solution :tryNewSolution true.
-    ?solution :new :triple.
-
 }.
+
+
+
 
 {
     ?problem :trySolution ?solution.
