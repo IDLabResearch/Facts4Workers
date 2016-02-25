@@ -32,8 +32,8 @@
               http:resp [
                   http:body _:body
               ].
-    _:body rest:contains {
-        [:id _:n]
+    _:body rest:contains { rest:json
+        :id _:n
     }.
     _:newOperatorURI a :operator;
         :operatorId _:n;
