@@ -7,23 +7,24 @@ var Cache = require('../Cache');
 
 describe('cache', function ()
 {
-    var cache = new Cache('CACHETESTKEY');
+    var key = 'CACHETESTKEY';
+    var cache = new Cache();
 
-    before(function (done) { cache.clear(done); });
+    before(function (done) { cache.clear(key, done); });
 
     it('can add and remove items', function (done)
     {
-        cache.push('a', function ()
+        cache.push(key, 'a', function ()
         {
-            cache.push('b', function ()
+            cache.push(key, 'b', function ()
             {
-                cache.list(function (error, list)
+                cache.list(key, function (error, list)
                 {
                     assert.deepEqual(list, ['b', 'a']);
-                    cache.pop(function (error, item)
+                    cache.pop(key, function (error, item)
                     {
                         assert.strictEqual(item, 'b');
-                        cache.pop(function (error, item)
+                        cache.pop(key, function (error, item)
                         {
                             assert.strictEqual(item, 'a');
                             done();
@@ -44,17 +45,17 @@ describe('cache', function ()
                 if (open.call(cache, callback))
                     throw new Error("Open function shouldn't be called again during a manual process.");
             };
-            cache.push('a', function ()
+            cache.push(key, 'a', function ()
             {
-                cache.push('b', function ()
+                cache.push(key, 'b', function ()
                 {
-                    cache.list(function (error, list)
+                    cache.list(key, function (error, list)
                     {
                         assert.deepEqual(list, ['b', 'a']);
-                        cache.pop(function (error, item)
+                        cache.pop(key, function (error, item)
                         {
                             assert.strictEqual(item, 'b');
-                            cache.pop(function (error, item)
+                            cache.pop(key, function (error, item)
                             {
                                 assert.strictEqual(item, 'a');
                                 cache.open = open;
@@ -67,5 +68,5 @@ describe('cache', function ()
         });
     });
 
-    after(function (done) { cache.clear(done); });
+    after(function (done) { cache.clear(key, done); });
 });

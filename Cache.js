@@ -9,11 +9,7 @@ var EXPIRATION = 24 * 60 * 60; // seconds
 
 // TODO: fallback if there is no running redis instance? (for debugging?)
 
-function Cache (key)
-{
-    this.key = key;
-    this.queueKey = key + '_queue';
-}
+function Cache () { }
 
 
 Cache.prototype.open = function (callback)
@@ -64,31 +60,31 @@ Cache.prototype._handleCall = function (/*f, args*/)
     this.client[f].apply(this.client, args);
 };
 
-Cache.prototype.clear = function (callback)
+Cache.prototype.clear = function (key, callback)
 {
-    this._handleCall('del', this.key, function () { this._handleCall('del', this.queueKey, callback); }.bind(this));
+    this._handleCall('del', key, callback);
 };
 
-Cache.prototype.push = function (val, callback)
+Cache.prototype.push = function (key, val, callback)
 {
     var close = this.open();
-    this._handleCall('lpush', this.key, val,
+    this._handleCall('lpush', key, val,
         function ()
         {
             // reset expiration value if new data is added
-            this._handleCall('expire', this.key, EXPIRATION, function () { close ? this.close(callback) : callback.call(); }.bind(this));
+            this._handleCall('expire', key, EXPIRATION, function () { close ? this.close(callback) : callback.call(); }.bind(this));
         }.bind(this));
 };
 
-Cache.prototype.pop = function (callback)
+Cache.prototype.pop = function (key, callback)
 {
-    this._handleCall('lpop', this.key, callback);
+    this._handleCall('lpop', key, callback);
 };
 
 // callback: function (error, response)
-Cache.prototype.list = function (callback)
+Cache.prototype.list = function (key, callback)
 {
-    this._handleCall('lrange', this.key, 0, -1, callback);
+    this._handleCall('lrange', key, 0, -1, callback);
 };
 
 // TODO: should get rid of these when clearing cache...
@@ -114,7 +110,7 @@ Cache.prototype.popSingle = function (key, callback)
         }.bind(this));
 };
 
-Cache.prototype.addToQueue = function (vals, callback)
+Cache.prototype.addToQueue = function (key, vals, callback)
 {
     var close = this.open();
     var cache = this;
@@ -122,20 +118,20 @@ Cache.prototype.addToQueue = function (vals, callback)
     function push ()
     {
         if (vals.length > 0)
-            cache._handleCall('lpush', cache.queueKey, vals.pop(), push);
+            cache._handleCall('lpush', key, vals.pop(), push);
         else
-            cache._handleCall('expire', cache.queueKey, EXPIRATION, function () { close ? cache.close(callback) : callback.call(); }.bind(this));
+            cache._handleCall('expire', key, EXPIRATION, function () { close ? cache.close(callback) : callback.call(); }.bind(this));
     }
 };
 
-Cache.prototype.popQueue = function (callback)
+Cache.prototype.popQueue = function (key, callback)
 {
-    this._handleCall('lpop', this.queueKey, callback);
+    this._handleCall('lpop', key, callback);
 };
 
-Cache.prototype.queueLength = function (callback)
+Cache.prototype.queueLength = function (key, callback)
 {
-    this._handleCall('llen', this.queueKey, callback);
+    this._handleCall('llen', key, callback);
 };
 
 module.exports = Cache;

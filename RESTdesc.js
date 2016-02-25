@@ -16,6 +16,7 @@ function RESTdesc (dataPaths, goalPath, cacheKey)
     this.dataPaths = dataPaths;
     this.goalPath = goalPath;
     this.cacheKey = cacheKey || uuid.v4();
+    this.queueKey = this.cacheKey + '_queue';
 
     // TODO: might be a problem if we have multiple servers but that's a problem for later
     if (RESTdesc.instances[this.cacheKey])
@@ -43,7 +44,18 @@ function RESTdesc (dataPaths, goalPath, cacheKey)
 
 RESTdesc.prototype.clear = function (callback)
 {
-    this.cache.clear(callback);
+    // TODO: clear single IDs
+    // TODO: prettify list of commands like this
+    this.cache.open(function ()
+    {
+        this.cache.clear(this.cacheKey, function ()
+        {
+            this.cache.clear(this.queueKey, function ()
+            {
+                this.cache.close(callback);
+            }.bind(this))
+        }.bind(this))
+    }.bind(this));
 };
 
 // TODO: probably should also clear queue here
@@ -54,7 +66,7 @@ RESTdesc.prototype.back = function (callback, _recursive)
     if (!_recursive)
         this.cache.open();
 
-    this.cache.pop(function (err, val)
+    this.cache.pop(this.cacheKey, function (err, val)
     {
         // if val is null the list is empty
         if (!val || _.includes(val, 'askTheWorker'))
@@ -80,6 +92,7 @@ RESTdesc.prototype.handleUserResponse = function (response, json, callback)
         try { call.handleResponse(response); }
         catch (e) { error = e; }
         this.cache.push(
+            this.cacheKey,
             call.toN3(),
             // it's really important to execute the callback after the push is finished or there is a race condition
             function () { this.cache.close(function () { callback(error); }); }.bind(this)
@@ -89,7 +102,7 @@ RESTdesc.prototype.handleUserResponse = function (response, json, callback)
 
 RESTdesc.prototype.next = function (callback)
 {
-    this.cache.queueLength(function (err, length)
+    this.cache.queueLength(this.queueKey, function (err, length)
     {
         if (length > 0)
         {
@@ -98,7 +111,7 @@ RESTdesc.prototype.next = function (callback)
                 // put this outside of popQueue to prevent race condition
                 callback = this.callback;
                 this.callback = undefined;
-                this.cache.popQueue(function (err, val)
+                this.cache.popQueue(this.queueKey, function (err, val)
                 {
                     var call = ValidCallGenerator.N3ToValidCall(val);
                     var json = call.toJSON();
@@ -115,7 +128,7 @@ RESTdesc.prototype.next = function (callback)
             if (!this.running && this.callback)
             {
                 this.running = true;
-                this.cache.list(function (err, data)
+                this.cache.list(this.cacheKey, function (err, data)
                 {
                     this.eye = new EYEHandler();
                     this.eye.call(this.dataPaths, data, this.goalPath, true, true, function (error, proof) { if (error) this._stop(); else this._handleProof(proof); }.bind(this));
@@ -153,14 +166,13 @@ RESTdesc.prototype._handleNext = function (next)
 
     // TODO: can't do this, not stateless...
     if (calls.user.length > 0)
-        this.cache.addToQueue(_.invokeMap(calls.user, 'toN3'), function () { this.next(); }.bind(this));
+        this.cache.addToQueue(this.queueKey, _.invokeMap(calls.user, 'toN3'), function () { this.next(); }.bind(this));
 
     this.running = calls.api.length > 0;
 
     var delay = _.after(calls.api.length, function () { this.running = false; this.next(); }.bind(this));
 
     // TODO: one of the API responses might already lead to a user request...
-    var cache = this.cache;
     var self = this;
     for (var i = 0; i < calls.api.length; ++i)
     {
@@ -172,7 +184,7 @@ RESTdesc.prototype._handleNext = function (next)
             if (error)
                 return self._stop(error);
 
-            cache.push(this.toN3(), delay);
+            self.cache.push(self.cacheKey, this.toN3(), delay);
         }.bind(call));
     }
 };
