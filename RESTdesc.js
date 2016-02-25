@@ -28,7 +28,7 @@ function RESTdesc (dataPaths, goalPath, cacheKey)
     }
 
     RESTdesc.instances[this.cacheKey] = this;
-    this.cache = new Cache(this.cacheKey);
+    this.cache = new Cache();
 
     if (!_.isArray(this.dataPaths))
         this.dataPaths = [this.dataPaths];
@@ -102,16 +102,16 @@ RESTdesc.prototype.handleUserResponse = function (response, json, callback)
 
 RESTdesc.prototype.next = function (callback)
 {
-    this.cache.queueLength(this.queueKey, function (err, length)
+    this.cache.length(this.queueKey, function (err, length)
     {
         if (length > 0)
         {
             if (this.callback) // maybe the callback already got a response earlier and doesn't need another one
             {
-                // put this outside of popQueue to prevent race condition
+                // put this outside of pop to prevent race condition
                 callback = this.callback;
                 this.callback = undefined;
-                this.cache.popQueue(this.queueKey, function (err, val)
+                this.cache.pop(this.queueKey, function (err, val)
                 {
                     var call = ValidCallGenerator.N3ToValidCall(val);
                     var json = call.toJSON();
@@ -166,7 +166,7 @@ RESTdesc.prototype._handleNext = function (next)
 
     // TODO: can't do this, not stateless...
     if (calls.user.length > 0)
-        this.cache.addToQueue(this.queueKey, _.invokeMap(calls.user, 'toN3'), function () { this.next(); }.bind(this));
+        this.cache.push(this.queueKey, _.invokeMap(calls.user, 'toN3'), function () { this.next(); }.bind(this));
 
     this.running = calls.api.length > 0;
 

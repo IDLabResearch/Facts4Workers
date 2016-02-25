@@ -68,12 +68,17 @@ Cache.prototype.clear = function (key, callback)
 Cache.prototype.push = function (key, val, callback)
 {
     var close = this.open();
-    this._handleCall('lpush', key, val,
-        function ()
-        {
-            // reset expiration value if new data is added
-            this._handleCall('expire', key, EXPIRATION, function () { close ? this.close(callback) : callback.call(); }.bind(this));
-        }.bind(this));
+    var cache = this;
+    if (!_.isArray(val))
+        val = [val];
+    push();
+    function push ()
+    {
+        if (val.length > 0)
+            cache._handleCall('lpush', key, val.pop(), push);
+        else
+            cache._handleCall('expire', key, EXPIRATION, function () { close ? cache.close(callback) : callback.call(); }.bind(this));
+    }
 };
 
 Cache.prototype.pop = function (key, callback)
@@ -85,6 +90,11 @@ Cache.prototype.pop = function (key, callback)
 Cache.prototype.list = function (key, callback)
 {
     this._handleCall('lrange', key, 0, -1, callback);
+};
+
+Cache.prototype.length = function (key, callback)
+{
+    this._handleCall('llen', key, callback);
 };
 
 // TODO: should get rid of these when clearing cache...
@@ -108,30 +118,6 @@ Cache.prototype.popSingle = function (key, callback)
             var callbackVal = function (err) { callback(err, val); };
             this._handleCall('del', key, function () { close ? this.close(callbackVal) : callbackVal(); }.bind(this));
         }.bind(this));
-};
-
-Cache.prototype.addToQueue = function (key, vals, callback)
-{
-    var close = this.open();
-    var cache = this;
-    push();
-    function push ()
-    {
-        if (vals.length > 0)
-            cache._handleCall('lpush', key, vals.pop(), push);
-        else
-            cache._handleCall('expire', key, EXPIRATION, function () { close ? cache.close(callback) : callback.call(); }.bind(this));
-    }
-};
-
-Cache.prototype.popQueue = function (key, callback)
-{
-    this._handleCall('lpop', key, callback);
-};
-
-Cache.prototype.queueLength = function (key, callback)
-{
-    this._handleCall('llen', key, callback);
 };
 
 module.exports = Cache;
