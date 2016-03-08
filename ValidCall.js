@@ -73,7 +73,6 @@ ValidCall.prototype.call = function (callback)
     request(requestParams,
         function (error, response, body)
         {
-            // TODO: error handling
             if (!error && response.statusCode < 400)
             {
                 // TODO: hardcode fix for big list for now
@@ -82,9 +81,11 @@ ValidCall.prototype.call = function (callback)
                 callback(null, body);
             }
             else if (response && response.statusCode && response.url)
-                callback(new Error('Status code ' + response.statusCode + ' when calling ' + response.url + ' (' + error.message + ')'));
+                // TODO: maybe still inform the user even if we can handle it?
+                // callback(new Error('Status code ' + response.statusCode + ' when calling ' + url + ' (' + error.message + ')'));
+                callback({url: url, response: response, error: error});
             else
-                callback(error);
+                callback({url: url, error: error});
         }
     );
 };

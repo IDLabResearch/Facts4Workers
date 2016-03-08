@@ -17,6 +17,9 @@ function RESTdesc (dataPaths, goalPath, cacheKey)
     this.goalPath = goalPath;
     this.cacheKey = cacheKey || uuid.v4();
     this.queueKey = this.cacheKey + '_queue';
+    // TODO: put default error object in cache if there isn't one there yet?
+    // TODO: will we put all our custom N3 in 1 file? (errors, start of use cases, etc.)
+    this.customKey = this.cacheKey = '_custom';
 
     // TODO: might be a problem if we have multiple servers but that's a problem for later
     if (RESTdesc.instances[this.cacheKey])
@@ -131,7 +134,14 @@ RESTdesc.prototype.next = function (callback)
                 this.cache.list(this.cacheKey, function (err, data)
                 {
                     this.eye = new EYEHandler();
-                    this.eye.call(this.dataPaths, data, this.goalPath, true, true, function (error, proof) { if (error) this._stop(); else this._handleProof(proof); }.bind(this));
+                    this.eye.call(this.dataPaths, data, this.goalPath, true, true, function (error, proof)
+                    {
+                        // TODO: check if the proof is empty. If yes: throw error
+                        if (error)
+                            this._stop(error);
+                        else
+                            this._handleProof(proof);
+                    }.bind(this));
                 }.bind(this));
             }
             else if (!this.running)
@@ -142,7 +152,7 @@ RESTdesc.prototype.next = function (callback)
 
 RESTdesc.prototype._handleProof = function (proof)
 {
-    this.eye.call([this.list], [proof], this.findPath, false, false, function (error, body) { if (error) this._stop(); else this._handleNext(body); }.bind(this));
+    this.eye.call([this.list], [proof], this.findPath, false, false, function (error, body) { if (error) this._stop(error); else this._handleNext(body); }.bind(this));
 };
 
 RESTdesc.prototype._handleNext = function (next)
@@ -179,8 +189,16 @@ RESTdesc.prototype._handleNext = function (next)
         var call = calls.api[i];
         call.call(function (error, response)
         {
-            try { this.handleResponse(response); } // 'this' references call now
-            catch (e) { error = e; }
+            if (error)
+                error = new Error('Status code ' + error.response.statusCode + ' when calling ' + error.url + ' (' + error.error.message + ')');
+            else
+            {
+                try
+                { this.handleResponse(response); } // 'this' references call now
+                catch (e)
+                { error = e; }
+            }
+
             if (error)
                 return self._stop(error);
 
