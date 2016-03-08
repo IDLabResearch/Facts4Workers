@@ -11,6 +11,8 @@
 @prefix out: <http://f4w.restdesc.org/demo/.well-known/genid/f3ed8675-47ce-42f1-ac89-9082b146b6db#>.
 @prefix math: <http://www.w3.org/2000/10/swap/math#>.
 @prefix string: <http://www.w3.org/2000/10/swap/string#>.
+@prefix util: <http://f4w.restdesc.org/util#>.
+@prefix auth: <http://f4w.restdesc.org/demo/authorization#>.
 
 :thereIsADefect a operator:problem.
 :thereIsADefect :trySolution :firstTry.
@@ -52,7 +54,7 @@
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               rest:check ?operator;
               http:body { rest:json
-                  :message "On what machine are you working?";
+                  :message "On wich machine are you working?";
                   :sendList ?list
               };
               http:resp [
@@ -107,12 +109,14 @@
 #Problem is HERE
 #get defect id list
 {
-?problem :occurredOnPartWithID ?p
+    ?problem :occurredOnPartWithID ?p.
+    ?user auth:authenticated true.
+    ?user auth:access_token ?token.
 }
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/defects?part_id=" ?p);
+              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/defects?part_id=" ?p "&access_token=" ?token);
               http:resp [
                   http:body _:list2
               ].
@@ -145,12 +149,14 @@
 
 #get solution id list
 {
-    ?problem :defect ?id;
+    ?problem :defect ?id.
+    ?user auth:authenticated true.
+    ?user auth:access_token ?token.
 }
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/solutions?defect_id=" ?id);
+              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/solutions?defect_id=" ?id "&access_toke=" ?token);
               http:resp [
                   http:body _:list
               ].
@@ -194,11 +200,14 @@
 {
     ?operator :foundProblem ?problem;
 :operatorId ?id.
+
+    ?user auth:authenticated true.
+    ?user auth:access_token ?token.
 }
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://skillp.tho.f4w.l0g.in/api/operator_skills/" ?id);
+              tmpl:requestURI ("http://skillp.tho.f4w.l0g.in/api/operator_skills/" ?id "?access_token=" ?token);
               http:resp [
                   http:body _:body
               ].
@@ -222,9 +231,11 @@
              :trySolution ?solution.
     ?solution :solutionId ?sid.
     ?solution :requiredSkillsKnown "no".
+    ?user auth:authenticated true.
+    ?user auth:access_token ?token.
 }=>{
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/solutions/" ?sid);
+              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/solutions/" ?sid "?access_token=" ?token);
               http:resp [
                   http:body _:body
               ].
@@ -279,12 +290,13 @@
     ?m :state "notstopped1".
     ?operator :foundProblem ?problem;
               :operatorId ?wid.
-
+    ?user auth:authenticated true.
+    ?user auth:access_token ?token.
 }
 =>
 {
     _:request http:methodName "POST";
-              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?machineID "/events");
+              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?machineID "/events?access_token=" ?token);
               http:body { rest:json
                   :name "Stop the machine";
                   :desc "Stoping the machine after a defect was spotted!";
@@ -340,9 +352,7 @@
               :desc ?s_desc;
               :comment ?s_comment.
 
-    (?wm ?wt ?wc ?ms ?t ?c) e:whenGround (?wm2 ?wt2 ?wc2 ?m2 ?t2 ?c2).
-
-    (?wm2 ?wt2 ?wc2) :match (?m2 ?t2 ?c2).
+    (?wm ?wt ?wc ?ms ?t ?c) e:whenGround {(?wm ?wt ?wc) util:match (?ms ?t ?c)}.
 }
 =>
 {
@@ -378,44 +388,13 @@
 }.
 
 
-# skill-matching
-{
-    (?wm ?wt ?wc) :match (?m ?t ?c).
-}
-<=
-{
-    ?m math:notGreaterThan ?wm.
-    ?t math:notGreaterThan ?wt.
-    ?c math:notGreaterThan ?wc.
-}.
-
-{
-    (?wm ?wt ?wc) :noMatch (?m ?t ?c).
-}
-<=
-{
-    ?t math:greaterThan ?wt.
-}.
-
-{
-    (?wm ?wt ?wc) :noMatch (?m ?t ?c).
-}
-<=
-{
-    ?m math:greaterThan ?wm.
-}.
-
-{
-    (?wm ?wt ?wc) :noMatch (?m ?t ?c).
-}
-<=
-{
-    ?c math:greaterThan ?wc.
-}.
 
 
 # POST solution intent
 {
+
+    ?user auth:authenticated true.
+    ?user auth:access_token ?token.
     ?operator :foundProblem ?problem;
               :operatorId ?wid.
     ?problem :trySolution ?solution.
@@ -430,7 +409,7 @@
 =>
 {
     _:request http:methodName "POST";
-              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/reports");
+              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/reports?access_token=" ?token);
               http:body { rest:json
                      #I am not sure, but maybe this answers to the machine stopped event?
                     :event_id ?eid;
@@ -448,6 +427,7 @@
 
 
 {
+?solution :new :triple.
 ?problem :trySolution ?solution.
  ?solution :solutionId ?sid;
            :worked false.
@@ -484,10 +464,13 @@
 
 
 {
-    ?solution :triedAndReported ?yes;
+    
+   ?user auth:authenticated true.
+    ?user auth:access_token ?token.
+?solution :triedAndReported ?yes;
               :worked ?tf.
     ?yes e:whenGround "yes".
-    ?tf e:whenGround true.
+    ?tf e:whenGround {?tf log:equalTo true}.
     ?problem :occurredOnMachine ?machine.
     ?machine :machineID ?mid.
      ?problem        :trySolution ?solution.
@@ -498,7 +481,7 @@
 {
     _:request http:methodName "POST";
               rest:check (?tf ?yes);
-              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?mid "/events");
+              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?mid "/events?access_token=" ?token);
               http:body { rest:json
                      #I am not sure, but maybe this answers to the machine stopped event?
                     :name "Starting the machine";
@@ -512,6 +495,8 @@
 
 
 {
+    ?user auth:authenticated true.
+    ?user auth:access_token ?token.
     ?problem :occurredOnMachine ?machine.
     ?problem :defect ?defect.
     {?machine :state ?state2.} :eventId ?eid.
@@ -531,15 +516,13 @@
         :reqToolSkills ?t;
         :reqComputerSkills ?c.
 
-    (?wm ?wt ?wc ?m ?t ?c) e:whenGround (?wm2 ?wt2 ?wc2 ?m2 ?t2 ?c2).
-
-    (?wm2 ?wt2 ?wc2) :noMatch (?m2 ?t2 ?c2).
+    (?wm ?wt ?wc ?m ?t ?c) e:whenGround {(?wm ?wt ?wc) util:noMatch (?m ?t ?c)}.
 }
 =>
 {
     _:request http:methodName "POST";
               rest:check (?wm ?m);
-              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?mid "/events");
+              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?mid "/events?access_token=" ?token);
               http:body { rest:json
                   :name "waiting_for_teamleader";
                   :desc "Stoping the machine. Problem has to be fixed by the team leader.";
