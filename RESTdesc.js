@@ -190,7 +190,7 @@ RESTdesc.prototype._handleNext = function (next)
         call.call(function (error, response)
         {
             if (error)
-                error = new Error('Status code ' + error.response.statusCode + ' when calling ' + error.url + ' (' + error.error.message + ')');
+                error = new Error('Status code ' + error.response.statusCode + ' when calling ' + error.url + ' (' + (error.response.body ? error.response.body : error.error.message) + ')');
             else
             {
                 try

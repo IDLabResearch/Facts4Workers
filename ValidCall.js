@@ -80,7 +80,7 @@ ValidCall.prototype.call = function (callback)
                     body = body.slice(-20);
                 callback(null, body);
             }
-            else if (response && response.statusCode && response.url)
+            else if (response && response.statusCode)
                 // TODO: maybe still inform the user even if we can handle it?
                 // callback(new Error('Status code ' + response.statusCode + ' when calling ' + url + ' (' + error.message + ')'));
                 callback({url: url, response: response, error: error});
