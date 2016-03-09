@@ -323,7 +323,7 @@
     ?report a teamleader:report;
             teamleader:success ?success;
             teamleader:state teamleader:posted.
-    ?success e:whenGround false.
+    ?success e:whenGround {?success log:equalTo false}.
 }
 =>
 {
@@ -420,7 +420,7 @@
             teamleader:event ?original;
             teamleader:state teamleader:posted;
             teamleader:success ?success.
-    ?success e:whenGround true.
+    ?success e:whenGround {?success log:equalTo true}.
     ?operator teamleader:id ?operator_id.
 }
 =>
