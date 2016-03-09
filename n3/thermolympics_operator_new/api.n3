@@ -156,7 +156,7 @@
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/solutions?defect_id=" ?id "&access_toke=" ?token);
+              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/solutions?defect_id=" ?id "&access_token=" ?token);
               http:resp [
                   http:body _:list
               ].
