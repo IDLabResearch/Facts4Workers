@@ -19,7 +19,7 @@ function RESTdesc (dataPaths, goalPath, cacheKey)
     this.queueKey = this.cacheKey + '_queue';
     // TODO: put default error object in cache if there isn't one there yet?
     // TODO: will we put all our custom N3 in 1 file? (errors, start of use cases, etc.)
-    this.customKey = this.cacheKey = '_custom';
+    this.customKey = this.cacheKey + '_custom';
 
     // TODO: might be a problem if we have multiple servers but that's a problem for later
     if (RESTdesc.instances[this.cacheKey])
