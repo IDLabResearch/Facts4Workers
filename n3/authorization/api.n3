@@ -52,7 +52,7 @@
                   http:body _:body
               ].
     _:body rest:contains { rest:json
-        :access_token  _:acces_token;
+        :access_token  _:access_token;
         :refresh_token _:refresh_token;
         :created_at    _:created_at
     }.
