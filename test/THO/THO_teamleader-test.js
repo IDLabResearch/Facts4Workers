@@ -3,7 +3,7 @@ var assert = require('assert');
 var _ = require('lodash');
 var ValidCall = require('../../ValidCall');
 var RESTdesc = require('../../RESTdesc');
-var stubs = require('./THO_teamleader-stubs');
+var stubs = require('./THO-stubs');
 
 // TODO: check through demo.js?
 // TODO: check if request body is also correct
@@ -18,6 +18,20 @@ describe('THO teamleader use case', function ()
         new RESTdesc([], '', key).clear(done);
     });
 
+    it ('requires authorization', function (done)
+    {
+        var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
+        rest.next(function (error, result)
+        {
+            if (error)
+                throw error;
+            assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/authorization');
+            var contains = result['http:resp']['http:body']['contains'];
+            assert.deepEqual(Object.keys(contains), ['username', 'password']);
+            rest.handleUserResponse({ username: 'iminds', password: 'iminds' }, result, done);
+        });
+    });
+
     it ('asks for an operator ID', function (done)
     {
         var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
@@ -28,11 +42,11 @@ describe('THO teamleader use case', function ()
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getOperatorID');
             var contains = result['http:resp']['http:body']['contains'];
             assert.deepEqual(Object.keys(contains), ['id']);
-            rest.handleUserResponse({ id: 2 }, result, done);
+            rest.handleUserResponse({ id: '1d09d800-4936-4d49-9ab7-d006663d185b' }, result, done);
         });
     });
 
-    it ('asks for a machine ID (choose 1)', function (done)
+    it ('asks for a machine ID (choose f57438f4)', function (done)
     {
         var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
         rest.next(function (error, result)
@@ -42,7 +56,7 @@ describe('THO teamleader use case', function ()
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getMachineID');
             var contains = result['http:resp']['http:body']['contains'];
             assert.deepEqual(Object.keys(contains), ['id']);
-            rest.handleUserResponse({ id: 1 }, result, done);
+            rest.handleUserResponse({ id: 'f57438f4-ccfc-4c5d-a0ac-0c7008d4bf3f' }, result, done);
         });
     });
 
@@ -84,7 +98,7 @@ describe('THO teamleader use case', function ()
         });
     });
 
-    it ('asks for a machine ID (choose 2)', function (done)
+    it ('asks for a machine ID (choose d8b20647)', function (done)
     {
         var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
         rest.next(function (error, result)
@@ -94,7 +108,7 @@ describe('THO teamleader use case', function ()
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getMachineID');
             var contains = result['http:resp']['http:body']['contains'];
             assert.deepEqual(Object.keys(contains), ['id']);
-            rest.handleUserResponse({ id: 2 }, result, done);
+            rest.handleUserResponse({ id: 'd8b20647-d578-46b2-a32a-479d440f438a' }, result, done);
         });
     });
 

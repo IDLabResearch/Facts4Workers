@@ -3,7 +3,7 @@ var assert = require('assert');
 var _ = require('lodash');
 var ValidCall = require('../../ValidCall');
 var RESTdesc = require('../../RESTdesc');
-var stubs = require('./THO_operator-stubs');
+var stubs = require('./THO-stubs');
 
 describe('THO operator use case', function ()
 {

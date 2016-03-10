@@ -222,16 +222,14 @@
         :desc _:desc;
         :part_id _:part_id;
         :media_url _:media_url;
-        :comment _:comment;
-        :created_at _:created_at
+        :comment _:comment
     }.
     # TODO: @doerthe: an easier way to copy like this?
     ?defect  teamleader:name _:name;
              teamleader:desc _:desc;
              teamleader:part_id _:part_id;
              teamleader:media_url _:media_url;
-             teamleader:comment _:comment;
-             teamleader:created_at _:created_at.
+             teamleader:comment _:comment.
 }.
 
 # TODO: copied from operator, need 1 building block, also, no way currently to get info for 1 part
@@ -295,8 +293,7 @@
     ?defect  teamleader:name ?name;
              teamleader:desc ?desc;
              teamleader:media_url ?media_url;
-             teamleader:comment ?comment;
-             teamleader:created_at ?created.
+             teamleader:comment ?comment.
 
     ?original teamleader:reports ?reports.
 }
@@ -311,8 +308,7 @@
                       :name ?name;
                       :desc ?desc;
                       :media_url ?media_url;
-                      :comment ?comment;
-                      :created_at ?created
+                      :comment ?comment
                   };
                   :reports ?reports;
                   :events ?events

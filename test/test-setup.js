@@ -40,9 +40,9 @@ TEST.createStubFunction = function (stubs)
             parsed.search = '';
             link = url.format(parsed);
         }
-        if (!(link in stubs))
-            throw new Error('Unsupported URL stub: ' + link);
-        var result = stubs[link](this.getBody());
+        if (!(link in stubs[this.getMethod()]))
+            throw new Error('Unsupported URL stub: ' + this.getMethod() + ' ' + link);
+        var result = stubs[this.getMethod()][link](this.getBody());
         callback(null, result);
     };
 };
