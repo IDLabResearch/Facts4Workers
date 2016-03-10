@@ -75,7 +75,7 @@
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://machinesandparts.surge.sh/api/parts.json");
+              tmpl:requestURI ("https://machinesandparts.surge.sh/api/parts.json");
               http:resp [
                   http:body _:list
               ].
@@ -116,7 +116,7 @@
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/defects?part_id=" ?p "&access_token=" ?token);
+              tmpl:requestURI ("https://defects.tho.facts4.work/api/defects?part_id=" ?p "&access_token=" ?token);
               http:resp [
                   http:body _:list2
               ].
@@ -156,7 +156,7 @@
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/solutions?defect_id=" ?id "&access_token=" ?token);
+              tmpl:requestURI ("https://defects.tho.facts4.work/api/solutions?defect_id=" ?id "&access_token=" ?token);
               http:resp [
                   http:body _:list
               ].
@@ -207,7 +207,7 @@
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://skillp.tho.f4w.l0g.in/api/operator_skills/" ?id "?access_token=" ?token);
+              tmpl:requestURI ("https://skillp.tho.facts4.work/api/operator_skills/" ?id "?access_token=" ?token);
               http:resp [
                   http:body _:body
               ].
@@ -235,7 +235,7 @@
     ?user auth:access_token ?token.
 }=>{
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/solutions/" ?sid "?access_token=" ?token);
+              tmpl:requestURI ("https://defects.tho.facts4.work/api/solutions/" ?sid "?access_token=" ?token);
               http:resp [
                   http:body _:body
               ].
@@ -296,11 +296,11 @@
 =>
 {
     _:request http:methodName "POST";
-              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?machineID "/events?access_token=" ?token);
+              tmpl:requestURI ("https://mstate.tho.facts4.work/api/machines/" ?machineID "/events?access_token=" ?token);
               http:body { rest:json
                   :name "Stop the machine";
                   :desc "Stoping the machine after a defect was spotted!";
-                  :machine_state "4";
+                  :machine_state "5e41b90e-77b6-4810-99ff-9df87d709801";
                   :operator_id ?wid;
                   :optional { rest:json :defect_id ?defectID }
               };
@@ -409,7 +409,7 @@
 =>
 {
     _:request http:methodName "POST";
-              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/reports?access_token=" ?token);
+              tmpl:requestURI ("https://defects.tho.facts4.work/api/reports?access_token=" ?token);
               http:body { rest:json
                      #I am not sure, but maybe this answers to the machine stopped event?
                     :event_id ?eid;
@@ -481,13 +481,13 @@
 {
     _:request http:methodName "POST";
               rest:check (?tf ?yes);
-              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?mid "/events?access_token=" ?token);
+              tmpl:requestURI ("https://mstate.tho.facts4.work/api/machines/" ?mid "/events?access_token=" ?token);
               http:body { rest:json
                      #I am not sure, but maybe this answers to the machine stopped event?
                     :name "Starting the machine";
                     :desc "Starting the machine after a solution was successfully applied!";
                     :operator_id ?wid;
-                    :machine_state "1"
+                    :machine_state "fb71a95f-8068-4b92-964c-9b5720efda54"
               }.
      ?machine :newState _:state.
     ?problem :finalState :solved.
@@ -522,12 +522,12 @@
 {
     _:request http:methodName "POST";
               rest:check (?wm ?m);
-              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?mid "/events?access_token=" ?token);
+              tmpl:requestURI ("https://mstate.tho.facts4.work/api/machines/" ?mid "/events?access_token=" ?token);
               http:body { rest:json
                   :name "waiting_for_teamleader";
                   :desc "Stoping the machine. Problem has to be fixed by the team leader.";
                   #TODO: put the right machine state
-                  :machine_state "3";
+                  :machine_state "3abbbd8c-bf6a-42c0-a096-2087d4b8e4a8";
                   :operator_id ?wid;
                   :optional { rest:json :defect_id ?defect; :stopped_for_defect_event_id ?eid }
               };

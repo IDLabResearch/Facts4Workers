@@ -21,8 +21,22 @@ describe('THO operator use case', function ()
     before(function (done)
     {
         oldCall = ValidCall.prototype.call;
-        ValidCall.prototype.call = callStub;
+        //ValidCall.prototype.call = callStub;
         new RESTdesc([], '', key).clear(done);
+    });
+
+    it ('requires authorization', function (done)
+    {
+        var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
+        rest.next(function (error, result)
+        {
+            if (error)
+                throw error;
+            assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/authorization');
+            var contains = result['http:resp']['http:body']['contains'];
+            assert.deepEqual(Object.keys(contains), ['username', 'password']);
+            rest.handleUserResponse({ username: 'iminds', password: 'iminds' }, result, done);
+        });
     });
 
     it ('asks for an operator ID', function (done)
@@ -35,7 +49,7 @@ describe('THO operator use case', function ()
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getOperatorID');
             var contains = result['http:resp']['http:body']['contains'];
             assert.deepEqual(Object.keys(contains), ['id']);
-            rest.handleUserResponse({ id: 2 }, result, done);
+            rest.handleUserResponse({ id: 'fe25bbc1-4e4e-4da4-99f7-6a673c53e237' }, result, done);
         });
     });
 
@@ -49,7 +63,7 @@ describe('THO operator use case', function ()
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getMachineID');
             var contains = result['http:resp']['http:body']['contains'];
             assert.deepEqual(Object.keys(contains), ['id']);
-            rest.handleUserResponse({ id: 1 }, result, done);
+            rest.handleUserResponse({ id: 'f57438f4-ccfc-4c5d-a0ac-0c7008d4bf3f' }, result, done);
         });
     });
 
@@ -77,7 +91,7 @@ describe('THO operator use case', function ()
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getDefectID');
             var contains = result['http:resp']['http:body']['contains'];
             assert.deepEqual(Object.keys(contains), ['id']);
-            rest.handleUserResponse({ id: 1 }, result, done);
+            rest.handleUserResponse({ id: '0324aa5e-9136-4888-85c7-9027a66121ab' }, result, done);
         });
     });
 
@@ -91,7 +105,7 @@ describe('THO operator use case', function ()
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getSolutionID');
             var contains = result['http:resp']['http:body']['contains'];
             assert.deepEqual(Object.keys(contains), ['id']);
-            rest.handleUserResponse({ id: 3 }, result, done);
+            rest.handleUserResponse({ id: '9519490e-5fb8-401b-b864-339c8b16dc56' }, result, done);
         });
     });
 
@@ -119,7 +133,7 @@ describe('THO operator use case', function ()
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getSolutionID');
             var contains = result['http:resp']['http:body']['contains'];
             assert.deepEqual(Object.keys(contains), ['id']);
-            rest.handleUserResponse({ id: 3 }, result, done);
+            rest.handleUserResponse({ id: '9519490e-5fb8-401b-b864-339c8b16dc56' }, result, done);
         });
     });
 
@@ -186,7 +200,7 @@ describe('THO operator use case', function ()
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getSolutionID');
             var contains = result['http:resp']['http:body']['contains'];
             assert.deepEqual(Object.keys(contains), ['id']);
-            rest.handleUserResponse({ id: 1 }, result, done);
+            rest.handleUserResponse({ id: 'e314e5ab-9860-4c4c-8830-83dc84d5c307' }, result, done);
         });
     });
 

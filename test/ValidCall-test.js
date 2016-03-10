@@ -10,15 +10,15 @@ describe('ValidCalls', function ()
 {
     it('can handle multiple calls in a single proof', function ()
     {
-        var n3 = 'PREFIX : <http://f4w.restdesc.org/demo#>\nPREFIX tmpl: <http://purl.org/restdesc/http-template#>\nPREFIX http: <http://www.w3.org/2011/http#>\n_:sk0 :validCall {_:sk11_1 http:methodName "GET". _:sk11_1 tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines"). _:sk11_1 http:resp _:sk12_1. _:sk12_1 http:body _:sk13_2. _:sk13_2 a :machineList}. _:sk1 :validCall {_:sk0_1 http:methodName "GET". _:sk0_1 tmpl:requestURI ("http://skillp.tho.f4w.l0g.in/api/operator_skills/"). _:sk0_1 http:resp _:sk1_1. _:sk1_1 http:body _:sk2_2. _:sk2_2 a :operatorlist}.';
+        var n3 = 'PREFIX : <http://f4w.restdesc.org/demo#>\nPREFIX tmpl: <http://purl.org/restdesc/http-template#>\nPREFIX http: <http://www.w3.org/2011/http#>\n_:sk0 :validCall {_:sk11_1 http:methodName "GET". _:sk11_1 tmpl:requestURI ("https://mstate.tho.facts4.work/api/machines"). _:sk11_1 http:resp _:sk12_1. _:sk12_1 http:body _:sk13_2. _:sk13_2 a :machineList}. _:sk1 :validCall {_:sk0_1 http:methodName "GET". _:sk0_1 tmpl:requestURI ("http://skillp.tho.facts4.work/api/operator_skills/"). _:sk0_1 http:resp _:sk1_1. _:sk1_1 http:body _:sk2_2. _:sk2_2 a :operatorlist}.';
         var calls = ValidCallGenerator.N3toValidCalls(n3, 'http://f4w.restdesc.org/demo#');
         assert.equal(calls.length, 2);
 
-        assert.strictEqual(calls[0].getURL(), 'http://mstate.tho.f4w.l0g.in/api/machines');
+        assert.strictEqual(calls[0].getURL(), 'https://mstate.tho.facts4.work/api/machines');
         assert(_.isString(calls[0].getResponse()));
         assert.deepEqual(ValidCallGenerator.N3ToValidCall(calls[0].toN3(), 'http://f4w.restdesc.org/demo#').jsonld, calls[0].jsonld);
 
-        assert.strictEqual(calls[1].getURL(), 'http://skillp.tho.f4w.l0g.in/api/operator_skills/');
+        assert.strictEqual(calls[1].getURL(), 'http://skillp.tho.facts4.work/api/operator_skills/');
         assert(_.isString(calls[1].getResponse()));
         assert.deepEqual(ValidCallGenerator.N3ToValidCall(calls[1].toN3(), 'http://f4w.restdesc.org/demo#').jsonld, calls[1].jsonld);
     });

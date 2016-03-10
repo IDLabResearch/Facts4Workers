@@ -68,7 +68,7 @@
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?machine_id "/last_event?access_token=" ?token);
+              tmpl:requestURI ("https://mstate.tho.facts4.work/api/machines/" ?machine_id "/last_event?access_token=" ?token);
               http:resp [
                   http:body _:body
               ].
@@ -126,7 +126,7 @@
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?machine_id "/events?access_token=" ?token);
+              tmpl:requestURI ("https://mstate.tho.facts4.work/api/machines/" ?machine_id "/events?access_token=" ?token);
               http:resp [
                   http:body _:list
               ].
@@ -175,7 +175,7 @@
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/solutions?defect_id=" ?defect_id "&access_token=" ?token);
+              tmpl:requestURI ("https://defects.tho.facts4.work/api/solutions?defect_id=" ?defect_id "&access_token=" ?token);
               http:resp [
                   http:body _:list
               ].
@@ -193,7 +193,7 @@
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/reports?event_id=" ?original_id  "&access_token=" ?token);
+              tmpl:requestURI ("https://defects.tho.facts4.work/api/reports?event_id=" ?original_id  "&access_token=" ?token);
               http:resp [
                   http:body _:list
               ].
@@ -212,7 +212,7 @@
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/defects/" ?defect_id "?access_token=" ?token);
+              tmpl:requestURI ("https://defects.tho.facts4.work/api/defects/" ?defect_id "?access_token=" ?token);
               http:resp [
                   http:body _:body
               ].
@@ -243,7 +243,7 @@
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("http://machinesandparts.surge.sh/api/parts.json");
+              tmpl:requestURI ("https://machinesandparts.surge.sh/api/parts.json");
               http:resp [
                   http:body _:list
               ].
@@ -402,7 +402,7 @@
 =>
 {
     _:request http:methodName "POST";
-              tmpl:requestURI ("http://defects.tho.f4w.l0g.in/api/reports?access_token=" ?token);
+              tmpl:requestURI ("https://defects.tho.facts4.work/api/reports?access_token=" ?token);
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body { rest:json
                   :event_id ?event_id;
@@ -443,7 +443,7 @@
 =>
 {
     _:request http:methodName "POST";
-              tmpl:requestURI ("http://mstate.tho.f4w.l0g.in/api/machines/" ?machine_id "/events?access_token=" ?token);
+              tmpl:requestURI ("https://mstate.tho.facts4.work/api/machines/" ?machine_id "/events?access_token=" ?token);
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               rest:check ?success; # TODO: a bit annoying
               http:body { rest:json
