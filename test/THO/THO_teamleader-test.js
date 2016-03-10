@@ -5,18 +5,6 @@ var ValidCall = require('../../ValidCall');
 var RESTdesc = require('../../RESTdesc');
 var stubs = require('./THO_teamleader-stubs');
 
-function callStub (callback)
-{
-    var url = this.getURL();
-    if (!(url in stubs))
-        throw new Error('Unsupported URL stub: ' + url);
-    var result = stubs[url](this.getBody());
-    // TODO: hardcode fix for big list for now
-    if (_.endsWith(url, '/events'))
-        result = result.slice(-20);
-    callback(null, result);
-}
-
 // TODO: check through demo.js?
 // TODO: check if request body is also correct
 describe('THO teamleader use case', function ()
@@ -26,7 +14,7 @@ describe('THO teamleader use case', function ()
     before(function (done)
     {
         oldCall = ValidCall.prototype.call;
-        ValidCall.prototype.call = callStub;
+        ValidCall.prototype.call = TEST.createStubFunction(stubs);
         new RESTdesc([], '', key).clear(done);
     });
 
