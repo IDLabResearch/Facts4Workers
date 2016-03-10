@@ -4,13 +4,22 @@ var _ = require('lodash');
 var ValidCall = require('../../ValidCall');
 var RESTdesc = require('../../RESTdesc');
 var stubs = require('./THO_operator-stubs');
+var url = require('url');
 
 function callStub (callback)
 {
-    var url = this.getURL();
-    if (!(url in stubs))
-        throw new Error('Unsupported URL stub: ' + url);
-    var result = stubs[url](this.getBody());
+    var link = this.getURL();
+    var parsed = url.parse(link, true);
+    if (parsed.query.access_token)
+    {
+        assert.strictEqual(parsed.query.access_token, 'ACCESS');
+        delete parsed.query.access_token;
+        parsed.search = '';
+        link = url.format(parsed);
+    }
+    if (!(link in stubs))
+        throw new Error('Unsupported URL stub: ' + link);
+    var result = stubs[link](this.getBody());
     callback(null, result);
 }
 
@@ -21,7 +30,7 @@ describe('THO operator use case', function ()
     before(function (done)
     {
         oldCall = ValidCall.prototype.call;
-        //ValidCall.prototype.call = callStub;
+        ValidCall.prototype.call = callStub;
         new RESTdesc([], '', key).clear(done);
     });
 

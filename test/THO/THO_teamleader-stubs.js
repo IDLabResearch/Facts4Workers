@@ -7,18 +7,18 @@ var _ = require('lodash');
 
 
 var stubs = {
-    'http://skillp.tho.f4w.l0g.in/api/operator_skills/': operators,
-    'http://mstate.tho.f4w.l0g.in/api/machines': machines,
-    'http://mstate.tho.f4w.l0g.in/api/machines/1/last_event': last_event1,
-    'http://mstate.tho.f4w.l0g.in/api/machines/2/last_event': last_event2,
-    'http://mstate.tho.f4w.l0g.in/api/machines/1/events': events,
-    'http://mstate.tho.f4w.l0g.in/api/machines/2/events': events,
-    'http://defects.tho.f4w.l0g.in/api/defects/1': defect1,
+    'http://skillp.tho.facts4.work/api/operator_skills/': operators,
+    'https://mstate.tho.facts4.work/api/machines': machines,
+    'https://mstate.tho.facts4.work/api/machines/1/last_event': last_event1,
+    'https://mstate.tho.facts4.work/api/machines/2/last_event': last_event2,
+    'https://mstate.tho.facts4.work/api/machines/1/events': events,
+    'https://mstate.tho.facts4.work/api/machines/2/events': events,
+    'http://defects.tho.facts4.work/api/defects/1': defect1,
     'http://machinesandparts.surge.sh/api/parts.json': parts,
-    'http://defects.tho.f4w.l0g.in/api/solutions?defect_id=1': solutions1,
-    'http://defects.tho.f4w.l0g.in/api/reports?event_id=307': reports307,
-    'http://defects.tho.f4w.l0g.in/api/reports': reports,
-    'http://mstate.tho.f4w.l0g.in/api/machines/2/events/': events2
+    'http://defects.tho.facts4.work/api/solutions?defect_id=1': solutions1,
+    'http://defects.tho.facts4.work/api/reports?event_id=307': reports307,
+    'http://defects.tho.facts4.work/api/reports': reports,
+    'https://mstate.tho.facts4.work/api/machines/2/events/': events2
 };
 
 
