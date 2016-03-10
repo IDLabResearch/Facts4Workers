@@ -137,6 +137,15 @@ RESTdesc.prototype.next = function (callback)
                     this.eye.call(this.dataPaths, data, this.goalPath, true, true, function (error, proof)
                     {
                         // TODO: check if the proof is empty. If yes: throw error
+                        // TODO: do this more cleanly and somewhere else
+                        var lines = proof.split(/[\n\r]+/);
+                        var empty = lines.every(function (line)
+                        {
+                            line = line.trim();
+                            return line === '' || _.startsWith(line, '#') || _.startsWith(line, 'PREFIX');
+                        });
+                        if (empty)
+                            error = new Error('The reasoner was unable to find a valid path.');
                         if (error)
                             this._stop(error);
                         else
