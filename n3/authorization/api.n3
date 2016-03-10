@@ -18,7 +18,7 @@
 =>
 {
     _:request http:methodName "GET";
-              tmpl:requestURI ("https://askTheWorker/authorization");
+              tmpl:requestURI ("http://askTheWorker/authorization");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:resp [
                   http:body _:body

@@ -199,7 +199,12 @@ RESTdesc.prototype._handleNext = function (next)
         call.call(function (error, response)
         {
             if (error)
-                error = new Error('Status code ' + error.response.statusCode + ' when calling ' + error.url + ' (' + (error.response.body ? error.response.body : error.error.message) + ')');
+            {
+                if (error.response)
+                    error = new Error('Status code ' + error.response.statusCode + ' when calling ' + error.url + ' (' + (error.response.body ? error.response.body : error.error.message) + ')');
+                else
+                    error = new Error('Error when trying to call ' + error.url + ': ' + JSON.stringify(error.error));
+            }
             else
             {
                 try
