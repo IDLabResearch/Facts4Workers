@@ -57,7 +57,7 @@
         :created_at    _:created_at
     }.
     ?user auth:access_token  _:access_token;
-          auth:refresh_token [ auth:token _:refresh_token; prov:atTime _:created_at ].
+          auth:refresh_token [ auth:token _:refresh_token; prov:generatedAtTime _:created_at ].
 }.
 
 
@@ -82,17 +82,17 @@
         :refresh_token _:refresh_token;
         :created_at    _:created_at
     }.
-    ?user auth:refresh_token [ auth:token _:refresh_token; prov:atTime  _:created_at ].
+    ?user auth:refresh_token [ auth:token _:refresh_token; prov:generatedAtTime  _:created_at ].
 }.
 
 # TODO: insufficient if authentication over multiple APIs is required
 {
     ?user a auth:user;
           auth:refresh_token ?token.
-    ?token prov:atTime ?refresh_time.
+    ?token prov:generatedAtTime ?refresh_time.
     ?error a rest:error;
            http:statusCodeNumber 401;
-           prov:atTime ?error_time.
+           prov:generatedAtTime ?error_time.
     ?refresh e:whenGround { ?error_time math:lessThan ?refresh_time. }.
 }
 =>

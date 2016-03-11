@@ -45,7 +45,7 @@ ErrorData.prototype.addError = function (statusCode, url)
         '@type': 'rest:Error',
         'http:statusCodeNumber': statusCode,
         'http:requestURI': url,
-        'prov:atTime': Math.floor(Date.now() / 1000) // seconds instead of milliseconds
+        'prov:generatedAtTime': Math.floor(Date.now() / 1000) // seconds instead of milliseconds
     };
     this.jsonld['@graph'].push(entry);
     this.jsonld = Util.skolemizeJSONLD(this.jsonld, {}); // need to generate URI for the new blank node
