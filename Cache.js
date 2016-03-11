@@ -9,7 +9,10 @@ var EXPIRATION = 24 * 60 * 60; // seconds
 
 // TODO: fallback if there is no running redis instance? (for debugging?)
 
-function Cache () { }
+function Cache (errorFtn)
+{
+    this.errorFtn = errorFtn;
+}
 
 
 Cache.prototype.open = function (callback)
@@ -17,6 +20,8 @@ Cache.prototype.open = function (callback)
     if (!this.client)
     {
         this.client = redis.createClient();
+        if (this.errorFtn)
+            this.client.on('error', this.errorFtn);
         // REALLY REALLY IMPORTANT, DO NOT FORGET OR GITLAB GETS DESTROYED WHEN THIS GETS DEPLOYED ON RESTDESC
         this.client.select(4, callback);
         return true;

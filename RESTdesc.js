@@ -31,7 +31,7 @@ function RESTdesc (dataPaths, goalPath, cacheKey)
     }
 
     RESTdesc.instances[this.cacheKey] = this;
-    this.cache = new Cache();
+    this.cache = new Cache(this._stop.bind(this));
 
     if (!_.isArray(this.dataPaths))
         this.dataPaths = [this.dataPaths];
@@ -133,6 +133,8 @@ RESTdesc.prototype.next = function (callback)
                 this.running = true;
                 this.cache.list(this.cacheKey, function (err, data)
                 {
+                    if (err)
+                        return this._stop(err);
                     this.eye = new EYEHandler();
                     this.eye.call(this.dataPaths, data, this.goalPath, true, true, function (error, proof)
                     {
