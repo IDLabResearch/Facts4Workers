@@ -1,0 +1,224 @@
+@prefix : <http://f4w.restdesc.org/demo#>.
+@prefix ofs: <http://f4w.restdesc.org/demo/offset#>.
+@prefix http: <http://www.w3.org/2011/http#>.
+@prefix tmpl: <http://purl.org/restdesc/http-template#>.
+@prefix log: <http://www.w3.org/2000/10/swap/log#>.
+@prefix util: <http://f4w.restdesc.org/util#>.
+@prefix rest: <http://f4w.restdesc.org/demo#>.
+@prefix prov: <http://www.w3.org/ns/prov#>.
+@prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
+@prefix math: <http://www.w3.org/2000/10/swap/math#>.
+@prefix auth: <http://f4w.restdesc.org/demo/authorization#>.
+@prefix prolog: <http://eulersharp.sourceforge.net/2003/03swap/prolog#>.
+
+
+#get parts
+{
+    ?user auth:authenticated true.
+    ?user auth:access_token ?token.
+#this is to make sure that the rule does not get fired again if I have a new access token. 
+#I think we could add that automatically to the rules so that the user does not need to do it
+    ?user util:onlyOnce ofs:first. 
+}
+=>
+{
+    ?user util:onlyOnceTest ofs:first.
+    _:request http:methodName "GET";
+              tmpl:requestURI ("https://offsug.hir.facts4.work/api/v1/parts?access_token=" ?token);
+              http:resp [
+                  http:body _:list
+              ].
+    _:list a :partList.
+}.
+
+#get part Id
+{
+    
+#Here we assume that there is only one active user in the system, maybe we should be more careful here. Should we start writing an ontology?     
+     ?user a auth:user.
+     ?list a :partList.
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://askTheWorker/getPartID");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              http:body {rest:json
+                  :message "Please provide the ID of the part you are working with.";
+                  :parts ?list
+              };
+              http:resp [
+                  http:body _:body
+              ].
+    _:body :contains 
+    {rest:json
+        :id _:n }.
+    _:part a :Part.
+    _:part :partId _:n.
+#I know, we can discuss whether we can derive that triple, but I think the API cantains a user dialog which asks soemething to a user, therefore we can keep the information the user provided
+    ?user :worksWith _:part.
+}.
+
+
+#get details for a specific part
+{
+    ?user auth:authenticated true.
+    ?user auth:access_token ?token.
+    ?user :worksWith ?part.
+    ?part :partId ?id.
+#this is to make sure that the rule does not get fired again if I have a new access token. 
+#I think we could add that automatically to the rules so that the user does not need to do it
+    (?user ?id) util:onlyOnce ofs:rule2. 
+}
+=>
+{
+    (?user ?id) util:onlyOnceTest ofs:rule2.
+    _:request http:methodName "GET";
+              tmpl:requestURI ("https://offsug.hir.facts4.work/api/v1/parts/" ?id "?access_token=" ?token);
+              http:resp [
+                  http:body _:list
+              ].
+    _:list a :dimensionsList.
+    ?part :dimensions _:list
+}.
+
+
+
+{
+?list a :dimensionsList.
+?part :dimensions ?list
+}=>{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://askTheWorker/getMeasurements");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              http:body {rest:json
+                  :message "Please provide your measurements.";
+                  :partdetails ?list
+              };
+              http:resp [
+                  http:body _:body
+              ].
+    _:body :contains 
+     {
+     rest:json :dimensions 
+      (
+        {
+        rest:json :id _:n.
+        rest:json :measurement _:m.
+        }
+      )
+     }.
+#Problem: the output is no list and I would rather prefer to keep it that way. But if we do so, we need do have a default behavour for lists whcih we should define
+?part :measured _:measurement.
+#question: do we also need a time or something? Would come in handy if we do looping
+_:measurement :dimension _:n.
+_:measurement :value  _:m
+
+}.
+
+
+{  ?part :partId ?pid.
+   ?part :measured ?measurement. 
+   ?measurement :dimension ?n.
+   ?measurement :value  ?m.
+   ?user auth:authenticated true.
+   ?user auth:access_token ?token.
+   (?pid ?n ?m) util:onlyOnce ofs:rule3. 
+}
+=>
+{
+    (?pid ?n ?m) util:onlyOnceTest ofs:rule3.
+
+    _:request http:methodName "GET";
+              tmpl:requestURI ("https://offsug.hir.facts4.work/api/v1/offsets?part_id=" ?pid "&dimension_id=" ?n "&value=" ?m "&access_token=" ?token);
+              http:resp [
+                  http:body _:body
+              ].
+    _:body :contains {
+                     rest:json :type _:type;
+                               :suggestion _:sug;
+                               :value _:value
+                     }.
+     ?measurement :offsetType _:type;
+                  :offsetSuggestion _:sug;
+                  :offsetValue _:value
+}.
+
+
+#get a measurement list, maybe pass that to util?
+
+
+{
+?part :results ?list.
+}
+<=
+{
+?part :partId ?pid.
+?part :measured ?measurement.
+?measurement e:notLabel _:label.
+
+_:x e:findall ({rest:json :id ?pid;
+                          :type ?type;
+                          :value ?value;
+                          :suggestion ?sug
+               }  
+               {?part2 :partId ?pid.
+                ?part2 :measured ?meas2.    
+                ?meas2 :dimension ?d; 
+                       :offsetType ?type;
+                       :offsetSuggestion ?sug;
+                       :offsetValue ?value        
+               }         
+               ?list
+              ).
+
+() prolog:cut true.
+}.
+
+#TODO: find a better solution here
+
+{
+?part :results ?list.
+}
+<=
+{
+?part :partId ?pid.
+?part :measured ?measurement.
+?list e:tuple :dummy.
+}.
+
+
+
+
+{
+?user :worksWith ?part.
+?part :results ?list.
+}
+=>{
+
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://askTheWorker/showCheckResult");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              http:body {rest:json
+                  :message "Here the results of the offset check.";
+                  :results ?list
+              }.
+?list :displayedTo ?user.
+}.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

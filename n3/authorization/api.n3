@@ -18,6 +18,7 @@
 =>
 {
     _:request http:methodName "GET";
+#TODO: change HIR document, athorization instead of logInData
               tmpl:requestURI ("http://askTheWorker/authorization");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:resp [
@@ -30,6 +31,7 @@
     _:user a auth:user;
            auth:username _:username;
            auth:password _:password.
+    
 }.
 
 
@@ -58,53 +60,55 @@
     }.
     ?user auth:access_token  _:access_token;
           auth:refresh_token [ auth:token _:refresh_token; prov:generatedAtTime _:created_at ].
+#quick fix
+      ?user auth:authenticated true.
 }.
 
-
-{
-    ?user a auth:user;
-          auth:refresh_token ?refresh_token.
-    ?refresh_token auth:token ?token.
-}
-=>
-{
-    _:request http:methodName "POST";
-              tmpl:requestURI ("https://auth.facts4.work/oauth/token");
-              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
-              http:body { rest:json
-                  :refresh_token ?token;
-                  :grant_type "refresh_token"
-              };
-              http:resp [
-                  http:body _:body
-              ].
-    _:body rest:contains { rest:json
-        :refresh_token _:refresh_token;
-        :created_at    _:created_at
-    }.
-    ?user auth:refresh_token [ auth:token _:refresh_token; prov:generatedAtTime  _:created_at ].
-}.
+#TODO: fix -- it caused an infinite loop
+#{
+#    ?user a auth:user;
+#          auth:refresh_token ?refresh_token.
+#    ?refresh_token auth:token ?token.
+#}
+#=>
+#{
+#    _:request http:methodName "POST";
+#              tmpl:requestURI ("https://auth.facts4.work/oauth/token");
+#              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+#              http:body { rest:json
+#                  :refresh_token ?token;
+#                  :grant_type "refresh_token"
+#              };
+#              http:resp [
+#                  http:body _:body
+#              ].
+#    _:body rest:contains { rest:json
+#        :refresh_token _:refresh_token;
+#        :created_at    _:created_at
+#    }.
+#    ?user auth:refresh_token [ auth:token _:refresh_token; prov:generatedAtTime  _:created_at ].
+#}.
 
 # TODO: insufficient if authentication over multiple APIs is required
-{
-    ?user a auth:user;
-          auth:refresh_token ?token.
-    ?token prov:generatedAtTime ?refresh_time.
-    ?error a rest:error;
-           http:statusCodeNumber 401;
-           prov:generatedAtTime ?error_time.
-    ?refresh e:whenGround { ?error_time math:lessThan ?refresh_time. }.
-}
-=>
-{
-   ?user auth:authenticated true.
-}.
+#{
+#    ?user a auth:user;
+#          auth:refresh_token ?token.
+#    ?token prov:generatedAtTime ?refresh_time.
+#    ?error a rest:error;
+#           http:statusCodeNumber 401;
+#           prov:generatedAtTime ?error_time.
+#    ?refresh e:whenGround { ?error_time math:lessThan ?refresh_time. }.
+#}
+#=>
+#{
+#   ?user auth:authenticated true.
+#}.
 
-{
-    ?user a auth:user.
-    _:x e:findall(?x { ?error a rest:error; http:statusCodeNumber 401} ()).
-}
-=>
-{
-   ?user auth:authenticated true.
-}.
+#{
+#    ?user a auth:user.
+#    _:x e:findall(?x { ?error a rest:error; http:statusCodeNumber 401} ()).
+#}
+#=>
+#{
+#   ?user auth:authenticated true.
+#}.
