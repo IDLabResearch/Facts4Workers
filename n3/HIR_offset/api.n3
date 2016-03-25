@@ -146,8 +146,6 @@ _:measurement :value  _:m
 
 
 #get a measurement list, maybe pass that to util?
-
-
 {
 ?part :results ?list.
 }
@@ -156,7 +154,7 @@ _:measurement :value  _:m
 ?part :partId ?pid.
 ?part :measured ?measurement.
 ?measurement e:notLabel _:label.
-
+() prolog:cut true.
 _:x e:findall ({rest:json :id ?pid;
                           :type ?type;
                           :value ?value;
@@ -172,7 +170,7 @@ _:x e:findall ({rest:json :id ?pid;
                ?list
               ).
 
-() prolog:cut true.
+
 }.
 
 #TODO: find a better solution here
@@ -184,6 +182,7 @@ _:x e:findall ({rest:json :id ?pid;
 {
 ?part :partId ?pid.
 ?part :measured ?measurement.
+?measurement e:label _:label.
 ?list e:tuple :dummy.
 }.
 
