@@ -28,7 +28,7 @@
               http:resp [
                   http:body _:list
               ].
-    _:list a :partList.
+    _:list a ofs:partList.
 }.
 
 #get part Id
@@ -36,7 +36,7 @@
     
 #Here we assume that there is only one active user in the system, maybe we should be more careful here. Should we start writing an ontology?     
      ?user a auth:user.
-     ?list a :partList.
+     ?list a ofs:partList.
 }
 =>
 {
@@ -53,10 +53,10 @@
     _:body :contains 
     {rest:json
         :id _:n }.
-    _:part a :Part.
-    _:part :partId _:n.
+    _:part a ofs:Part.
+    _:part ofs:partId _:n.
 #I know, we can discuss whether we can derive that triple, but I think the API cantains a user dialog which asks soemething to a user, therefore we can keep the information the user provided
-    ?user :worksWith _:part.
+    ?user ofs:worksWith _:part.
 }.
 
 
@@ -64,8 +64,8 @@
 {
     ?user auth:authenticated true.
     ?user auth:access_token ?token.
-    ?user :worksWith ?part.
-    ?part :partId ?id.
+    ?user ofs:worksWith ?part.
+    ?part ofs:partId ?id.
 #this is to make sure that the rule does not get fired again if I have a new access token. 
 #I think we could add that automatically to the rules so that the user does not need to do it
     (?user ?id) util:onlyOnce ofs:rule2. 
@@ -78,15 +78,15 @@
               http:resp [
                   http:body _:list
               ].
-    _:list a :dimensionsList.
-    ?part :dimensions _:list
+    _:list a ofs:dimensionsList.
+    ?part ofs:dimensions _:list
 }.
 
 
 
 {
-?list a :dimensionsList.
-?part :dimensions ?list
+?list a ofs:dimensionsList.
+?part ofs:dimensions ?list
 }=>{
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/getMeasurements");
@@ -100,7 +100,7 @@
               ].
     _:body :contains 
      {
-     rest:json :dimensions 
+     rest:json :dimensions
       (
         {
         rest:json :id _:n.
@@ -109,18 +109,18 @@
       )
      }.
 #Problem: the output is no list and I would rather prefer to keep it that way. But if we do so, we need do have a default behavour for lists whcih we should define
-?part :measured _:measurement.
+?part ofs:measured _:measurement.
 #question: do we also need a time or something? Would come in handy if we do looping
-_:measurement :dimension _:n.
-_:measurement :value  _:m
+_:measurement ofs:dimension _:n.
+_:measurement ofs:value  _:m
 
 }.
 
 
-{  ?part :partId ?pid.
-   ?part :measured ?measurement. 
-   ?measurement :dimension ?n.
-   ?measurement :value  ?m.
+{  ?part ofs:partId ?pid.
+   ?part ofs:measured ?measurement.
+   ?measurement ofs:dimension ?n.
+   ?measurement ofs:value  ?m.
    ?user auth:authenticated true.
    ?user auth:access_token ?token.
    (?pid ?n ?m) util:onlyOnce ofs:rule3. 
@@ -139,9 +139,9 @@ _:measurement :value  _:m
                                :suggestion _:sug;
                                :value _:value
                      }.
-     ?measurement :offsetType _:type;
-                  :offsetSuggestion _:sug;
-                  :offsetValue _:value
+     ?measurement ofs:offsetType _:type;
+                  ofs:offsetSuggestion _:sug;
+                  ofs:offsetValue _:value
 }.
 
 
@@ -151,8 +151,8 @@ _:measurement :value  _:m
 }
 <=
 {
-?part :partId ?pid.
-?part :measured ?measurement.
+?part ofs:partId ?pid.
+?part ofs:measured ?measurement.
 ?measurement e:notLabel _:label.
 () prolog:cut true.
 _:x e:findall ({rest:json :id ?pid;
@@ -160,12 +160,12 @@ _:x e:findall ({rest:json :id ?pid;
                           :value ?value;
                           :suggestion ?sug
                }  
-               {?part2 :partId ?pid.
-                ?part2 :measured ?meas2.    
-                ?meas2 :dimension ?d; 
-                       :offsetType ?type;
-                       :offsetSuggestion ?sug;
-                       :offsetValue ?value        
+               {?part2 ofs:partId ?pid.
+                ?part2 ofs:measured ?meas2.
+                ?meas2 ofs:dimension ?d;
+                       ofs:offsetType ?type;
+                       ofs:offsetSuggestion ?sug;
+                       ofs:offsetValue ?value
                }         
                ?list
               ).
@@ -176,12 +176,12 @@ _:x e:findall ({rest:json :id ?pid;
 #TODO: find a better solution here
 
 {
-?part :results ?list.
+?part ofs:results ?list.
 }
 <=
 {
-?part :partId ?pid.
-?part :measured ?measurement.
+?part ofs:partId ?pid.
+?part ofs:measured ?measurement.
 ?measurement e:label _:label.
 ?list e:tuple :dummy.
 }.
@@ -190,8 +190,8 @@ _:x e:findall ({rest:json :id ?pid;
 
 
 {
-?user :worksWith ?part.
-?part :results ?list.
+?user ofs:worksWith ?part.
+?part ofs:results ?list.
 }
 =>{
 
@@ -202,7 +202,7 @@ _:x e:findall ({rest:json :id ?pid;
                   :message "Here the results of the offset check.";
                   :results ?list
               }.
-?list :displayedTo ?user.
+?list ofs:displayedTo ?user.
 }.
 
 

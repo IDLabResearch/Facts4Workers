@@ -11,12 +11,12 @@
 @prefix auth: <http://f4w.restdesc.org/demo/authorization#>.
 
 
-{?list :displayedTo ?user.}=>{?list :displayedTo ?user.}.
+{?list ofs:displayedTo ?user.}=>{?list ofs:displayedTo ?user.}.
 
 #{?user :worksWith ?part.}=>{?user :worksWith ?part.}.
 
 #{   _:list a :partList.
 #}=> {:yes :it :works.}. 
-{?part :results ?list.}=>{?part :results ?list.}.
+{?part ofs:results ?list.}=>{?part ofs:results ?list.}.
 
 
