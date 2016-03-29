@@ -61,7 +61,8 @@ var rulePaths = [
     'n3/authorization/api.n3',
     'n3/thermolympic/api.n3',
     'n3/thermolympics_operator_new/api.n3',
-    'n3/thermolympics_teamleader_new/api.n3'
+    'n3/thermolympics_teamleader_new/api.n3',
+    'n3/HIR_offset/api.n3'
 ];
 
 var input = rulePaths.map(relative);
@@ -70,8 +71,9 @@ var goals = {
     //'calibration': relative('n3/calibration/goal.n3'),
     //'thermolympics_operator': relative('n3/thermolympics_operator/goal.n3'),
     //'therolympics_teamleader': relative('n3/thermolympics_teamleader/goal.n3'),
-    'thermolympics_operator_new': relative('n3/thermolympics_operator_new/goal.n3'),
-    'thermolympics_teamleader_new': relative('n3/thermolympics_teamleader_new/goal.n3')
+    thermolympics_operator_new: relative('n3/thermolympics_operator_new/goal.n3'),
+    thermolympics_teamleader_new: relative('n3/thermolympics_teamleader_new/goal.n3'),
+    hir_offset: relative('n3/HIR_offset/goal.n3')
 };
 
 app.get('/', function (req, res)
@@ -157,7 +159,7 @@ function next (req, res)
     if (!req.body || !req.body.goal)
         return res.status(400).json({ error: 'Expected an input body containing at least the goal.'});
 
-    var goal = goals[req.body.goal];
+    var goal = goals[req.body.goal.toLowerCase()];
     if (!goal)
         return res.status(400).json({ error: 'Unknown goal ' + req.body.goal });
 

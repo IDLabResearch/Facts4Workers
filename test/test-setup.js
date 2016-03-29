@@ -19,12 +19,14 @@ TEST.files = [
     relative('n3/authorization/api.n3'),
     relative('n3/thermolympic/api.n3'),
     relative('n3/thermolympics_teamleader_new/api.n3'),
-    relative('n3/thermolympics_operator_new/api.n3')
+    relative('n3/thermolympics_operator_new/api.n3'),
+    relative('n3/HIR_offset/api.n3')
 ];
 
 TEST.goals = {
     operator: TEST.relative('n3/thermolympics_operator_new/goal.n3'),
-    teamleader: TEST.relative('n3/thermolympics_teamleader_new/goal.n3')
+    teamleader: TEST.relative('n3/thermolympics_teamleader_new/goal.n3'),
+    offset: TEST.relative('n3/HIR_offset/goal.n3'),
 };
 
 TEST.createStubFunction = function (stubs)
