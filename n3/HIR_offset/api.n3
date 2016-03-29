@@ -147,7 +147,7 @@ _:measurement ofs:value  _:m
 
 #get a measurement list, maybe pass that to util?
 {
-?part :results ?list.
+?part ofs:results ?list.
 }
 <=
 {
