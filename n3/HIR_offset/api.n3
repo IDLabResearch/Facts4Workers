@@ -50,9 +50,9 @@
               http:resp [
                   http:body _:body
               ].
-    _:body :contains 
-    {rest:json
-        :id _:n }.
+    _:body :contains  { rest:json
+        :id _:n
+    }.
     _:part a ofs:Part.
     _:part ofs:partId _:n.
 #I know, we can discuss whether we can derive that triple, but I think the API cantains a user dialog which asks soemething to a user, therefore we can keep the information the user provided
@@ -85,9 +85,11 @@
 
 
 {
-?list a ofs:dimensionsList.
-?part ofs:dimensions ?list
-}=>{
+    ?list a ofs:dimensionsList.
+    ?part ofs:dimensions ?list
+}
+=>
+{
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/getMeasurements");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
@@ -98,22 +100,17 @@
               http:resp [
                   http:body _:body
               ].
-    _:body :contains 
-     {
-     rest:json :dimensions
-      (
-        {
-        rest:json :id _:n.
-        rest:json :measurement _:m.
-        }
-      )
+    _:body :contains  { rest:json
+        :dimensions ({ rest:json
+            :id _:n;
+            :measurement _:m.
+        })
      }.
 #Problem: the output is no list and I would rather prefer to keep it that way. But if we do so, we need do have a default behavour for lists whcih we should define
-?part ofs:measured _:measurement.
+    ?part ofs:measured _:measurement.
 #question: do we also need a time or something? Would come in handy if we do looping
-_:measurement ofs:dimension _:n.
-_:measurement ofs:value  _:m
-
+    _:measurement ofs:dimension _:n.
+    _:measurement ofs:value  _:m
 }.
 
 
@@ -134,75 +131,71 @@ _:measurement ofs:value  _:m
               http:resp [
                   http:body _:body
               ].
-    _:body :contains {
-                     rest:json :type _:type;
-                               :suggestion _:sug;
-                               :value _:value
-                     }.
-     ?measurement ofs:offsetType _:type;
-                  ofs:offsetSuggestion _:sug;
-                  ofs:offsetValue _:value
+    _:body :contains { rest:json
+        :type _:type;
+        :suggestion _:sug;
+        :value _:value
+    }.
+    ?measurement ofs:offsetType _:type;
+                 ofs:offsetSuggestion _:sug;
+                 ofs:offsetValue _:value
 }.
 
 
 #get a measurement list, maybe pass that to util?
 {
-?part ofs:results ?list.
+    ?part ofs:results ?list.
 }
 <=
 {
-?part ofs:partId ?pid.
-?part ofs:measured ?measurement.
-?measurement e:notLabel _:label.
-() prolog:cut true.
-_:x e:findall ({rest:json :id ?pid;
-                          :type ?type;
-                          :value ?value;
-                          :suggestion ?sug
-               }  
-               {?part2 ofs:partId ?pid.
-                ?part2 ofs:measured ?meas2.
-                ?meas2 ofs:dimension ?d;
-                       ofs:offsetType ?type;
-                       ofs:offsetSuggestion ?sug;
-                       ofs:offsetValue ?value
-               }         
-               ?list
-              ).
-
-
+    ?part ofs:partId ?pid.
+    ?part ofs:measured ?measurement.
+    ?measurement e:notLabel _:label.
+    () prolog:cut true.
+    _:x e:findall ({rest:json :id ?pid;
+                              :type ?type;
+                              :value ?value;
+                              :suggestion ?sug
+                   }
+                   {?part2 ofs:partId ?pid.
+                    ?part2 ofs:measured ?meas2.
+                    ?meas2 ofs:dimension ?d;
+                           ofs:offsetType ?type;
+                           ofs:offsetSuggestion ?sug;
+                           ofs:offsetValue ?value
+                   }
+                   ?list
+    ).
 }.
 
 #TODO: find a better solution here
 
 {
-?part ofs:results ?list.
+    ?part ofs:results ?list.
 }
 <=
 {
-?part ofs:partId ?pid.
-?part ofs:measured ?measurement.
-?measurement e:label _:label.
-?list e:tuple :dummy.
+    ?part ofs:partId ?pid.
+    ?part ofs:measured ?measurement.
+    ?measurement e:label _:label.
+    ?list e:tuple :dummy.
 }.
 
 
-
-
 {
-?user ofs:worksWith ?part.
-?part ofs:results ?list.
+    ?user ofs:worksWith ?part.
+    ?part ofs:results ?list.
 }
 =>{
 
     _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/showCheckResult");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
-              http:body {rest:json
+              http:body { rest:json
                   :message "Here the results of the offset check.";
                   :results ?list
               }.
-?list ofs:displayedTo ?user.
+    ?list ofs:displayedTo ?user.
 }.
 
 
