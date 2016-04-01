@@ -35,6 +35,17 @@ EYEHandler.prototype.call = function (dataPaths, data, queryPath, proof, singleA
         // blame windows npm implementation
         // http://stackoverflow.com/questions/17516772/using-nodejss-spawn-causes-unknown-option-and-error-spawn-enoent-err
         var proc = spawn(process.platform === "win32" ? "eye.cmd" : "eye", args);
+
+        function exit ()
+        {
+            // Windows seems to not kill the process correctly if it's still running (haven't checked other OS yet)
+            if (process.platform === "win32")
+                spawn("taskkill", ["/pid", proc.pid, '/f', '/t']);
+            else
+                proc.kill();
+        }
+        process.on('exit', exit);
+
         var output = "";
         var errorOutput = "";
         proc.stdout.on('data', function (data) {
@@ -46,7 +57,7 @@ EYEHandler.prototype.call = function (dataPaths, data, queryPath, proof, singleA
             //console.error(data.toString());
         });
         proc.on('close', function (code) {
-            // TODO: check exit code?
+            process.removeListener('exit', exit);
             var error = null;
             if (code !== 0)
                 error = new Error('EYE error\n' + errorOutput);
