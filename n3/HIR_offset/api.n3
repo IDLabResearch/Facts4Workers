@@ -10,6 +10,7 @@
 @prefix math: <http://www.w3.org/2000/10/swap/math#>.
 @prefix auth: <http://f4w.restdesc.org/demo/authorization#>.
 @prefix prolog: <http://eulersharp.sourceforge.net/2003/03swap/prolog#>.
+@prefix list: <http://www.w3.org/2000/10/swap/list#>.
 
 
 #get parts
@@ -94,25 +95,41 @@
               tmpl:requestURI ("http://askTheWorker/getMeasurements");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {rest:json
-                  :message "Please provide your measurements.";
+                  :message "Please provide your measurements in a list. I.e.: [{'id': 1, 'measurement': 5.1}, {'id': 2, 'measurement': 2.8}]";
                   :partdetails ?list
               };
               http:resp [
                   http:body _:body
               ].
-    _:body :contains  { rest:json
-        :dimensions ({ rest:json
-            :id _:n;
-            :measurement _:m.
-        })
-     }.
-#Problem: the output is no list and I would rather prefer to keep it that way. But if we do so, we need do have a default behavour for lists whcih we should define
-    ?part ofs:measured _:measurement.
+    ?part ofs:measurements _:body.
 #question: do we also need a time or something? Would come in handy if we do looping
-    _:measurement ofs:dimension _:n.
-    _:measurement ofs:value  _:m
 }.
 
+{
+    ?part ofs:partId ?pid;
+          ofs:measurements ?list.
+    ?list e:notLabel ?label.
+    ?measurementGraph list:in ?list.
+    ?measurementGraph log:includes { ?measurement :id ?n; :measurement ?m }.
+}
+=>
+{
+    ?part ofs:measured ?measurement.
+    ?measurement ofs:dimension ?n;
+                 ofs:value  ?m.
+}.
+
+{
+    ?part ofs:partId ?pid;
+          ofs:measurements ?list.
+    ?list e:label ?label.
+}
+=>
+{
+    ?part ofs:measured :measurement.
+    :measurement ofs:dimension 0;
+                 ofs:value  0.
+}.
 
 {  ?part ofs:partId ?pid.
    ?part ofs:measured ?measurement.
@@ -142,16 +159,15 @@
 }.
 
 
-#get a measurement list, maybe pass that to util?
 {
-    ?part ofs:results ?list.
+    ?part ofs:results ?list2.
 }
 <=
 {
     ?part ofs:partId ?pid.
-    ?part ofs:measured ?measurement.
-    ?measurement e:notLabel _:label.
-    () prolog:cut true.
+    ?part ofs:measurements ?list.
+    ?list e:notLabel _:label.
+    #({?thingy list:in ?list} { ?thingy log:includes { ?x :id ?id }. ?x ofs:offsetType ?type. } ) prolog:forall true.
     _:x e:findall ({rest:json :id ?pid;
                               :type ?type;
                               :value ?value;
@@ -164,7 +180,7 @@
                            ofs:offsetSuggestion ?sug;
                            ofs:offsetValue ?value
                    }
-                   ?list
+                   ?list2
     ).
 }.
 
@@ -176,9 +192,9 @@
 <=
 {
     ?part ofs:partId ?pid.
-    ?part ofs:measured ?measurement.
-    ?measurement e:label _:label.
-    ?list e:tuple :dummy.
+    ?part ofs:measurements ?list.
+    ?list e:label _:label.
+    #?list e:tuple :dummy.
 }.
 
 

@@ -52,9 +52,9 @@ describe('HIR offset use case', function ()
             if (error)
                 throw error;
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/getMeasurements');
-            var contains = result['http:resp']['http:body']['contains'];
-            assert.deepEqual(Object.keys(contains), ['dimensions']);
-            rest.handleUserResponse({dimensions: [{id: 1, measurement: 6}]}, result, done);
+            var body = result['http:resp']['http:body'];
+            assert(_.startsWith(body, '_:'));
+            rest.handleUserResponse([{id: 1, measurement: 6}], result, done);
         });
     });
 
