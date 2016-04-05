@@ -3,7 +3,8 @@ var assert = require('assert');
 var stubs = {
     GET : {
         'https://offsug.hir.facts4.work/api/v1/parts': parts,
-        'https://offsug.hir.facts4.work/api/v1/parts/5b015ac5-fd14-488c-b387-2d8d7b5d4989': part
+        'https://offsug.hir.facts4.work/api/v1/parts/5b015ac5-fd14-488c-b387-2d8d7b5d4989': part,
+        'https://offsug.hir.facts4.work/api/v1/offsets?part_id=5b015ac5-fd14-488c-b387-2d8d7b5d4989&dimension_id=1&value=6': offset
     },
     POST: {
         'https://auth.facts4.work/oauth/token': oauth
@@ -21,6 +22,15 @@ function oauth (body)
         "expires_in"   : 4785,
         "refresh_token": "REFRESH",
         "created_at"   : 123456
+    };
+}
+
+function offset ()
+{
+    return {
+        "type": "X",
+        "value": -0.3,
+        "suggestion": "critical"
     };
 }
 

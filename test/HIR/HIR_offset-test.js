@@ -68,7 +68,7 @@ describe('HIR offset use case', function ()
             assert.strictEqual(result['http:requestURI'], 'http://askTheWorker/showCheckResult');
             var contains = result['http:resp']['http:body']['contains'];
             assert.deepEqual(contains, undefined);
-            rest.handleUserResponse({dimensions: [{id: 1, measurement: 6}]}, result, done);
+            rest.handleUserResponse({dimensions: [{id: 1, measurement: 6}, {id: 2, measurement: 8.2}]}, result, done);
         });
     });
 
