@@ -5,7 +5,7 @@
 @prefix list: <http://www.w3.org/2000/10/swap/list#>.
 @prefix prolog: <http://eulersharp.sourceforge.net/2003/03swap/prolog#>.
 @prefix math: <http://www.w3.org/2000/10/swap/math#>.
-
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 
 # LOOPING
 {
@@ -140,6 +140,60 @@
 
 {?x :onlyOnce ?y}<={}.
 
+#Tests whether everything in a list is ground
+
+{() :ground true}
+<={}.
+
+{?list :ground true }
+<=
+{
+?list list:first ?fst.
+?list list:rest ?rest.
+?fst log:rawType ?type.
+?type log:notEqualTo log:Formula, rdf:List.
+?fst e:notLabel ?label.
+
+?rest :ground true.
+}.
+
+{?list :ground true }
+<=
+{
+?list list:first ?fst.
+?list list:rest ?rest.
+?fst log:rawType rdf:List.
+?fst :ground true.
+
+?rest :ground true.
+}.
+
+{?list :ground true }
+<=
+{
+?list list:first ?fst.
+?list list:rest ?rest.
+?fst log:rawType log:Formula.
+?fst e:graphList  ?graphlist. 
+?graphlist :groundGL true.
+?rest :ground true.
+}.
+
+#tests whater everything in a graphlist is ground
+{
+() :groundGL true.
+}<={
+}.
+
+{
+?list :groundGL true.
+}<={
+?list list:first ?fst.
+?list list:rest ?rest.
+?fst log:equalTo {?s ?p ?o}.
+(?s ?p ?o) :ground true.
+?rest :groundGL true.
+}.
 
 
 

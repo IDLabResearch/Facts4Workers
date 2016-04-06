@@ -179,10 +179,9 @@
 {
     ?part ofs:partId ?pid.
     ?part ofs:measured ?measurement.
-    ?measurement ofs:offsetSuggestion ?sug.
-    ?sug e:notLabel _:lab.
-    () prolog:cut true.
-    _:x e:findall ({rest:json :id ?pid;
+
+
+    _:x e:findall ({rest:json :id ?d;
                               :type ?type;
                               :value ?value;
                               :suggestion ?sug
@@ -196,7 +195,42 @@
                    }
                    ?list
     ).
+   ?list util:ground true.
 }.
+
+#what we do here is really based on the datastructure we get we need another solution here
+{?part ofs:results ?list.}
+<=
+{
+?part ofs:partId ?pid.
+?part ofs:measured ?measurement.
+?measurement ofs:offsetSuggestion ?sug.
+?measurement e:label ?sug.
+?part ofs:measurements ?lis.
+?lis :alloffsets ().
+?list e:tuple :dummy.
+}.
+
+{() :alloffsets ().}
+<=
+{
+}.
+
+{?list :alloffsets ().}
+<=
+{
+?list list:first ?fst.
+?fst log:includes {?m :measurement ?ms}.
+?m ofs:dimension ?d;
+   ofs:offsetType ?type;
+   ofs:offsetSuggestion ?sug;
+   ofs:offsetValue ?value.
+?list list:rest ?rest.
+?rest :alloffsets ().
+}.
+
+
+
 
 #TODO: find a better solution here
 
@@ -207,8 +241,8 @@
 {
     ?part ofs:partId ?pid.
     ?part ofs:measured ?measurement.
-    ?measurement ofs:offsetSuggestion ?sug.
-    ?sug e:label _:lab.
+    ?measurement e:label _:l.
+   ?measurement ofs:offsetSuggestion ?sug.
     ?list e:tuple :dummy.
 }.
 
