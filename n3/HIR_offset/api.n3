@@ -205,11 +205,12 @@
 ?part ofs:partId ?pid.
 ?part ofs:measured ?measurement.
 ?measurement ofs:offsetSuggestion ?sug.
-?measurement e:label ?sug.
+?sug e:label ?ll.
 ?part ofs:measurements ?lis.
 ?lis :alloffsets ().
 ?list e:tuple :dummy.
 }.
+
 
 {() :alloffsets ().}
 <=
@@ -241,7 +242,7 @@
 {
     ?part ofs:partId ?pid.
     ?part ofs:measured ?measurement.
-    ?measurement e:label _:l.
+    ?measurement e:label ?l.
    ?measurement ofs:offsetSuggestion ?sug.
     ?list e:tuple :dummy.
 }.
