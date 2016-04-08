@@ -23,6 +23,13 @@ function relative (relativePath)
     return path.join(__dirname, relativePath);
 }
 
+// CORS
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept");
+    next();
+});
+
 // provide jquery file that can be used
 app.set('views', relative('views'));
 app.use('/scripts/jquery.min.js', express.static(relative('node_modules/jquery/dist/jquery.min.js')));
@@ -36,8 +43,6 @@ app.use(bodyParser.urlencoded({   // to support URL-encoded bodies
 // only accept these content types (http://stackoverflow.com/questions/23190659/expressjs-limit-acceptable-content-types)
 var RE_CONTYPE = /^application\/(?:x-www-form-urlencoded|json)(?:[\s;]|$)/i;
 app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*"); // CORS
-    res.header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept");
     if (req.method === 'POST' && !RE_CONTYPE.test(req.headers['content-type']))
         return res.status(406).send('Only accepting JSON and URL-encoded bodies.');
     next();
