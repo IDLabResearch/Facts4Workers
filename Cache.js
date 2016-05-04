@@ -14,12 +14,14 @@ function Cache (errorFtn)
     this.errorFtn = errorFtn;
 }
 
+Cache.REDIS_URL = 'redis://localhost:6379';
 
 Cache.prototype.open = function (callback)
 {
     if (!this.client)
     {
-        this.client = redis.createClient();
+        console.log(Cache.REDIS_URL);
+        this.client = redis.createClient(Cache.REDIS_URL, {connect_timeout: 5000});
         if (this.errorFtn)
             this.client.on('error', this.errorFtn);
         // REALLY REALLY IMPORTANT, DO NOT FORGET OR GITLAB GETS DESTROYED WHEN THIS GETS DEPLOYED ON RESTDESC

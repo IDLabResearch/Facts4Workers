@@ -6,14 +6,18 @@ var path = require('path');
 var _ = require('lodash');//
 var RESTdesc = require('./RESTdesc');
 var serveIndex = require('serve-index');
+var Cache = require('./Cache');
 
 var args = require('minimist')(process.argv.slice(2));
-if (!args.p || args.h || args.help)
+if (args.h || args.help || args._.length > 0 || !_.isEmpty(_.omit(args, ['_', 'p', 'r'])))
 {
-    console.error('usage: node demo.js [-p port] [--help]');
+    console.error('usage: node demo.js [-p port] [-r redis_url] [--help]');
     return process.exit((args.h || args.help) ? 0 : 1);
 }
-var port = args.p;
+var port = args.p || 3000;
+
+if (args.r)
+    Cache.REDIS_URL = args.r;
 
 var app = express();
 app.set('view engine', 'jade');
