@@ -20,7 +20,6 @@ Cache.prototype.open = function (callback)
 {
     if (!this.client)
     {
-        console.log(Cache.REDIS_URL);
         this.client = redis.createClient(Cache.REDIS_URL, {connect_timeout: 5000});
         if (this.errorFtn)
             this.client.on('error', this.errorFtn);
