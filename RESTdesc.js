@@ -69,6 +69,9 @@ RESTdesc.prototype.back = function (callback, _recursive)
     if (!_recursive)
         this.cache.open();
 
+    // TODO: totally breaking statelessness here but quick fix
+    this.lastBack = true;
+
     this.cache.pop(this.cacheKey, function (err, val)
     {
         // if val is null the list is empty
@@ -81,11 +84,15 @@ RESTdesc.prototype.back = function (callback, _recursive)
 
 RESTdesc.prototype.handleUserResponse = function (response, json, callback)
 {
+    var lastBack = this.lastBack;
+    this.lastBack = false;
     if (json === undefined || !json.callID)
         return callback();
 
     this.cache.open();
     this.cache.popSingle(json.callID, function (err, val) {
+        if (lastBack)
+            return callback();
         // TODO: fixed problem but not completely correct...
         if (!val)
             // return this.cache.close(function () { callback(new Error('Unable to find callID ' + json.callID)); });
