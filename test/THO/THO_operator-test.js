@@ -175,6 +175,8 @@ describe('THO operator use case', function ()
             {
                 rest.back(function ()
                 {
+                    // TODO: part of 'back' hack
+                    rest.lastBack = false;
                     done();
                 });
             });

@@ -93,6 +93,8 @@ describe('THO teamleader use case', function ()
         {
             rest.back(function ()
             {
+                // TODO: part of 'back' hack
+                rest.lastBack = false;
                 done();
             });
         });
@@ -112,7 +114,7 @@ describe('THO teamleader use case', function ()
         });
     });
 
-    it ('returns all events to the user', function (done)
+    it ('returns all events to the user again', function (done)
     {
         var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
         rest.next(function (error, result)
