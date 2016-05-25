@@ -19,6 +19,7 @@
     "redis": "^2.6.0-2",
     "request": "^2.54.0",
     "resourcecache": "^0.1.2",
+    "semantic-search": "git+ssh://git@git.mmlab.be:facts4workers/semantic-search.git",
     "serve-index": "^1.6.3"
   },
   "devDependencies": {

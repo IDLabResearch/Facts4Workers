@@ -1,0 +1,300 @@
+[
+{
+    "id": "a8fde43e-22c5-438d-bdc7-1ad97cf2576f",
+    "name": "Flow Lines",
+    "desc": "streaks, patterns, or lines off-toned in color - that show up on the prototype",
+    "part_id": "1",
+    "media_url": "http://machinesandparts.surge.sh/part1/part1_flow_lines.png",
+    "comment": "I see that the flow lines are mostly on the upper part of the product, in the farther position respect to the flow gate",
+    "taxonomy": null
+},
+{
+
+    "id": "dcd4445e-917d-4168-a1b0-885a0dda4b66",
+    "name": "Sink Marks",
+    "desc": "small craters or depressions in thicker areas of the injection molded prototype. ",
+    "part_id": "1",
+    "media_url": "http://machinesandparts.surge.sh/part1/part1_sink_marks.png",
+    "comment": "the sink is critical only when it is a visually evident effect",
+    "taxonomy": null
+},
+{
+    "id": "d83a8085-63c6-45f4-b994-138c5debf7fb",
+    "name": "Vacuum voids",
+    "desc": "pockets of air trapped within or close to the surface of an injection molded prototype",
+    "part_id": "1",
+    "media_url": "http://machinesandparts.surge.sh/part1/part1_vacuum_voids.png",
+    "comment": "it could be considered acceptable a void of a max dimension of 1 mm in non aesthetic surface",
+    "taxonomy": null
+},
+{
+    "id": "c0f7b1f8-6e82-4f49-9175-85a8015aa240",
+    "name": "Surface Delamination",
+    "desc": "thin surface layers appear on the part due to a contaminant material. These layers appear like coatings and can usually be peeled off",
+    "part_id": "1",
+    "media_url": "http://machinesandparts.surge.sh/part1/part1_surface_delamination.png",
+    "comment": "check if the layer is large or small, in case of small are the product is acceptable",
+    "taxonomy": null
+},
+{
+    "id": "9cc14c6d-906a-4a69-929a-5107df26e953",
+    "name": "Weld Lines",
+    "desc": "Weld lines are planes that appears in a part where molten plastics meet each other as they flow from two different parts of the mold",
+    "part_id": "1",
+    "media_url": "http://machinesandparts.surge.sh/part1/part1_weld_lines.png",
+    "comment": "Product suffer of bad color due to bad dying",
+    "taxonomy": null
+},
+{
+    "id": "cd03db58-1883-4090-ab74-7051717b4642",
+    "name": "Short Shot",
+    "desc": "molding shot falls short. This means that the molten plastic for some reason does not fully occupy the mold cavity or cavities, resulting in a portion where there is no plastic. The finished product becomes deficient because it is incomplete",
+    "part_id": "1",
+    "media_url": "http://machinesandparts.surge.sh/part1/part1_short_shot.png",
+    "comment": "evident especially in the lower part",
+    "taxonomy": null
+},
+{
+    "id": "7888d6dd-7f58-4597-aa8a-be26a786a246",
+    "name": "Warping",
+    "desc": "twisted, uneven, or bent shape where one was not intended, this is evident on the left side",
+    "part_id": "1",
+    "media_url": "http://machinesandparts.surge.sh/part1/part1_warping.png",
+    "comment": "rotate the product to evaluate better the case",
+    "taxonomy": null
+},
+{
+    "id": "cafd269f-23c8-45d0-921c-a0a2a623a0f4",
+    "name": "Burn Marks",
+    "desc": "discolorations, usually rust colored, that appear on the surface of the injection molded prototypes",
+    "part_id": "1",
+    "media_url": "http://machinesandparts.surge.sh/part1/part1_burn_marks",
+    "comment": "Critical, report this immediately",
+    "taxonomy": null
+},
+{
+    "id": "7cb96bb7-8f37-4f16-8d36-e69c11dd49bc",
+    "name": "Jetting",
+    "desc": "molten plastic fails to stick to the mold surface due to the speed of injection",
+    "part_id": "1",
+    "media_url": "http://machinesandparts.surge.sh/part1/part1_jetting.part1png",
+    "comment": "pay attention to the lower angle, where the defect is frequent",
+    "taxonomy": null
+},
+{
+    "id": "c3ab7c2f-bce4-4777-baa4-d32d9e817cc9",
+    "name": "Flash",
+    "desc": "some molten plastic escapes from the mold cavity. Typical routes for escape are through the parting line or ejector pin locations. This extrusion cools and remains attached to the finished product",
+    "part_id": "1",
+    "media_url": "http://machinesandparts.surge.sh/part1/part1_flash.png",
+    "comment": "before calling for a solution, check the tool damage for a quick fix",
+    "taxonomy": null
+},
+{
+    "id": "d82fe8fa-5bcc-4e63-af32-4f22ae4bc68a",
+    "name": "shot incomplete",
+    "desc": "Molten Plastic is not reaching the mold cavity section",
+    "part_id": "3",
+    "media_url": "http://machinesandparts.surge.sh/part3/part3_shot_incomplete.png",
+    "comment": "",
+    "taxonomy": null
+},
+{
+    "id": "9b3571b0-3d34-4244-837b-5315466e8dfb",
+    "name": "Flash",
+    "desc": "Molten Plastic is flowing into unwanted sections of the mold cavity",
+    "part_id": "3",
+    "media_url": "http://machinesandparts.surge.sh/part3/part3_flash.png",
+    "comment": "",
+    "taxonomy": null
+},
+{
+    "id": "1c488740-99f9-4e26-a60f-3323c5961292",
+    "name": "Sink",
+    "desc": "Plastic is shrinking as it cools but additional plastic cannot be for further compensation of the shrinkage",
+    "part_id": "3",
+    "media_url": "http://machinesandparts.surge.sh/part3/part3_sink.png",
+    "comment": "",
+    "taxonomy": null
+},
+{
+    "id": "0547dcbd-145c-49d4-b5ba-5776f84dd355",
+    "name": "Splay",
+    "desc": "A layer/ streak of a unwanted gaseous byproduct from the melt or moisture in the material comes in between the melt flow and the cavity walls preventing the texture from being picked up and in addition eventually leaving a residue",
+    "part_id": "3",
+    "media_url": "http://machinesandparts.surge.sh/part3/part3_splay.png",
+    "comment": "",
+    "taxonomy": null
+},
+{
+    "id": "9fce9a21-77e9-4520-b0ac-f1c387b208cc",
+    "name": "Warpage",
+    "desc": "A differential cooling rate of the melt in two sections of the molded product",
+    "part_id": "3",
+    "media_url": "http://machinesandparts.surge.sh/part3/part3_warpage.png",
+    "comment": "",
+    "taxonomy": null
+},
+{
+    "id": "f2a5937a-117f-4957-b9b0-f2b6c4b782d0",
+    "name": "burns",
+    "desc": "When air and gasses get trapped inside the mold cavity during plastic injection, the high pressure results in the dieseling of the plastic resulting in the burning of the plastic that have a dark brown color.",
+    "part_id": "3",
+    "media_url": "http://machinesandparts.surge.sh/part3/part3_burns.png",
+    "comment": "",
+    "taxonomy": null
+},
+{
+    "id": "f1f05b9a-c3da-4eb8-b478-2ddca8d7a2da",
+    "name": "Voids",
+    "desc": "The walls solidify and the plastic melt shrinks towards the wall and therefore sucks a vacuum void on the inside of the part",
+    "part_id": "3",
+    "media_url": "http://machinesandparts.surge.sh/part3/part3_voids.png",
+    "comment": "",
+    "taxonomy": null
+},
+{
+    "id": "ac75bbd6-b03e-4827-918b-a8124edd74be",
+    "name": "Bubbles",
+    "desc": "When moisture and/or a gaseous byproduct gets mixed with the melt and is injected in the mold cavity this moisture or gas if embedded inside the melt can show up as bubbles",
+    "part_id": "3",
+    "media_url": "http://machinesandparts.surge.sh/part3/part3_bubbles.png",
+    "comment": "",
+    "taxonomy": null
+},
+{
+    "id": "af02250b-62ef-4597-8f15-dcc170a99872",
+    "name": "jet marks",
+    "desc": "Usually seen with the part is thick causing the injected plastic to 'snake fall' on to the cold mold surface and start freezing immediately. When the fresh plastic come in it does not blend well with the first material causing the jetting marks",
+    "part_id": "3",
+    "media_url": "http://machinesandparts.surge.sh/part3/part3_jet_marks.png",
+    "comment": "",
+    "taxonomy": null
+},
+{
+    "id": "b1c07c01-fc9e-419a-9e44-8192a0b546a6",
+    "name": "Weld Lines",
+    "desc": "The melt flow front is usually cold due to the exposure to the cold cavity. When two flow fronts meet as in a flow around a mold pin they do not fuse uniformly causing a weld line. Sometimes air can also get trapped in to form the defect",
+    "part_id": "3",
+    "media_url": "http://machinesandparts.surge.sh/part3/part3_weld_lines.png",
+    "comment": "",
+    "taxonomy": null
+},
+{
+    "id": "539518b2-6ac5-4c2e-ad01-84a43ffbd90d",
+    "name": "bad color",
+    "desc": "Variation from the original color with a streaking pattern in a molded product",
+    "part_id": "4",
+    "media_url": "http://machinesandparts.surge.sh/part4/part4_bad_color.jpg",
+    "comment": "",
+    "taxonomy": null
+},
+{
+    "id": "75aaecca-61aa-4c60-bae4-031b0055b351",
+    "name": "broken lines",
+    "desc": "some lines appears near the weld zone of the plastic",
+    "part_id": "4",
+    "media_url": "http://machinesandparts.surge.sh/part4/part4_broken_lines.jpg",
+    "comment": "",
+    "taxonomy": null
+},
+{
+    "id": "c7ab1d9d-6c9f-4b3b-b876-71bfb3931d14",
+    "name": "Stringiness",
+    "desc": "Thin plastic string formed at the tip of a sprue",
+    "part_id": "4",
+    "media_url": "http://machinesandparts.surge.sh/part4/part4_stringiness.jpg",
+    "comment": "",
+    "taxonomy": null
+},
+{
+    "id": "01ce6309-8080-4af8-8c6c-7bcb2d273a6c",
+    "name": "Void",
+    "desc": "A molded product that is incomplete because the mold cavity was not filled completely",
+    "part_id": "2",
+    "media_url": null,
+    "comment": "a void is found in the lower part, pay attention to its dimension",
+    "taxonomy": null
+},
+{
+    "id": "0d545fb9-1b5e-4abc-bde9-5753d3c08be7",
+    "name": "Flow marks",
+    "desc": "Ring shaped miniature bands appear on the molded product surface around gates or narrow sections",
+    "part_id": "2",
+    "media_url": null,
+    "comment": "check also the color",
+    "taxonomy": null
+},
+{
+    "id": "988fe999-e15a-427d-97d9-bd107ec0f7be",
+    "name": "Silver streaking",
+    "desc": "Streaks of a silvery white color appear in the material flow direction",
+    "part_id": "2",
+    "media_url": null,
+    "comment": "direction of flow is really important",
+    "taxonomy": null
+},
+{
+    "id": "3358760d-05fe-46bf-a986-a1dc1dd50313",
+    "name": "Poor weld line",
+    "desc": "The material splits off and flows in two or more directions. When the divergent flow fronts converge again, hair-like lines appear where they meet.",
+    "part_id": "2",
+    "media_url": null,
+    "comment": "This results in reduced strength, as well as burn-mark and bubble defects",
+    "taxonomy": null
+},
+{
+    "id": "9b79279f-419e-45e0-80df-46ac707ff84b",
+    "name": "Holes in the product",
+    "desc": "The presence of holes or voids inside molded products",
+    "part_id": "2",
+    "media_url": null,
+    "comment": "pay attention to the lower part",
+    "taxonomy": null
+},
+{
+    "id": "de369d14-0e9f-4818-8275-0c066ea1cebd",
+    "name": "Sink marks",
+    "desc": "The surface of the molded product collapses somewhat-something that is particularly common in thicker products.",
+    "part_id": "2",
+    "media_url": null,
+    "comment": "Same as what causes voids, but sink marks arise when the surface cools too slowly.",
+    "taxonomy": null
+},
+{
+    "id": "cee05723-94a5-4134-9490-2ba16b727fc3",
+    "name": "Warpage",
+    "desc": "The molded product warps immediately following or at some time following molding where the mold cavity should be straight.",
+    "part_id": "2",
+    "media_url": null,
+    "comment": "max 1 degree is acceptable",
+    "taxonomy": null
+},
+{
+    "id": "0090048d-3e52-4847-a29c-c4f297ca37ae",
+    "name": "Sticking of parts in the mold",
+    "desc": "Ordinarily a molded product is removed from the mold by having the product stick to the moving side of the mold when the mold opens, after which the product is ejected using ejector pins. Sticking occurs when the part fails to separate from the stationary mold or from the moving mold. In the case of the latter, the problem could result in broken ejector pins.",
+    "part_id": "2",
+    "media_url": null,
+    "comment": "",
+    "taxonomy": null
+},
+{
+    "id": "6383e93c-1c7d-423e-8c19-eaf193b0f74b",
+    "name": "burned parts",
+    "desc": "Discoloration or dark reddish brown streaks in the molded product",
+    "part_id": "2",
+    "media_url": null,
+    "comment": "dark brown or purple si critical",
+    "taxonomy": null
+},
+{
+    "id": "829d1c23-8753-443a-9c8e-d8f574ffa16b",
+    "name": "Discoloration",
+    "desc": "the part have a lighter color than expected",
+    "part_id": "4",
+    "media_url": null,
+    "comment": "",
+    "taxonomy": null
+}
+]

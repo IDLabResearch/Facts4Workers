@@ -7,6 +7,7 @@ var _ = require('lodash');//
 var RESTdesc = require('./RESTdesc');
 var serveIndex = require('serve-index');
 var Cache = require('./Cache');
+var fs = require('fs');
 
 var args = require('minimist')(process.argv.slice(2));
 if (args.h || args.help || args._.length > 0 || !_.isEmpty(_.omit(args, ['_', 'p', 'r'])))
@@ -226,5 +227,27 @@ function handleNext (rest, req, res, count)
         }
     });
 }
+
+// TODO: semantic search stuff, totally should clean up
+var semanticsearch = require('semantic-search');
+semanticsearch.clear_index(semanticsearch.IDX_NAME, function ()
+{
+    semanticsearch.setup_index(semanticsearch.IDX_NAME, function ()
+    {
+        var entries = JSON.parse(fs.readFileSync('data.json', 'utf8'));
+        semanticsearch.bulk_add(semanticsearch.IDX_NAME, entries);
+    });
+});
+app.post('/semantic-search', function (req, res)
+{
+    var fields = req.body.fields || ['name', 'desc', 'comment'];
+    var id = req.body.id;
+    if (!id)
+        res.status(400).json({ error: "Input ID required. (Format is { 'id': '9b79279f-419e-45e0-80df-46ac707ff84b'}) "});
+    semanticsearch.more_like_this(semanticsearch.IDX_NAME, id, fields, function (error, response, body)
+    {
+        res.json(body.hits.hits);
+    });
+});
 
 app.listen(port);
