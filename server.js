@@ -230,11 +230,11 @@ function handleNext (rest, req, res, count)
 
 // TODO: semantic search stuff, totally should clean up
 var semanticsearch = require('semantic-search');
+var entries = JSON.parse(fs.readFileSync('data.json', 'utf8'));
 semanticsearch.clear_index(semanticsearch.IDX_NAME, function ()
 {
     semanticsearch.setup_index(semanticsearch.IDX_NAME, function ()
     {
-        var entries = JSON.parse(fs.readFileSync('data.json', 'utf8'));
         semanticsearch.bulk_add(semanticsearch.IDX_NAME, entries);
     });
 });
@@ -246,8 +246,19 @@ app.post('/semantic-search', function (req, res)
         res.status(400).json({ error: "Input ID required. (Format is { 'id': '9b79279f-419e-45e0-80df-46ac707ff84b'}) "});
     semanticsearch.more_like_this(semanticsearch.IDX_NAME, id, fields, function (error, response, body)
     {
-        res.json(body.hits.hits);
+        if (body.hits)
+            res.json(body.hits.hits);
+        else
+            res.json(body);
     });
+});
+app.get('/semantic-search-demo', function (req, res)
+{
+    res.render('semantic-search', {entries: entries});
+});
+app.get('/semantic-search-demo/entries', function (req, res)
+{
+    res.json(entries);
 });
 
 app.listen(port);

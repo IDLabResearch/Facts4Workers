@@ -1,0 +1,57 @@
+
+html
+    head
+        title="Semantic Search"
+        script(type='text/javascript', src='/scripts/jquery.min.js')
+        script(type='text/javascript').
+            var entries = !{JSON.stringify(entries)};
+
+            function changeEntry()
+            {
+                var id = $('#select').children(':selected').text();
+                var entry = $.grep(entries, function(e){ return e.id === id; })[0];
+                $('#entry').val(JSON.stringify(entry, null, 2));
+            }
+
+            function submit()
+            {
+                var fields = [];
+                if ($('#name').is(':checked')) fields.push('name');
+                if ($('#desc').is(':checked')) fields.push('desc');
+                if ($('#comment').is(':checked')) fields.push('comment');
+                var id = $('#select').children(':selected').text();
+                var data = {id : id, fields : fields};
+                $.ajax({
+                    type       : "POST",
+                    url        : "/semantic-search",
+                    data       : JSON.stringify(data),
+                    contentType: "application/json; charset=utf-8",
+                    success    : function (data)
+                    {
+                        $('#output').val(JSON.stringify(data, null, 2));
+                    }
+                });
+            }
+body
+    div
+        label
+            input#name(type='checkbox', checked)
+            | name
+        label
+            input#desc(type='checkbox', checked)
+            | desc
+        label
+            input#comment(type='checkbox', checked)
+            | comment
+    dive
+        select#select(onchange="changeEntry();")
+            option(value=0)
+            each entry, i in entries
+                option(value=entry.id) #{entry.id}
+    div
+        textarea#entry(cols=100, rows=11)
+    div
+        button(onClick="submit();").
+            Submit
+    div
+        textarea#output(cols=100, rows= 50)
