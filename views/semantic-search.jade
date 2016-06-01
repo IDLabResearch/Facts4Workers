@@ -5,6 +5,7 @@ html
         script(type='text/javascript', src='/scripts/jquery.min.js')
         script(type='text/javascript').
             var entries = !{JSON.stringify(entries)};
+            var fields = !{JSON.stringify(fields)};
 
             function changeEntry()
             {
@@ -15,12 +16,17 @@ html
 
             function submit()
             {
-                var fields = [];
-                if ($('#name').is(':checked')) fields.push('name');
-                if ($('#desc').is(':checked')) fields.push('desc');
-                if ($('#comment').is(':checked')) fields.push('comment');
                 var id = $('#select').children(':selected').text();
-                var data = {id : id, fields : fields};
+                var data = {id: id, fields: [], weights:[]};
+                for (var i = 0; i < fields.length; ++i)
+                {
+                    var field = fields[i];
+                    if ($('#' + field).is(':checked'))
+                    {
+                        data.fields.push(field);
+                        data.weights.push(parseFloat($('#' + field + '_weight').val()));
+                    }
+                }
                 $.ajax({
                     type       : "POST",
                     url        : "/semantic-search",
@@ -34,16 +40,24 @@ html
             }
 body
     div
-        label
-            input#name(type='checkbox', checked)
-            | name
-        label
-            input#desc(type='checkbox', checked)
-            | desc
-        label
-            input#comment(type='checkbox')
-            | comment
-    dive
+        table
+            tr
+                th Field
+                th Weight
+            each field in fields
+                tr
+                    td
+                        if field === 'comment'
+                            label
+                                input(id='#{field}', type='checkbox')
+                                | #{field}
+                        else
+                            label
+                                input(id='#{field}', type='checkbox', checked)
+                                | #{field}
+                    td
+                        input(id='#{field}_weight', type='text', size=5, value=1)
+    div
         select#select(onchange="changeEntry();")
             option(value=0)
             each entry, i in entries

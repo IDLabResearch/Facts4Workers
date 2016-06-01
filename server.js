@@ -241,10 +241,11 @@ semanticsearch.clear_index(semanticsearch.IDX_NAME, function ()
 app.post('/semantic-search', function (req, res)
 {
     var fields = req.body.fields || ['name', 'desc', 'comment'];
+    var weights = req.body.weights || [1, 1, 1];
     var id = req.body.id;
     if (!id)
-        res.status(400).json({ error: "Input ID required. (Format is { 'id': '9b79279f-419e-45e0-80df-46ac707ff84b'}) "});
-    semanticsearch.more_like_this(semanticsearch.IDX_NAME, id, fields, function (error, response, body)
+        res.status(400).json({ error: "Input ID required. (Format is { 'id': '9b79279f-419e-45e0-80df-46ac707ff84b', 'fields': ['name', 'desc'], 'weights': [2, 1]}) "});
+    semanticsearch.more_like_this_extended(semanticsearch.IDX_NAME, id, fields, weights, function (error, response, body)
     {
         if (body.hits)
             res.json(body.hits.hits);
@@ -254,7 +255,7 @@ app.post('/semantic-search', function (req, res)
 });
 app.get('/semantic-search-demo', function (req, res)
 {
-    res.render('semantic-search', {entries: entries});
+    res.render('semantic-search', {entries: entries, fields: ['name', 'desc', 'comment']});
 });
 app.get('/semantic-search-demo/entries', function (req, res)
 {
