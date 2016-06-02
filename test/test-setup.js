@@ -2,6 +2,7 @@
 var path = require('path');
 var url = require('url');
 var assert = require('assert');
+var nock = require('nock');
 
 function TEST ()
 {}
@@ -13,6 +14,7 @@ function relative (relativePath)
 }
 
 TEST.relative = relative;
+TEST.stubs = { 'GET': {}, 'POST': {}};
 
 TEST.files = [
     relative('n3/util.n3'),
@@ -48,5 +50,30 @@ TEST.createStubFunction = function (stubs)
         callback(null, result);
     };
 };
+
+function startNock (method)
+{
+    return nock(/.*/)
+        .intercept(/.*/, method)
+        .reply(200, function (uri, requestBody)
+        {
+            uri = 'https://' + this.req.headers.host + uri;
+            startNock(method);
+
+            var parsed = url.parse(uri, true);
+            if (parsed.query.access_token)
+            {
+                assert.strictEqual(parsed.query.access_token, 'ACCESS');
+                delete parsed.query.access_token;
+                parsed.search = '';
+                uri = url.format(parsed);
+            }
+            if (!(uri in TEST.stubs[method]))
+                throw new Error('Unsupported URL stub: ' + method + ' ' + uri);
+            return TEST.stubs[method][uri](requestBody);
+        });
+}
+startNock('GET');
+startNock('POST');
 
 global.TEST = TEST;

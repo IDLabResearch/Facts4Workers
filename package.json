@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "mocha": "^2.3.4",
-    "proxyquire": "^1.7.9",
+    "nock": "^8.0.0",
     "request": "^2.54.0"
   },
   "scripts": {
