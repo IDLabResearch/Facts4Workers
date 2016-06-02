@@ -1,0 +1,22 @@
+PREFIX schema: <http://schema.org/>
+PREFIX hc: <http://aca.agfa.net/resource/ontology/healthcare#>
+PREFIX tmpl: <http://purl.org/restdesc/http-template#>
+PREFIX http: <http://www.w3.org/2011/http#>
+PREFIX form:  <http://www.agfa.com/w3c/orbis/orbis-schema/Form#>
+PREFIX natperson: <http://www.agfa.com/w3c/orbis/orbis-schema/Natperson#>
+PREFIX patient: <http://www.agfa.com/w3c/orbis/orbis-schema/Patient#>
+
+{
+	?patient 
+		a schema:Person.
+}=> {
+	_:request
+		http:methodName "GET";
+		tmpl:requestURI ("http://localhost:8089/pavo/entities/salus/demographics/demographics{?patient_uri}" ("patient_uri" ?patient));
+		http:resp [ http:body _:body ].
+		
+	_:body tmpl:represents ?patient.
+	
+	?patient
+		schema:name _:name.
+}.

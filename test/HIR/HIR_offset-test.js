@@ -1,9 +1,10 @@
 
 var assert = require('assert');
 var _ = require('lodash');
-var ValidCall = require('../../ValidCall');
-var RESTdesc = require('../../RESTdesc');
+var ValidCall = require('../../node_modules/RESTdesc/ValidCall'); // totally not a dirty hack at all
 var stubs = require('./HIR-stubs');
+
+var RESTdesc = require('restdesc').RESTdesc;
 
 describe('HIR offset use case', function ()
 {
@@ -13,12 +14,12 @@ describe('HIR offset use case', function ()
     {
         oldCall = ValidCall.prototype.call;
         ValidCall.prototype.call = TEST.createStubFunction(stubs);
-        new RESTdesc([], '', key).clear(done);
+        new RESTdesc('redis://localhost:6379',[], '', key).clear(done);
     });
 
     it ('requires authorization', function (done)
     {
-        var rest = new RESTdesc(TEST.files, TEST.goals.offset, key);
+        var rest = new RESTdesc('redis://localhost:6379',TEST.files, TEST.goals.offset, key);
         rest.next(function (error, result)
         {
             if (error)
@@ -32,7 +33,7 @@ describe('HIR offset use case', function ()
 
     it ('asks for a part ID', function (done)
     {
-        var rest = new RESTdesc(TEST.files, TEST.goals.offset, key);
+        var rest = new RESTdesc('redis://localhost:6379',TEST.files, TEST.goals.offset, key);
         rest.next(function (error, result)
         {
             if (error)
@@ -46,7 +47,7 @@ describe('HIR offset use case', function ()
 
     it ('asks for measurements', function (done)
     {
-        var rest = new RESTdesc(TEST.files, TEST.goals.offset, key);
+        var rest = new RESTdesc('redis://localhost:6379',TEST.files, TEST.goals.offset, key);
         rest.next(function (error, result)
         {
             if (error)
@@ -60,7 +61,7 @@ describe('HIR offset use case', function ()
 
     it ('shows final result', function (done)
     {
-        var rest = new RESTdesc(TEST.files, TEST.goals.offset, key);
+        var rest = new RESTdesc('redis://localhost:6379',TEST.files, TEST.goals.offset, key);
         rest.next(function (error, result)
         {
             if (error)
@@ -74,7 +75,7 @@ describe('HIR offset use case', function ()
 
     it ('is finished', function (done)
     {
-        var rest = new RESTdesc(TEST.files, TEST.goals.offset, key);
+        var rest = new RESTdesc('redis://localhost:6379',TEST.files, TEST.goals.offset, key);
         rest.next(function (error, result)
         {
             if (error)
@@ -86,7 +87,7 @@ describe('HIR offset use case', function ()
 
     after(function (done)
     {
-        new RESTdesc([], '', key).clear(done);
+        new RESTdesc('redis://localhost:6379',[], '', key).clear(done);
         ValidCall.prototype.call = oldCall;
     });
 });

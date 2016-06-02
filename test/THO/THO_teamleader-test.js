@@ -1,11 +1,10 @@
 
 var assert = require('assert');
 var _ = require('lodash');
-var ValidCall = require('../../ValidCall');
-var RESTdesc = require('../../RESTdesc');
+var ValidCall = require('../../node_modules/RESTdesc/ValidCall'); // totally not a dirty hack at all
+var RESTdesc = require('restdesc').RESTdesc;
 var stubs = require('./THO-stubs');
 
-// TODO: check through demo.js?
 // TODO: check if request body is also correct
 describe('THO teamleader use case', function ()
 {
@@ -15,12 +14,12 @@ describe('THO teamleader use case', function ()
     {
         oldCall = ValidCall.prototype.call;
         ValidCall.prototype.call = TEST.createStubFunction(stubs);
-        new RESTdesc([], '', key).clear(done);
+        new RESTdesc('redis://localhost:6379',[], '', key).clear(done);
     });
 
     it ('requires authorization', function (done)
     {
-        var rest = new RESTdesc(TEST.files, TEST.goals.operator, key);
+        var rest = new RESTdesc('redis://localhost:6379',TEST.files, TEST.goals.operator, key);
         rest.next(function (error, result)
         {
             if (error)
@@ -34,7 +33,7 @@ describe('THO teamleader use case', function ()
 
     it ('asks for an operator ID', function (done)
     {
-        var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
+        var rest = new RESTdesc('redis://localhost:6379',TEST.files, TEST.goals.teamleader, key);
         rest.next(function (error, result)
         {
             if (error)
@@ -48,7 +47,7 @@ describe('THO teamleader use case', function ()
 
     it ('asks for a machine ID (choose f57438f4)', function (done)
     {
-        var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
+        var rest = new RESTdesc('redis://localhost:6379',TEST.files, TEST.goals.teamleader, key);
         rest.next(function (error, result)
         {
             if (error)
@@ -62,7 +61,7 @@ describe('THO teamleader use case', function ()
 
     it ('returns all events to the user', function (done)
     {
-        var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
+        var rest = new RESTdesc('redis://localhost:6379',TEST.files, TEST.goals.teamleader, key);
         rest.next(function (error, result)
         {
             if (error)
@@ -76,7 +75,7 @@ describe('THO teamleader use case', function ()
 
     it ('is finished', function (done)
     {
-        var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
+        var rest = new RESTdesc('redis://localhost:6379',TEST.files, TEST.goals.teamleader, key);
         rest.next(function (error, result)
         {
             if (error)
@@ -88,7 +87,7 @@ describe('THO teamleader use case', function ()
 
     it('can be rolled back to get a new machine ID', function (done)
     {
-        var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
+        var rest = new RESTdesc('redis://localhost:6379',TEST.files, TEST.goals.teamleader, key);
         rest.back(function ()
         {
             rest.back(function ()
@@ -102,7 +101,7 @@ describe('THO teamleader use case', function ()
 
     it ('asks for a machine ID (choose d8b20647)', function (done)
     {
-        var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
+        var rest = new RESTdesc('redis://localhost:6379',TEST.files, TEST.goals.teamleader, key);
         rest.next(function (error, result)
         {
             if (error)
@@ -116,7 +115,7 @@ describe('THO teamleader use case', function ()
 
     it ('returns all events to the user again', function (done)
     {
-        var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
+        var rest = new RESTdesc('redis://localhost:6379',TEST.files, TEST.goals.teamleader, key);
         rest.next(function (error, result)
         {
             if (error)
@@ -130,7 +129,7 @@ describe('THO teamleader use case', function ()
 
     it ('asks for a solution', function (done)
     {
-        var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
+        var rest = new RESTdesc('redis://localhost:6379',TEST.files, TEST.goals.teamleader, key);
         rest.next(function (error, result)
         {
             if (error)
@@ -144,7 +143,7 @@ describe('THO teamleader use case', function ()
 
     it ('asks for a report', function (done)
     {
-        var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
+        var rest = new RESTdesc('redis://localhost:6379',TEST.files, TEST.goals.teamleader, key);
         rest.next(function (error, result)
         {
             if (error)
@@ -158,7 +157,7 @@ describe('THO teamleader use case', function ()
 
     it ('asks for a new solution if the previous one failed', function (done)
     {
-        var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
+        var rest = new RESTdesc('redis://localhost:6379',TEST.files, TEST.goals.teamleader, key);
         rest.next(function (error, result)
         {
             if (error)
@@ -172,7 +171,7 @@ describe('THO teamleader use case', function ()
 
     it ('asks for a new report', function (done)
     {
-        var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
+        var rest = new RESTdesc('redis://localhost:6379',TEST.files, TEST.goals.teamleader, key);
         rest.next(function (error, result)
         {
             if (error)
@@ -186,7 +185,7 @@ describe('THO teamleader use case', function ()
 
     it ('is really finished', function (done)
     {
-        var rest = new RESTdesc(TEST.files, TEST.goals.teamleader, key);
+        var rest = new RESTdesc('redis://localhost:6379',TEST.files, TEST.goals.teamleader, key);
         rest.next(function (error, result)
         {
             if (error)
@@ -198,7 +197,7 @@ describe('THO teamleader use case', function ()
 
     after(function (done)
     {
-        new RESTdesc([], '', key).clear(done);
+        new RESTdesc('redis://localhost:6379',[], '', key).clear(done);
         ValidCall.prototype.call = oldCall;
     });
 });

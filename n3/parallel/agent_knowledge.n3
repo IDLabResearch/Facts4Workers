@@ -1,0 +1,6 @@
+PREFIX schema: <http://schema.org/>
+PREFIX patient: <http://www.agfa.com/w3c/orbis/orbis-schema/Patient#>
+
+<https://agfa.com/orbis/SALUS/resource/Patient/883001#this> a schema:Person.
+
+#<https://agfa.com/orbis/SALUS/resource/Patient/883001#this> patient:persnr <https://agfa.com/orbis/SALUS/resource/NatPerson/883001#this>.

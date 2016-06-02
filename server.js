@@ -1,12 +1,10 @@
 
 var express = require('express');
 var bodyParser = require('body-parser');
-var request = require('request');
 var path = require('path');
-var _ = require('lodash');//
-var RESTdesc = require('./RESTdesc');
+var _ = require('lodash');
+var RESTdesc = require('restdesc').RESTdesc;
 var serveIndex = require('serve-index');
-var Cache = require('./Cache');
 var fs = require('fs');
 
 var args = require('minimist')(process.argv.slice(2));
@@ -17,8 +15,7 @@ if (args.h || args.help || args._.length > 0 || !_.isEmpty(_.omit(args, ['_', 'p
 }
 var port = args.p || 3000;
 
-if (args.r)
-    Cache.REDIS_URL = args.r;
+var cacheURL = args.r || 'redis://localhost:6379';
 
 var app = express();
 app.set('view engine', 'jade');
@@ -96,7 +93,7 @@ app.post('/clear', function (req, res)
 {
     if (!req.body || !req.body.data)
         return res.status(400).json({ error: 'Expected a JSON object with a "data" field.'});
-    var rest = new RESTdesc(null, null, req.body.data);
+    var rest = new RESTdesc(cacheURL, null, null, req.body.data);
     rest.clear(function ()
     {
         res.sendStatus(200);
@@ -107,7 +104,7 @@ app.post('/back', function (req, res)
 {
     if (!req.body || !req.body.data)
         return res.status(400).json({ error: 'Expected a JSON object with a "data" field.'});
-    var rest = new RESTdesc(null, null, req.body.data);
+    var rest = new RESTdesc(cacheURL, null, null, req.body.data);
     rest.back(function ()
     {
         res.sendStatus(200);
@@ -154,7 +151,7 @@ app.post('/eye', function (req, res)
 {
     var input = req.body.input || "";
     var goal = req.body.goal || "";
-    var rest = new RESTdesc(input, goal);
+    var rest = new RESTdesc(cacheURL, input, goal);
     handleNext(rest, req, res);
 });
 
@@ -178,7 +175,7 @@ function next (req, res)
     if (req.body.eye)
         cacheKey = req.body.eye.data;
 
-    var rest = new RESTdesc(input, goal, cacheKey);
+    var rest = new RESTdesc(cacheURL, input, goal, cacheKey);
     rest.handleUserResponse(
         req.body.json,
         req.body.eye,
@@ -229,15 +226,25 @@ function handleNext (rest, req, res, count)
 }
 
 // TODO: semantic search stuff, totally should clean up
-var semanticsearch = require('semantic-search');
-var entries = JSON.parse(fs.readFileSync('data.json', 'utf8'));
-semanticsearch.clear_index(semanticsearch.IDX_NAME, function ()
+try
 {
-    semanticsearch.setup_index(semanticsearch.IDX_NAME, function ()
+    var semanticsearch = require('semantic-search');
+    var entries = JSON.parse(fs.readFileSync('data.json', 'utf8'));
+    semanticsearch.clear_index(semanticsearch.IDX_NAME, function ()
     {
-        semanticsearch.bulk_add(semanticsearch.IDX_NAME, entries);
+        semanticsearch.setup_index(semanticsearch.IDX_NAME, function ()
+        {
+            semanticsearch.bulk_add(semanticsearch.IDX_NAME, entries, function ()
+            {
+                // need empty function to prevent error when connection is refused
+            });
+        });
     });
-});
+}
+catch (e) {
+    // if elasticsearch isn't running
+    console.error(e);
+}
 app.post('/semantic-search', function (req, res)
 {
     var fields = req.body.fields || ['name', 'desc', 'comment'];

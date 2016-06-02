@@ -1,0 +1,8 @@
+PREFIX patient: <http://www.agfa.com/w3c/orbis/orbis-schema/Patient#>
+PREFIX schema: <http://schema.org/>
+
+{
+	?patient schema:name ?name; schema:address ?address. ?address schema:streetAddress ?street.
+} => {
+	?patient schema:name ?name; schema:address ?address. ?address schema:streetAddress ?street.
+}.
