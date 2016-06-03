@@ -230,9 +230,10 @@ try
 {
     var semanticsearch = require('semantic-search');
     var entries = JSON.parse(fs.readFileSync('data.json', 'utf8'));
+    var synonyms = true;
     semanticsearch.clear_index(semanticsearch.IDX_NAME, function ()
     {
-        semanticsearch.setup_index(semanticsearch.IDX_NAME, function ()
+        semanticsearch.setup_index_synonyms(semanticsearch.IDX_NAME, function ()
         {
             semanticsearch.bulk_add(semanticsearch.IDX_NAME, entries, function ()
             {
@@ -245,6 +246,49 @@ catch (e) {
     // if elasticsearch isn't running
     console.error(e);
 }
+
+app.get('/semantic-search/standard', function (req, res)
+{
+    console.log('wtf');
+});
+app.post('/semantic-search/standard', function (req, res)
+{
+    if (!synonyms)
+        return res.status(200).end();
+    semanticsearch.clear_index(semanticsearch.IDX_NAME, function ()
+    {
+        semanticsearch.setup_index(semanticsearch.IDX_NAME, function ()
+        {
+            semanticsearch.bulk_add(semanticsearch.IDX_NAME, entries, function ()
+            {
+                semanticsearch.flush(semanticsearch.IDX_NAME, function ()
+                {
+                    synonyms = false;
+                    res.status(200).end();
+                });
+            });
+        });
+    });
+});
+app.post('/semantic-search/synonyms', function (req, res)
+{
+    if (synonyms)
+        return res.status(200).end();
+    semanticsearch.clear_index(semanticsearch.IDX_NAME, function ()
+    {
+        semanticsearch.setup_index_synonyms(semanticsearch.IDX_NAME, function ()
+        {
+            semanticsearch.bulk_add(semanticsearch.IDX_NAME, entries, function ()
+            {
+                semanticsearch.flush(semanticsearch.IDX_NAME, function ()
+                {
+                    synonyms = true;
+                    res.status(200).end();
+                });
+            });
+        });
+    });
+});
 app.post('/semantic-search', function (req, res)
 {
     var fields = req.body.fields || ['name', 'desc', 'comment'];

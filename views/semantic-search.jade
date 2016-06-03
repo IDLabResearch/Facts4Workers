@@ -14,27 +14,37 @@ html
                 $('#entry').val(JSON.stringify(entry, null, 2));
             }
 
-            function submit()
+            function submit(useSynonyms)
             {
-                var id = $('#select').children(':selected').text();
-                var data = {id: id, fields: [], weights:[]};
-                for (var i = 0; i < fields.length; ++i)
-                {
-                    var field = fields[i];
-                    if ($('#' + field).is(':checked'))
-                    {
-                        data.fields.push(field);
-                        data.weights.push(parseFloat($('#' + field + '_weight').val()));
-                    }
-                }
+                $('#buttons').find('button').prop('disabled', true);
                 $.ajax({
                     type       : "POST",
-                    url        : "/semantic-search",
-                    data       : JSON.stringify(data),
+                    url        : "/semantic-search/" + (useSynonyms ? "synonyms" : "standard"),
                     contentType: "application/json; charset=utf-8",
-                    success    : function (data)
+                    success    : function ()
                     {
-                        $('#output').val(JSON.stringify(data, null, 2));
+                        var id = $('#select').children(':selected').text();
+                        var data = {id: id, fields: [], weights:[]};
+                        for (var i = 0; i < fields.length; ++i)
+                        {
+                            var field = fields[i];
+                            if ($('#' + field).is(':checked'))
+                            {
+                                data.fields.push(field);
+                                data.weights.push(parseFloat($('#' + field + '_weight').val()));
+                            }
+                        }
+                        $.ajax({
+                            type       : "POST",
+                            url        : "/semantic-search",
+                            data       : JSON.stringify(data),
+                            contentType: "application/json; charset=utf-8",
+                            success    : function (data)
+                            {
+                                $('#output').val(JSON.stringify(data, null, 2));
+                                $('#buttons').find('button').prop('disabled', false);
+                            }
+                        });
                     }
                 });
             }
@@ -64,8 +74,10 @@ body
                 option(value=entry.id) #{entry.id}
     div
         textarea#entry(cols=100, rows=11)
-    div
-        button(onClick="submit();").
-            Submit
+    div#buttons
+        button(onClick="submit(true);").
+            Submit (synonyms)
+        button(onClick="submit(false);").
+            Submit (standard)
     div
         textarea#output(cols=100, rows= 50)
