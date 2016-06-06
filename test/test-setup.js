@@ -14,7 +14,6 @@ function relative (relativePath)
 }
 
 TEST.relative = relative;
-TEST.stubs = { 'GET': {}, 'POST': {}};
 
 TEST.files = [
     relative('n3/util.n3'),
@@ -51,14 +50,15 @@ TEST.createStubFunction = function (stubs)
     };
 };
 
-function startNock (method)
+function startNock (method, stubs)
 {
     return nock(/.*/)
         .intercept(/.*/, method)
         .reply(200, function (uri, requestBody)
         {
+            startNock(method, stubs);
+
             uri = 'https://' + this.req.headers.host + uri;
-            startNock(method);
 
             var parsed = url.parse(uri, true);
             if (parsed.query.access_token)
@@ -68,12 +68,19 @@ function startNock (method)
                 parsed.search = '';
                 uri = url.format(parsed);
             }
-            if (!(uri in TEST.stubs[method]))
+            if (!(uri in stubs[method]))
                 throw new Error('Unsupported URL stub: ' + method + ' ' + uri);
-            return TEST.stubs[method][uri](requestBody);
+            return stubs[method][uri](requestBody);
         });
 }
-startNock('GET');
-startNock('POST');
+TEST.disableHTTP = function (stubs)
+{
+    startNock('GET', stubs);
+    startNock('POST', stubs);
+};
+TEST.enableHTTP = function ()
+{
+    nock.cleanAll();
+};
 
 global.TEST = TEST;

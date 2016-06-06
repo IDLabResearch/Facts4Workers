@@ -9,7 +9,7 @@ describe('THO operator use case', function ()
     var key = 'TESTKEY';
     before(function (done)
     {
-        TEST.stubs = stubs;
+        TEST.disableHTTP(stubs);
         new RESTdesc('redis://localhost:6379',[], '', key).clear(done);
     });
 
@@ -220,6 +220,7 @@ describe('THO operator use case', function ()
 
     after(function (done)
     {
+        TEST.enableHTTP();
         new RESTdesc('redis://localhost:6379',[], '', key).clear(done);
     });
 });

@@ -1,10 +1,8 @@
 
 var assert = require('assert');
 var _ = require('lodash');
-var ValidCall = require('../../node_modules/RESTdesc/ValidCall'); // totally not a dirty hack at all
-var stubs = require('./HIR-stubs');
-
 var RESTdesc = require('restdesc').RESTdesc;
+var stubs = require('./HIR-stubs');
 
 describe('HIR offset use case', function ()
 {
@@ -12,8 +10,7 @@ describe('HIR offset use case', function ()
     var oldCall = null;
     before(function (done)
     {
-        oldCall = ValidCall.prototype.call;
-        ValidCall.prototype.call = TEST.createStubFunction(stubs);
+        TEST.disableHTTP(stubs);
         new RESTdesc('redis://localhost:6379',[], '', key).clear(done);
     });
 
@@ -87,7 +84,7 @@ describe('HIR offset use case', function ()
 
     after(function (done)
     {
+        TEST.enableHTTP();
         new RESTdesc('redis://localhost:6379',[], '', key).clear(done);
-        ValidCall.prototype.call = oldCall;
     });
 });
