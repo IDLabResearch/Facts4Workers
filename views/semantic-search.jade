@@ -17,34 +17,26 @@ html
             function submit(useSynonyms)
             {
                 $('#buttons').find('button').prop('disabled', true);
+                var id = $('#select').children(':selected').text();
+                var data = {id: id, fields: [], weights:[], synonyms: useSynonyms};
+                for (var i = 0; i < fields.length; ++i)
+                {
+                    var field = fields[i];
+                    if ($('#' + field).is(':checked'))
+                    {
+                        data.fields.push(field);
+                        data.weights.push(parseFloat($('#' + field + '_weight').val()));
+                    }
+                }
                 $.ajax({
                     type       : "POST",
-                    url        : "/semantic-search/" + (useSynonyms ? "synonyms" : "standard"),
+                    url        : "/semantic-search",
+                    data       : JSON.stringify(data),
                     contentType: "application/json; charset=utf-8",
-                    success    : function ()
+                    success    : function (data)
                     {
-                        var id = $('#select').children(':selected').text();
-                        var data = {id: id, fields: [], weights:[]};
-                        for (var i = 0; i < fields.length; ++i)
-                        {
-                            var field = fields[i];
-                            if ($('#' + field).is(':checked'))
-                            {
-                                data.fields.push(field);
-                                data.weights.push(parseFloat($('#' + field + '_weight').val()));
-                            }
-                        }
-                        $.ajax({
-                            type       : "POST",
-                            url        : "/semantic-search",
-                            data       : JSON.stringify(data),
-                            contentType: "application/json; charset=utf-8",
-                            success    : function (data)
-                            {
-                                $('#output').val(JSON.stringify(data, null, 2));
-                                $('#buttons').find('button').prop('disabled', false);
-                            }
-                        });
+                        $('#output').val(JSON.stringify(data, null, 2));
+                        $('#buttons').find('button').prop('disabled', false);
                     }
                 });
             }

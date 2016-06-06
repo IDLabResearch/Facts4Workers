@@ -230,7 +230,10 @@ try
 {
     var semanticsearch = require('semantic-search');
     var entries = JSON.parse(fs.readFileSync('data.json', 'utf8'));
-    var prev_synonyms = true;
+    update_index(false, function ()
+    {
+        // need empty function to prevent error when connection is refused
+    });
     update_index(true, function ()
     {
         // need empty function to prevent error when connection is refused
@@ -241,34 +244,22 @@ catch (e) {
     console.error(e);
 }
 
-app.post('/semantic-search/:type', function (req, res)
-{
-    var type = req.params.type;
-    if (type !== 'standard' && type !== 'synonyms')
-        return res.status(404).end();
-    var synonyms = type === 'synonyms';
-    update_index(synonyms, function ()
-    {
-        res.status(200).end();
-    });
-});
-
 function update_index (synonyms, callback)
 {
-    prev_synonyms = synonyms;
-    semanticsearch.clear_index(semanticsearch.IDX_NAME, function ()
+    var idx = semanticsearch.IDX_NAME + (synonyms ? '_synonyms' : '');
+    semanticsearch.clear_index(idx, function ()
     {
         if (synonyms)
-            semanticsearch.setup_index_synonyms(semanticsearch.IDX_NAME, bulk_add);
+            semanticsearch.setup_index_synonyms(idx, bulk_add);
         else
-            semanticsearch.setup_index(semanticsearch.IDX_NAME, bulk_add);
+            semanticsearch.setup_index(idx, bulk_add);
     });
 
     function bulk_add()
     {
-        semanticsearch.bulk_add(semanticsearch.IDX_NAME, entries, function ()
+        semanticsearch.bulk_add(idx, entries, function ()
         {
-            semanticsearch.flush(semanticsearch.IDX_NAME, callback);
+            semanticsearch.flush(idx, callback);
         });
     }
 }
@@ -278,9 +269,10 @@ app.post('/semantic-search', function (req, res)
     var fields = req.body.fields || ['name', 'desc', 'comment'];
     var weights = req.body.weights || [1, 1, 1];
     var id = req.body.id;
+    var synonyms = req.body.synonyms;
     if (!id)
-        res.status(400).json({ error: "Input ID required. (Format is { 'id': '9b79279f-419e-45e0-80df-46ac707ff84b', 'fields': ['name', 'desc'], 'weights': [2, 1]}) "});
-    semanticsearch.more_like_this_extended(semanticsearch.IDX_NAME, id, fields, weights, function (error, response, body)
+        res.status(400).json({ error: "Input ID required. (Format is { 'id': '9b79279f-419e-45e0-80df-46ac707ff84b', 'fields': ['name', 'desc'], 'weights': [2, 1], 'synonyms': false}) "});
+    semanticsearch.more_like_this_extended(semanticsearch.IDX_NAME + (synonyms ? '_synonyms' : ''), id, fields, weights, function (error, response, body)
     {
         if (error)
             return res.status(500).json(error);
