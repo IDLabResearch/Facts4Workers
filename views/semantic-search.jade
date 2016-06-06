@@ -9,7 +9,7 @@ html
 
             function changeEntry()
             {
-                var id = $('#select').children(':selected').text();
+                var id = $('#select').children(':selected').val();
                 var entry = $.grep(entries, function(e){ return e.id === id; })[0];
                 $('#entry').val(JSON.stringify(entry, null, 2));
             }
@@ -17,7 +17,7 @@ html
             function submit(useSynonyms)
             {
                 $('#buttons').find('button').prop('disabled', true);
-                var id = $('#select').children(':selected').text();
+                var id = $('#select').children(':selected').val();
                 var data = {id: id, fields: [], weights:[], synonyms: useSynonyms};
                 for (var i = 0; i < fields.length; ++i)
                 {
@@ -63,13 +63,13 @@ body
         select#select(onchange="changeEntry();")
             option(value=0)
             each entry, i in entries
-                option(value=entry.id) #{entry.id}
+                option(value=entry.id) #{entry.id} - #{entry.name}
     div
         textarea#entry(cols=100, rows=11)
     div#buttons
-        button(onClick="submit(true);").
-            Submit (synonyms)
         button(onClick="submit(false);").
             Submit (standard)
+        button(onClick="submit(true);").
+            Submit (synonyms)
     div
         textarea#output(cols=100, rows= 50)
