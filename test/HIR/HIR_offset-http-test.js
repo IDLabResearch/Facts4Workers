@@ -86,6 +86,19 @@ describe('HIR offset use case with HTTP calls', function ()
         });
     });
 
+    it('answer getPartID again', function (done)
+    {
+        console.log(output);
+        requestParams.json.eye = output;
+        requestParams.json.json = { id: '5b015ac5-fd14-488c-b387-2d8d7b5d4989' };
+        request(requestParams, function (error, response, body)
+        {
+            output = body;
+            // TODO: assert stuff
+            done();
+        });
+    });
+
     it('answer measurements', function (done)
     {
         console.log(output);

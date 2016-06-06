@@ -230,16 +230,10 @@ try
 {
     var semanticsearch = require('semantic-search');
     var entries = JSON.parse(fs.readFileSync('data.json', 'utf8'));
-    var synonyms = true;
-    semanticsearch.clear_index(semanticsearch.IDX_NAME, function ()
+    var prev_synonyms = true;
+    update_index(true, function ()
     {
-        semanticsearch.setup_index_synonyms(semanticsearch.IDX_NAME, function ()
-        {
-            semanticsearch.bulk_add(semanticsearch.IDX_NAME, entries, function ()
-            {
-                // need empty function to prevent error when connection is refused
-            });
-        });
+        // need empty function to prevent error when connection is refused
     });
 }
 catch (e) {
@@ -247,48 +241,38 @@ catch (e) {
     console.error(e);
 }
 
-app.get('/semantic-search/standard', function (req, res)
+app.post('/semantic-search/:type', function (req, res)
 {
-    console.log('wtf');
-});
-app.post('/semantic-search/standard', function (req, res)
-{
-    if (!synonyms)
-        return res.status(200).end();
-    semanticsearch.clear_index(semanticsearch.IDX_NAME, function ()
+    var type = req.params.type;
+    if (type !== 'standard' && type !== 'synonyms')
+        return res.status(404).end();
+    var synonyms = type === 'synonyms';
+    update_index(synonyms, function ()
     {
-        semanticsearch.setup_index(semanticsearch.IDX_NAME, function ()
-        {
-            semanticsearch.bulk_add(semanticsearch.IDX_NAME, entries, function ()
-            {
-                semanticsearch.flush(semanticsearch.IDX_NAME, function ()
-                {
-                    synonyms = false;
-                    res.status(200).end();
-                });
-            });
-        });
+        res.status(200).end();
     });
 });
-app.post('/semantic-search/synonyms', function (req, res)
+
+function update_index (synonyms, callback)
 {
-    if (synonyms)
-        return res.status(200).end();
+    prev_synonyms = synonyms;
     semanticsearch.clear_index(semanticsearch.IDX_NAME, function ()
     {
-        semanticsearch.setup_index_synonyms(semanticsearch.IDX_NAME, function ()
-        {
-            semanticsearch.bulk_add(semanticsearch.IDX_NAME, entries, function ()
-            {
-                semanticsearch.flush(semanticsearch.IDX_NAME, function ()
-                {
-                    synonyms = true;
-                    res.status(200).end();
-                });
-            });
-        });
+        if (synonyms)
+            semanticsearch.setup_index_synonyms(semanticsearch.IDX_NAME, bulk_add);
+        else
+            semanticsearch.setup_index(semanticsearch.IDX_NAME, bulk_add);
     });
-});
+
+    function bulk_add()
+    {
+        semanticsearch.bulk_add(semanticsearch.IDX_NAME, entries, function ()
+        {
+            semanticsearch.flush(semanticsearch.IDX_NAME, callback);
+        });
+    }
+}
+
 app.post('/semantic-search', function (req, res)
 {
     var fields = req.body.fields || ['name', 'desc', 'comment'];
@@ -298,6 +282,8 @@ app.post('/semantic-search', function (req, res)
         res.status(400).json({ error: "Input ID required. (Format is { 'id': '9b79279f-419e-45e0-80df-46ac707ff84b', 'fields': ['name', 'desc'], 'weights': [2, 1]}) "});
     semanticsearch.more_like_this_extended(semanticsearch.IDX_NAME, id, fields, weights, function (error, response, body)
     {
+        if (error)
+            return res.status(500).json(error);
         if (body.hits)
             res.json(body.hits.hits);
         else
