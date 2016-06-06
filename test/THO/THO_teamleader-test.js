@@ -1,7 +1,7 @@
 
 var assert = require('assert');
 var _ = require('lodash');
-var RESTdesc = require('restdesc').RESTdesc;
+var RESTdesc = require('RESTdesc').RESTdesc;
 var stubs = require('./THO-stubs');
 
 // TODO: check if request body is also correct

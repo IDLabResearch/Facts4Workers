@@ -3,7 +3,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var path = require('path');
 var _ = require('lodash');
-var RESTdesc = require('restdesc').RESTdesc;
+var RESTdesc = require('RESTdesc').RESTdesc;
 var serveIndex = require('serve-index');
 var fs = require('fs');
 

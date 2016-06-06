@@ -13,7 +13,7 @@
     "jquery": "^2.1.3",
     "lodash": "^4.0.0",
     "minimist": "^1.1.1",
-    "restdesc": "git+ssh://git@git.mmlab.be:facts4workers/restdesc.git",
+    "RESTdesc": "git+ssh://git@git.mmlab.be:facts4workers/restdesc.git",
     "semantic-search": "git+ssh://git@git.mmlab.be:facts4workers/semantic-search.git",
     "serve-index": "^1.6.3"
   },

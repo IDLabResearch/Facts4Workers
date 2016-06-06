@@ -4,7 +4,7 @@
 
 var assert = require('assert');
 var _ = require('lodash');
-var RESTdesc = require('restdesc').RESTdesc;
+var RESTdesc = require('RESTdesc').RESTdesc;
 var request = require('request');
 
 
