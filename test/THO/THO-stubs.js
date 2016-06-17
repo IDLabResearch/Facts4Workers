@@ -67,7 +67,7 @@ function machines ()
             "name"    : "Heating machine",
             "desc"    : "Machine used for heating purposes",
             "state"   : "5e41b90e-77b6-4810-99ff-9df87d709801",
-            "optional": { "media_url": "http://machinesandparts.surge.sh/machines/green_machine.jpg" }
+            "optional": { "media_url": null }
         },
         {
             "id"      : "9f3c5ac1-8ca5-4c55-8ed3-dcfcf0c684d2",
@@ -184,7 +184,7 @@ function defects1 ()
             "name"     : "Hole",
             "desc"     : "Hole on the border of the product",
             "part_id"  : "1",
-            "media_url": "http://machinesandparts.surge.sh/part1/part1_hole.jpg",
+            "media_url": null,
             "comment"  : "The product has a hole on the side, critical when wider than 1 mm",
             "taxonomy" : null
         },
