@@ -58,6 +58,7 @@ function logResponse(req, res){
     logStream.write('REQUEST BODY: ' + req.rawBody + '\n');
     logStream.write('RESPONSE HEADERS: ' + JSON.stringify(res._headers) + '\n');
     logStream.write('RESPONSE BODY: ' + res.rawBody + '\n');
+    logStream.write('\n');
 }
 
 // store send data in body
