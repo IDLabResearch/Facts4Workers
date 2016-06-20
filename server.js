@@ -50,6 +50,16 @@ app.use(bodyParser.urlencoded({                           // to support URL-enco
 }));
 app.use(bodyParser.raw({ verify: rawBodySaver, type: '*/*' }));
 
+// TODO: allow logging settings to change
+var logStream = stream({ file: './test.log', size: '100k', keep: 3 });
+function logResponse(req, res){
+    logStream.write('CONNECT: ' + req.connection.remoteAddress + ' ' + (new Date().toLocaleString()) + ' "' + req.method + ' ' + req.url + '" ' + res.statusCode + '\n');
+    logStream.write('REQUEST HEADERS: ' + JSON.stringify(req.headers) + '\n');
+    logStream.write('REQUEST BODY: ' + req.rawBody + '\n');
+    logStream.write('RESPONSE HEADERS: ' + JSON.stringify(res._headers) + '\n');
+    logStream.write('RESPONSE BODY: ' + res.rawBody + '\n');
+}
+
 // store send data in body
 app.use(function (req, res, next) {
     var send = res.send;
@@ -57,6 +67,7 @@ app.use(function (req, res, next) {
         var body = string instanceof Buffer ? string.toString() : string;
         res.rawBody = body;
         send.call(this, body);
+        logResponse(req, res);
     };
     next();
 });
@@ -108,7 +119,7 @@ app.get('/', function (req, res)
     res.render('goals');
 });
 
-app.post('/clear', function (req, res, express_next)
+app.post('/clear', function (req, res)
 {
     if (!req.body || !req.body.data)
         return res.status(400).json({ error: 'Expected a JSON object with a "data" field.'});
@@ -116,11 +127,10 @@ app.post('/clear', function (req, res, express_next)
     rest.clear(function ()
     {
         res.sendStatus(200);
-        express_next();
     });
 });
 
-app.post('/back', function (req, res, express_next)
+app.post('/back', function (req, res)
 {
     if (!req.body || !req.body.data)
         return res.status(400).json({ error: 'Expected a JSON object with a "data" field.'});
@@ -128,7 +138,6 @@ app.post('/back', function (req, res, express_next)
     rest.back(function ()
     {
         res.sendStatus(200);
-        express_next();
     });
 });
 
@@ -168,12 +177,12 @@ app.get('/demo/getSolution', function (req, res)
     res.render('getSolution');
 });
 
-app.post('/eye', function (req, res, express_next)
+app.post('/eye', function (req, res)
 {
     var input = req.body.input || "";
     var goal = req.body.goal || "";
     var rest = new RESTdesc(cacheURL, input, goal);
-    handleNext(rest, req, res, express_next);
+    handleNext(rest, req, res);
 });
 
 function errorToJSON (error)
@@ -183,7 +192,7 @@ function errorToJSON (error)
 }
 
 app.post('/next', next);
-function next (req, res, express_next)
+function next (req, res)
 {
     if (!req.body || !req.body.goal)
         return res.status(400).json({ error: 'Expected an input body containing at least the goal.'});
@@ -205,12 +214,12 @@ function next (req, res, express_next)
             if (error)
                 res.status(400).json({ error: errorToJSON(error) });
             else
-                handleNext(rest, req, res, express_next);
+                handleNext(rest, req, res);
         }
     );
 }
 
-function handleNext (rest, req, res, express_next)
+function handleNext (rest, req, res)
 {
     rest.next(function (error, data)
     {
@@ -237,8 +246,6 @@ function handleNext (rest, req, res, express_next)
         {
             res.status(500).json({ error: "This shouldn't happen."});
         }
-
-        express_next();
     });
 }
 
@@ -307,19 +314,5 @@ app.get('/semantic-search-demo/entries', function (req, res)
 {
     res.json(entries);
 });
-
-// TODO: allow logging settings to change
-// needs to be last!
-var logStream = stream({ file: './test.log', size: '100k', keep: 3 });
-function modify(req, res, next){
-    logStream.write('CONNECT: ' + req.connection.remoteAddress + ' ' + (new Date().toLocaleString()) + ' "' + req.method + ' ' + req.url + '" ' + res.statusCode + '\n');
-    logStream.write('REQUEST HEADERS: ' + JSON.stringify(req.headers) + '\n');
-    logStream.write('REQUEST BODY: ' + req.rawBody + '\n');
-    logStream.write('RESPONSE HEADERS: ' + JSON.stringify(res._headers) + '\n');
-    logStream.write('RESPONSE BODY: ' + res.rawBody + '\n');
-
-    next();
-}
-app.use(modify);
 
 app.listen(port);
