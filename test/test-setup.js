@@ -3,6 +3,7 @@ var path = require('path');
 var url = require('url');
 var assert = require('assert');
 var nock = require('nock');
+var _ = require('lodash');
 
 function TEST ()
 {}
@@ -57,6 +58,9 @@ function startNock (method, stubs)
         .reply(200, function (uri, requestBody)
         {
             startNock(method, stubs);
+
+            if (_.isString(requestBody))
+                requestBody = JSON.parse(requestBody);
 
             uri = 'https://' + this.req.headers.host + uri;
 
