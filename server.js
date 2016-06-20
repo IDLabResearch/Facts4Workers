@@ -6,6 +6,7 @@ var _ = require('lodash');
 var RESTdesc = require('RESTdesc').RESTdesc;
 var serveIndex = require('serve-index');
 var fs = require('fs');
+var stream = require('logrotate-stream');
 
 var args = require('minimist')(process.argv.slice(2));
 if (args.h || args.help || args._.length > 0 || !_.isEmpty(_.omit(args, ['_', 'p', 'r'])))
@@ -37,10 +38,28 @@ app.set('views', relative('views'));
 app.use('/scripts/jquery.min.js', express.static(relative('node_modules/jquery/dist/jquery.min.js')));
 
 // parse post data
-app.use(bodyParser.json());       // to support JSON-encoded bodies
-app.use(bodyParser.urlencoded({   // to support URL-encoded bodies
+// http://stackoverflow.com/questions/18710225/node-js-get-raw-request-body-using-express
+var rawBodySaver = function (req, res, buf, encoding) {
+    if (buf && buf.length)
+        req.rawBody = buf.toString(encoding || 'utf8');
+};
+app.use(bodyParser.json({ verify: rawBodySaver }));       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({                           // to support URL-encoded bodies
+    verify:rawBodySaver,
     extended: true
 }));
+app.use(bodyParser.raw({ verify: rawBodySaver, type: '*/*' }));
+
+// store send data in body
+app.use(function (req, res, next) {
+    var send = res.send;
+    res.send = function (string) {
+        var body = string instanceof Buffer ? string.toString() : string;
+        res.rawBody = body;
+        send.call(this, body);
+    };
+    next();
+});
 
 // only accept these content types (http://stackoverflow.com/questions/23190659/expressjs-limit-acceptable-content-types)
 var RE_CONTYPE = /^application\/(?:x-www-form-urlencoded|json)(?:[\s;]|$)/i;
@@ -89,7 +108,7 @@ app.get('/', function (req, res)
     res.render('goals');
 });
 
-app.post('/clear', function (req, res)
+app.post('/clear', function (req, res, express_next)
 {
     if (!req.body || !req.body.data)
         return res.status(400).json({ error: 'Expected a JSON object with a "data" field.'});
@@ -97,10 +116,11 @@ app.post('/clear', function (req, res)
     rest.clear(function ()
     {
         res.sendStatus(200);
+        express_next();
     });
 });
 
-app.post('/back', function (req, res)
+app.post('/back', function (req, res, express_next)
 {
     if (!req.body || !req.body.data)
         return res.status(400).json({ error: 'Expected a JSON object with a "data" field.'});
@@ -108,6 +128,7 @@ app.post('/back', function (req, res)
     rest.back(function ()
     {
         res.sendStatus(200);
+        express_next();
     });
 });
 
@@ -147,12 +168,12 @@ app.get('/demo/getSolution', function (req, res)
     res.render('getSolution');
 });
 
-app.post('/eye', function (req, res)
+app.post('/eye', function (req, res, express_next)
 {
     var input = req.body.input || "";
     var goal = req.body.goal || "";
     var rest = new RESTdesc(cacheURL, input, goal);
-    handleNext(rest, req, res);
+    handleNext(rest, req, res, express_next);
 });
 
 function errorToJSON (error)
@@ -162,7 +183,7 @@ function errorToJSON (error)
 }
 
 app.post('/next', next);
-function next (req, res)
+function next (req, res, express_next)
 {
     if (!req.body || !req.body.goal)
         return res.status(400).json({ error: 'Expected an input body containing at least the goal.'});
@@ -184,19 +205,13 @@ function next (req, res)
             if (error)
                 res.status(400).json({ error: errorToJSON(error) });
             else
-                handleNext(rest, req, res);
+                handleNext(rest, req, res, express_next);
         }
     );
 }
 
-function handleNext (rest, req, res, count)
+function handleNext (rest, req, res, express_next)
 {
-    count = count || 0;
-
-    // TODO this is simply a check to make sure there is a problem in the demo causing us to accidently DOS an API.
-    if (count >= 5)
-        return res.format({ json:function () { res.send({status:'Too many automated API calls in a row. Aborting to prevent infinte loop.'}); } });
-
     rest.next(function (error, data)
     {
         if (error)
@@ -222,6 +237,8 @@ function handleNext (rest, req, res, count)
         {
             res.status(500).json({ error: "This shouldn't happen."});
         }
+
+        express_next();
     });
 }
 
@@ -275,8 +292,8 @@ app.post('/semantic-search', function (req, res)
     semanticsearch.more_like_this_extended(semanticsearch.IDX_NAME + (synonyms ? '_synonyms' : ''), id, fields, weights, function (error, response, body)
     {
         if (error)
-            return res.status(500).json(error);
-        if (body.hits)
+            res.status(500).json(error);
+        else if (body.hits)
             res.json(body.hits.hits);
         else
             res.json(body);
@@ -290,5 +307,19 @@ app.get('/semantic-search-demo/entries', function (req, res)
 {
     res.json(entries);
 });
+
+// TODO: allow logging settings to change
+// needs to be last!
+var logStream = stream({ file: './test.log', size: '100k', keep: 3 });
+function modify(req, res, next){
+    logStream.write('CONNECT: ' + req.connection.remoteAddress + ' ' + (new Date().toLocaleString()) + ' "' + req.method + ' ' + req.url + '" ' + res.statusCode + '\n');
+    logStream.write('REQUEST HEADERS: ' + JSON.stringify(req.headers) + '\n');
+    logStream.write('REQUEST BODY: ' + req.rawBody + '\n');
+    logStream.write('RESPONSE HEADERS: ' + JSON.stringify(res._headers) + '\n');
+    logStream.write('RESPONSE BODY: ' + res.rawBody + '\n');
+
+    next();
+}
+app.use(modify);
 
 app.listen(port);
