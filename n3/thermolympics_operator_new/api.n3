@@ -110,8 +110,9 @@
 #get defect id list
 {
     ?problem :occurredOnPartWithID ?p.
-    ?user auth:authenticated true.
+    ?token2 auth:valid true.
     ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
 }
 =>
 {
@@ -150,8 +151,9 @@
 #get solution id list
 {
     ?problem :defect ?id.
-    ?user auth:authenticated true.
+     ?token2 auth:valid true.
     ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
 }
 =>
 {
@@ -201,8 +203,9 @@
     ?operator :foundProblem ?problem;
 :operatorId ?id.
 
-    ?user auth:authenticated true.
+    ?token2 auth:valid true.
     ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
 }
 =>
 {
@@ -231,8 +234,9 @@
              :trySolution ?solution.
     ?solution :solutionId ?sid.
     ?solution :requiredSkillsKnown "no".
-    ?user auth:authenticated true.
+    ?token2 auth:valid true.
     ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
 }=>{
     _:request http:methodName "GET";
               tmpl:requestURI ("https://defects.tho.facts4.work/api/solutions/" ?sid "?access_token=" ?token);
@@ -290,8 +294,9 @@
     ?m :state "notstopped1".
     ?operator :foundProblem ?problem;
               :operatorId ?wid.
-    ?user auth:authenticated true.
+    ?token2 auth:valid true.
     ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
 }
 =>
 {
@@ -393,8 +398,9 @@
 # POST solution intent
 {
 
-    ?user auth:authenticated true.
+    ?token2 auth:valid true.
     ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
     ?operator :foundProblem ?problem;
               :operatorId ?wid.
     ?problem :trySolution ?solution.
@@ -465,8 +471,9 @@
 
 {
     
-   ?user auth:authenticated true.
+    ?token2 auth:valid true.
     ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
 ?solution :triedAndReported ?yes;
               :worked ?tf.
     ?yes e:whenGround "yes".
@@ -495,8 +502,9 @@
 
 
 {
-    ?user auth:authenticated true.
+      ?token2 auth:valid true.
     ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
     ?problem :occurredOnMachine ?machine.
     ?problem :defect ?defect.
     {?machine :state ?state2.} :eventId ?eid.

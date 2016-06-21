@@ -11,8 +11,9 @@
 
 # GET operators
 {
-    ?user auth:authenticated true.
+    ?token2 auth:valid true.
     ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
 
 }
 =>
@@ -28,8 +29,9 @@
 
 # GET machines
 {
-    ?user auth:authenticated true.
+    ?token2 auth:valid true.
     ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
 }
 =>
 {

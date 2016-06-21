@@ -62,8 +62,9 @@
     ?problem a teamleader:problem;
              teamleader:machine ?machine.
     ?machine teamleader:id ?machine_id.
-    ?user auth:authenticated true.
+    ?token2 auth:valid true.
     ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
 }
 =>
 {
@@ -120,8 +121,9 @@
     ?problem a teamleader:problem;
              teamleader:machine ?machine.
     ?machine teamleader:id ?machine_id.
-    ?user auth:authenticated true.
+    ?token2 auth:valid true.
     ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
 }
 =>
 {
@@ -169,8 +171,9 @@
     ?problem teamleader:event ?event.
     ?event teamleader:defect ?defect.
     ?defect teamleader:id ?defect_id.
-    ?user auth:authenticated true.
+    ?token2 auth:valid true.
     ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
 }
 =>
 {
@@ -187,8 +190,9 @@
     ?problem teamleader:event ?event.
     ?event teamleader:original ?original.
     ?original teamleader:id ?original_id.
-    ?user auth:authenticated true.
+    ?token2 auth:valid true.
     ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
 }
 =>
 {
@@ -206,8 +210,9 @@
                teamleader:event ?event.
     ?event teamleader:defect ?defect.
     ?defect teamleader:id ?defect_id.
-    ?user auth:authenticated true.
+    ?token2 auth:valid true.
     ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
 }
 =>
 {
@@ -392,8 +397,9 @@
     ?event teamleader:id ?event_id.
     ?operator teamleader:id ?operator_id.
     ?solution teamleader:id ?solution_id.
-    ?user auth:authenticated true.
+    ?token2 auth:valid true.
     ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
 }
 =>
 {
@@ -433,8 +439,9 @@
             teamleader:success ?success.
     ?success e:whenGround {?success log:equalTo true}.
     ?operator teamleader:id ?operator_id.
-    ?user auth:authenticated true.
+    ?token2 auth:valid true.
     ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
 }
 =>
 {
