@@ -179,7 +179,7 @@
 ?rest :ground true.
 }.
 
-#tests whater everything in a graphlist is ground
+#tests whether everything in a graphlist is ground
 {
 () :groundGL true.
 }<={

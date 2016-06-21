@@ -11,6 +11,7 @@
 @prefix prov: <http://www.w3.org/ns/prov#>.
 @prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
 @prefix math: <http://www.w3.org/2000/10/swap/math#>.
+@prefix pred: <http://www.w3.org/2007/rif-builtin-predicate#>.
 
 {
     log:Truth
@@ -39,9 +40,11 @@
     ?user a auth:user;
           auth:username ?name;
           auth:password ?password.
+    ?user util:onlyOnce auth:id. 
 }
 =>
 {
+    ?user util:onlyOnceTest auth:id.
     _:request http:methodName "POST";
               tmpl:requestURI ("https://auth.facts4.work/oauth/token");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
@@ -60,55 +63,65 @@
     }.
     ?user auth:access_token  _:access_token;
           auth:refresh_token [ auth:token _:refresh_token; prov:generatedAtTime _:created_at ].
-#quick fix
-      ?user auth:authenticated true.
+          
+          
+          
 }.
 
-#TODO: fix -- it caused an infinite loop
-#{
-#    ?user a auth:user;
-#          auth:refresh_token ?refresh_token.
-#    ?refresh_token auth:token ?token.
-#}
-#=>
-#{
-#    _:request http:methodName "POST";
-#              tmpl:requestURI ("https://auth.facts4.work/oauth/token");
-#              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
-#              http:body { rest:json
-#                  :refresh_token ?token;
-#                  :grant_type "refresh_token"
-#              };
-#              http:resp [
-#                  http:body _:body
-#              ].
-#    _:body rest:contains { rest:json
-#        :refresh_token _:refresh_token;
-#        :created_at    _:created_at
-#    }.
-#    ?user auth:refresh_token [ auth:token _:refresh_token; prov:generatedAtTime  _:created_at ].
-#}.
+
+{
+    ?user a auth:user;
+          auth:access_token ?at;
+          auth:refresh_token ?refresh_token.
+    ?refresh_token auth:token ?token.
+    ?token e:notLabel ?label.
+    ?token util:onlyOnce auth:re.
+    _:x e:findall (?at {?at auth:valid true. } ()) 
+}
+=>
+{
+    ?token util:onlyOnceTest auth:re.
+    _:request http:methodName "POST";
+              tmpl:requestURI ("https://auth.facts4.work/oauth/token");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              http:body { rest:json
+                  :refresh_token ?token;
+                  :grant_type "refresh_token"
+              };
+              http:resp [
+                  http:body _:body
+              ].
+    _:body rest:contains { rest:json
+        :refresh_token _:refresh_token;
+        :created_at    _:created_at
+    }.
+    ?user auth:refresh_token [ auth:token _:refresh_token; prov:generatedAtTime  _:created_at ].
+}.
 
 # TODO: insufficient if authentication over multiple APIs is required
-#{
-#    ?user a auth:user;
-#          auth:refresh_token ?token.
-#    ?token prov:generatedAtTime ?refresh_time.
-#    ?error a rest:error;
-#           http:statusCodeNumber 401;
-#           prov:generatedAtTime ?error_time.
-#    ?refresh e:whenGround { ?error_time math:lessThan ?refresh_time. }.
-#}
-#=>
-#{
-#   ?user auth:authenticated true.
-#}.
+{
+    ?user a auth:user;
+          auth:refresh_token ?token.
+    ?token prov:generatedAtTime ?refresh_time.
+    ?error a rest:error;
+           http:statusCodeNumber 401;
+           prov:generatedAtTime ?error_time.
+    ?refresh_time e:whenGround {(?refresh_time ?error_time) pred:dateTime-greater-than true. }.
+    _:x e:findall (?error2 {    ?error2 a rest:error;
+           http:statusCodeNumber 401;
+           prov:generatedAtTime ?error_time2. ( ?error_time2 ?refresh_time) pred:dateTime-greater-than true.     
+    }   ())
+}
+=>
+{
+   ?token auth:valid true.
+}.
 
-#{
-#    ?user a auth:user.
-#    _:x e:findall(?x { ?error a rest:error; http:statusCodeNumber 401} ()).
-#}
-#=>
-#{
-#   ?user auth:authenticated true.
-#}.
+{
+    ?user auth:refresh_token ?token.
+    _:x e:findall(?x { ?error a rest:error; http:statusCodeNumber 401} ()).
+}
+=>
+{
+   ?token auth:valid true.
+}.

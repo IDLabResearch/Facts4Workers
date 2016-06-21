@@ -15,8 +15,9 @@
 
 #get parts
 {
-    ?user auth:authenticated true.
+    ?token2 auth:valid true.
     ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
 #this is to make sure that the rule does not get fired again if I have a new access token. 
 #I think we could add that automatically to the rules so that the user does not need to do it
     ?user util:onlyOnce ofs:first. 
@@ -25,6 +26,7 @@
 {
     ?user util:onlyOnceTest ofs:first.
     _:request http:methodName "GET";
+              rest:check ?token2;
               tmpl:requestURI ("https://offsug.hir.facts4.work/api/v1/parts?access_token=" ?token);
               http:resp [
                   http:body _:list
@@ -63,8 +65,9 @@
 
 #get details for a specific part
 {
-    ?user auth:authenticated true.
+    ?token2 auth:valid true.
     ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
     ?user ofs:worksWith ?part.
     ?part ofs:partId ?id.
 #this is to make sure that the rule does not get fired again if I have a new access token. 
@@ -75,6 +78,7 @@
 {
     (?user ?id) util:onlyOnceTest ofs:rule2.
     _:request http:methodName "GET";
+              rest:check ?token2;
               tmpl:requestURI ("https://offsug.hir.facts4.work/api/v1/parts/" ?id "?access_token=" ?token);
               http:resp [
                   http:body _:list
@@ -92,6 +96,7 @@
 =>
 {
     _:request http:methodName "GET";
+              rest:check ?token2;
               tmpl:requestURI ("http://askTheWorker/getMeasurements");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {rest:json
@@ -146,8 +151,9 @@
    ?part ofs:measured ?measurement.
    ?measurement ofs:dimension ?n.
    ?measurement ofs:value  ?m.
-   ?user auth:authenticated true.
+   ?token2 auth:valid true.
    ?user auth:access_token ?token.
+   ?user auth:refresh_token ?token2.
    (?pid ?n ?m) util:onlyOnce ofs:rule3.
 }
 =>
@@ -196,6 +202,7 @@
                    ?list
     ).
    ?list util:ground true.
+   ?list log:notEqualTo ().
 }.
 
 #what we do here is really based on the datastructure we get we need another solution here

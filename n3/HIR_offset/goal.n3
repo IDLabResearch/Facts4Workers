@@ -13,10 +13,6 @@
 
 {?list ofs:displayedTo ?user.}=>{?list ofs:displayedTo ?user.}.
 
-#{?user :worksWith ?part.}=>{?user :worksWith ?part.}.
 
-#{   _:list a :partList.
-#}=> {:yes :it :works.}. 
-{?part ofs:results ?list.}=>{?part ofs:results ?list.}.
 
 
