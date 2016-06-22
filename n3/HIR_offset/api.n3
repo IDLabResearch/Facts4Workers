@@ -96,7 +96,6 @@
 =>
 {
     _:request http:methodName "GET";
-              rest:check ?token2;
               tmpl:requestURI ("http://askTheWorker/getMeasurements");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {rest:json
