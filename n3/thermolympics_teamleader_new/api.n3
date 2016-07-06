@@ -452,7 +452,7 @@
               http:body { rest:json
                   :name "Teamleader maintenance finished.";
                   :desc "Machine fixed.";
-                  :machine_state 1;
+                  :machine_state "3abbbd8c-bf6a-42c0-a096-2087d4b8e4a8";
                   :operator_id ?operator_id
               }.
     ?problem teamleader:state teamleader:resolved.
