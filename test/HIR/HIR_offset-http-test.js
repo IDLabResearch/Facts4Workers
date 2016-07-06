@@ -17,7 +17,6 @@ function assertContains(output)
 describe('HIR offset use case with HTTP calls', function ()
 {
     var key = 'TESTKEY';
-    var oldCall = null;
     var output = { data: key };
     var requestParams = {
         url: 'http://localhost:3000/next',
