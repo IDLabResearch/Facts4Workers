@@ -189,13 +189,18 @@ app.post('/eye', function (req, res)
 
 app.post('/debug', function (req, res)
 {
+    if (_.isString(app.DEBUG_DATA))
+        app.DEBUG_DATA = JSON.parse(app.DEBUG_DATA);
+
     var body = req.body;
     if (!body.json)
+    {
+        if (app.DEBUG_DATA)
+            new RESTdesc(null, null, null, app.DEBUG_DATA.data).clear();
         app.DEBUG_DATA = undefined;
+    }
 
     req.body.eye = app.DEBUG_DATA;
-    if (_.isString(req.body.eye))
-        req.body.eye = JSON.parse(req.body.eye);
 
     next(req, res);
 });
