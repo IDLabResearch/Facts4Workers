@@ -67,6 +67,7 @@ app.use(function (req, res, next) {
     res.send = function (string) {
         var body = string instanceof Buffer ? string.toString() : string;
         res.rawBody = body;
+        app.DEBUG_DATA = body;
         send.call(this, body);
         logResponse(req, res);
     };
@@ -186,6 +187,19 @@ app.post('/eye', function (req, res)
     handleNext(rest, req, res);
 });
 
+app.post('/debug', function (req, res)
+{
+    var body = req.body;
+    if (!body.json)
+        app.DEBUG_DATA = undefined;
+
+    req.body.eye = app.DEBUG_DATA;
+    if (_.isString(req.body.eye))
+        req.body.eye = JSON.parse(req.body.eye);
+
+    next(req, res);
+});
+
 function errorToJSON (error)
 {
     //return _.pick(error, Object.getOwnPropertyNames(error));
@@ -224,7 +238,7 @@ function next (req, res)
     catch (e)
     {
         // shit happens
-        return res.status(500).json({ error: errorToJSON(error) });
+        return res.status(500).json({ error: errorToJSON(e) });
     }
 }
 
