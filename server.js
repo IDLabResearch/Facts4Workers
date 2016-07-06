@@ -206,18 +206,26 @@ function next (req, res)
     if (req.body.eye)
         cacheKey = req.body.eye.data;
 
-    var rest = new RESTdesc(cacheURL, input, goal, cacheKey);
-    rest.handleUserResponse(
-        req.body.json,
-        req.body.eye,
-        function (error)
-        {
-            if (error)
-                res.status(400).json({ error: errorToJSON(error) });
-            else
-                handleNext(rest, req, res);
-        }
-    );
+    try
+    {
+        var rest = new RESTdesc(cacheURL, input, goal, cacheKey);
+        rest.handleUserResponse(
+            req.body.json,
+            req.body.eye,
+            function (error)
+            {
+                if (error)
+                    res.status(400).json({ error: errorToJSON(error) });
+                else
+                    handleNext(rest, req, res);
+            }
+        );
+    }
+    catch (e)
+    {
+        // shit happens
+        return res.status(500).json({ error: errorToJSON(error) });
+    }
 }
 
 function handleNext (rest, req, res)
@@ -264,7 +272,8 @@ try
         // need empty function to prevent error when connection is refused
     });
 }
-catch (e) {
+catch (e)
+{
     // if elasticsearch isn't running
     console.error(e);
 }
