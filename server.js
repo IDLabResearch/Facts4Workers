@@ -193,7 +193,7 @@ app.post('/debug', function (req, res)
         app.DEBUG_DATA = JSON.parse(app.DEBUG_DATA);
 
     var body = req.body;
-    if (!body.json)
+    if (body.reset)
     {
         if (app.DEBUG_DATA)
             new RESTdesc(null, null, null, app.DEBUG_DATA.data).clear();
