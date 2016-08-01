@@ -103,28 +103,15 @@
     ?user a auth:user;
           auth:refresh_token ?token.
     ?token prov:generatedAtTime ?refresh_time.
-    ?error a rest:error;
-           http:statusCodeNumber 401;
-           prov:generatedAtTime ?error_time.
-    ?refresh_time e:whenGround {(?refresh_time ?error_time) pred:dateTime-greater-than true. }.
-    _:x e:findall (?error2
-                   {
-                     ?error2 a rest:error;
-                             http:statusCodeNumber 401;
-                             prov:generatedAtTime ?error_time2.
-                     ( ?error_time2 ?refresh_time) pred:dateTime-greater-than true.
-                   }
-                   ()
-                  )
-}
-=>
-{
-   ?token auth:valid true.
-}.
 
-{
-    ?user auth:refresh_token ?token.
-    _:x e:findall(?x { ?error a rest:error; http:statusCodeNumber 401} ()).
+    _:x e:findall (1
+                   {
+                     ?request http:resp ?resp.
+                     ?resp prov:generatedAtTime ?time;
+                           http:statusCodeValue 401.
+                     (?time ?refresh_time) pred:dateTime-greater-than true.
+                   }
+                   ()).
 }
 =>
 {
