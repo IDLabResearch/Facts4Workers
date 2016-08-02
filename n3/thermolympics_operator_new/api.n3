@@ -1,6 +1,5 @@
 # http://docs.facts4.work
 
-@prefix : <http://f4w.restdesc.org/demo#>.
 @prefix operator: <http://f4w.restdesc.org/demo/operator#>.
 @prefix tho: <http://f4w.restdesc.org/demo/thermolympic#>.
 @prefix rest: <http://restdesc.org/rest#>.
@@ -15,9 +14,9 @@
 @prefix util: <http://f4w.restdesc.org/util#>.
 @prefix auth: <http://f4w.restdesc.org/demo/authorization#>.
 
-:thereIsADefect a operator:problem.
-:thereIsADefect :trySolution :firstTry.
-:firstTry :solutionNo 1.
+operator:thereIsADefect a operator:problem.
+operator:thereIsADefect operator:trySolution operator:firstTry.
+operator:firstTry operator:solutionNo 1.
 
 {
     ?list a tho:operatorList.
@@ -38,15 +37,15 @@
     _:body rest:contains { rest:json
         json:id _:n
     }.
-    _:newOperatorURI a :operator;
-        :operatorId _:n;
-        :foundProblem ?problem.
+    _:newOperatorURI a operator:operator;
+        operator:operatorId _:n;
+        operator:foundProblem ?problem.
 }.
 
 #get machine id
 {
     ?list a tho:machineList.
-    ?operator :foundProblem ?problem.
+    ?operator operator:foundProblem ?problem.
 }
 =>
 {
@@ -64,14 +63,14 @@
     _:body rest:contains { rest:json
         json:id _:n
     }.
-    _:newMachineURI a :machine;
-                    :machineID _:n.
-    ?problem :occurredOnMachine _:newMachineURI.
+    _:newMachineURI a operator:machine;
+                    operator:machineID _:n.
+    ?problem operator:occurredOnMachine _:newMachineURI.
 }.
 
 #get parts
 {
-    ?problem :occurredOnMachine ?machine. ?machine :machineID ?n.
+    ?problem operator:occurredOnMachine ?machine. ?machine operator:machineID ?n.
 }
 =>
 {
@@ -80,13 +79,13 @@
               http:resp [
                   http:body _:list
               ].
-    _:list a :partList.
+    _:list a operator:partList.
 }.
 
 # API USER 1 (ask for a part ID, might want to send all available part IDs but no API for this atm)
 {
-    ?problem :occurredOnMachine ?machine. ?machine :machineID ?n.
-    ?list a :partList.
+    ?problem operator:occurredOnMachine ?machine. ?machine operator:machineID ?n.
+    ?list a operator:partList.
 }
 =>
 {
@@ -104,13 +103,13 @@
     _:body rest:contains { rest:json
         json:id _:n
     }.
-    ?problem :occurredOnPartWithID _:n.
+    ?problem operator:occurredOnPartWithID _:n.
 }.
 
 #Problem is HERE
 #get defect id list
 {
-    ?problem :occurredOnPartWithID ?p.
+    ?problem operator:occurredOnPartWithID ?p.
     ?token2 auth:valid true.
     ?user auth:access_token ?token.
     ?user auth:refresh_token ?token2.
@@ -122,13 +121,13 @@
               http:resp [
                   http:body _:list2
               ].
-    _:list2 a :defectList.
+    _:list2 a operator:defectList.
 }.
 
 # API USER 2 (ask the user for a defect id)
 {
-    ?list a :defectList.
-    ?operator :foundProblem ?problem.
+    ?list a operator:defectList.
+    ?operator operator:foundProblem ?problem.
 }
 =>
 {
@@ -145,13 +144,13 @@
     _:body rest:contains { rest:json
         json:id _:d;
     }.
-    ?problem :defect _:d.
+    ?problem operator:defect _:d.
 }.
 
 
 #get solution id list
 {
-    ?problem :defect ?id.
+    ?problem operator:defect ?id.
      ?token2 auth:valid true.
     ?user auth:access_token ?token.
     ?user auth:refresh_token ?token2.
@@ -163,13 +162,13 @@
               http:resp [
                   http:body _:list
               ].
-    _:list a :solutionList.
+    _:list a operator:solutionList.
 }.
 
 #choose a solution
 {
-    ?list a :solutionList.
-    ?problem :trySolution ?sol.
+    ?list a operator:solutionList.
+    ?problem operator:trySolution ?sol.
 }=>{
     _:request http:methodName "GET";
               rest:check ?sol;
@@ -185,24 +184,24 @@
     _:body rest:contains { rest:json
         json:id _:d;
     }.
-    ?sol :solutionId _:d.
+    ?sol operator:solutionId _:d.
 }.
 
 #solution has no result yet?
 {
-    ?solution :solutionId ?id.
-    _:x e:findall (?solution {?solution :triedAndReported "yes"} ()).
+    ?solution operator:solutionId ?id.
+    _:x e:findall (?solution {?solution operator:triedAndReported "yes"} ()).
 }
 =>
 {
-    ?solution :triedAndReported "no"
+    ?solution operator:triedAndReported "no"
 }.
 
 
 #get operator skills
 {
-    ?operator :foundProblem ?problem;
-:operatorId ?id.
+    ?operator operator:foundProblem ?problem;
+              operator:operatorId ?id.
 
     ?token2 auth:valid true.
     ?user auth:access_token ?token.
@@ -221,20 +220,20 @@
         json:role _:role;
         json:skills { rest:json json:machine _:m; json:tool _:t; json:computer _:c }
     }.
-    ?operator :machineSkills _:m;
-        :toolSkills _:t;
-        :computerSkills _:c.
-    ?operator :name _:name;
-              :desc _:desc;
-              :role _:role.
+    ?operator operator:machineSkills _:m;
+        operator:toolSkills _:t;
+        operator:computerSkills _:c.
+    ?operator operator:name _:name;
+              operator:desc _:desc;
+              operator:role _:role.
 }.
 
 #get skills required for solution
 {
-    ?problem :defect ?id;
-             :trySolution ?solution.
-    ?solution :solutionId ?sid.
-    ?solution :requiredSkillsKnown "no".
+    ?problem operator:defect ?id;
+             operator:trySolution ?solution.
+    ?solution operator:solutionId ?sid.
+    ?solution operator:requiredSkillsKnown "no".
     ?token2 auth:valid true.
     ?user auth:access_token ?token.
     ?user auth:refresh_token ?token2.
@@ -250,51 +249,51 @@
         json:comment _:comment;
         json:skill { rest:json json:machine _:m; json:tool _:t; json:computer _:c }
     }.
-    ?solution :reqMachineSkills _:m;
-         :reqToolSkills _:t;
-         :reqComputerSkills _:c. #problem: sometimes no computer value
-    ?solution :requiredSkillsKnown ?yes. #please ground with "yes"
-    ?solution :name _:name;
-              :desc _:desc;
-              :comment _:comment.
+    ?solution operator:reqMachineSkills _:m;
+         operator:reqToolSkills _:t;
+         operator:reqComputerSkills _:c. #problem: sometimes no computer value
+    ?solution operator:requiredSkillsKnown ?yes. #please ground with "yes"
+    ?solution operator:name _:name;
+              operator:desc _:desc;
+              operator:comment _:comment.
 }.
 
 
 {
-    ?problem :defect ?id;
-             :trySolution ?solution.
-    ?solution :solutionId ?sid.
-    _:e e:findall(?s {?solution :requiredSkillsKnown "yes"} ()).
+    ?problem operator:defect ?id;
+             operator:trySolution ?solution.
+    ?solution operator:solutionId ?sid.
+    _:e e:findall(?s {?solution operator:requiredSkillsKnown "yes"} ()).
 }
 =>
 {
-    ?solution :requiredSkillsKnown "no".
+    ?solution operator:requiredSkillsKnown "no".
 }.
 
 
-{?solution :solutionId ?sid. ?solution2 :solutionId ?sid.
- ?solution :reqMachineSkills ?ms; :reqToolSkills ?t; :reqComputerSkills ?c. ?solution :requiredSkillsKnown "yes"
-}=>{?solution2 :reqMachineSkills ?ms; :reqToolSkills ?t; :reqComputerSkills ?c. ?solution2 :requiredSkillsKnown "yes"}.
+{?solution operator:solutionId ?sid. ?solution2 operator:solutionId ?sid.
+ ?solution operator:reqMachineSkills ?ms; operator:reqToolSkills ?t; operator:reqComputerSkills ?c. ?solution operator:requiredSkillsKnown "yes"
+}=>{?solution2 operator:reqMachineSkills ?ms; operator:reqToolSkills ?t; operator:reqComputerSkills ?c. ?solution2 operator:requiredSkillsKnown "yes"}.
 
 
 
 
 #has the machine been stopped?
-{?problem :occurredOnMachine ?m. _:l e:findall (?x {?m :state "stopped1"} ()) }=>{ ?m :state "notstopped1" }.
+{?problem operator:occurredOnMachine ?m. _:l e:findall (?x {?m operator:state "stopped1"} ()) }=>{ ?m operator:state "notstopped1" }.
 
 
-{?problem :occurredOnMachine ?m. _:l e:findall (?x {?m :state "stopped2"} ()) }=>{ ?m :state "notstopped2" }.
+{?problem operator:occurredOnMachine ?m. _:l e:findall (?x {?m operator:state "stopped2"} ()) }=>{ ?m operator:state "notstopped2" }.
 
 
 
 #stop the machine and get id
 {
-    ?problem :occurredOnMachine ?m;
-             :defect ?defectID.
-    ?m :machineID ?machineID.
-    ?m :state "notstopped1".
-    ?operator :foundProblem ?problem;
-              :operatorId ?wid.
+    ?problem operator:occurredOnMachine ?m;
+             operator:defect ?defectID.
+    ?m operator:machineID ?machineID.
+    ?m operator:state "notstopped1".
+    ?operator operator:foundProblem ?problem;
+              operator:operatorId ?wid.
     ?token2 auth:valid true.
     ?user auth:access_token ?token.
     ?user auth:refresh_token ?token2.
@@ -316,47 +315,47 @@
     _:body rest:contains { rest:json
         json:id _:e
     }.
-    {?m :state "stopped1".} :eventId _:e.
-    ?m :state _:stopped1. #please put "stopped1" here when grounding.
+    {?m operator:state "stopped1".} operator:eventId _:e.
+    ?m operator:state _:stopped1. #please put "stopped1" here when grounding.
 }.
 
 {
-    ?problem :trySolution ?solution.
-    ?solution :solutionId ?id.
-    _:e e:findall (?solution {?solution :tried "yes"} ()).
+    ?problem operator:trySolution ?solution.
+    ?solution operator:solutionId ?id.
+    _:e e:findall (?solution {?solution operator:tried "yes"} ()).
 }
 =>
 {
-    ?solution :tried "no"
+    ?solution operator:tried "no"
 }.
 
-{?solution :worked true.}=>{?solution :tried "yes"}.
-{?solution :worked false.}=>{?solution :tried "yes"}.
+{?solution operator:worked true.}=>{?solution operator:tried "yes"}.
+{?solution operator:worked false.}=>{?solution operator:tried "yes"}.
 
 # report the result
 {
-    ?operator :foundProblem ?problem;
-         :operatorId ?wid;
-         :machineSkills ?wm;
-         :toolSkills ?wt;
-         :computerSkills ?wc.
-    ?operator :name ?w_name;
-              :desc ?w_desc;
-              :role ?w_role.
+    ?operator operator:foundProblem ?problem;
+         operator:operatorId ?wid;
+         operator:machineSkills ?wm;
+         operator:toolSkills ?wt;
+         operator:computerSkills ?wc.
+    ?operator operator:name ?w_name;
+              operator:desc ?w_desc;
+              operator:role ?w_role.
 
-    ?problem :occurredOnMachine ?m.
-    ?m :machineID ?machineID.
-    {?m :state ?stopped1.} :eventId ?e.
-    ?problem :trySolution ?solution.
-    ?solution :solutionId ?id;
-              :tried "no";
-              :triedAndReported "no".
-    ?solution :reqMachineSkills ?ms;
-        :reqToolSkills ?t;
-        :reqComputerSkills ?c.
-    ?solution :name ?s_name;
-              :desc ?s_desc;
-              :comment ?s_comment.
+    ?problem operator:occurredOnMachine ?m.
+    ?m operator:machineID ?machineID.
+    {?m operator:state ?stopped1.} operator:eventId ?e.
+    ?problem operator:trySolution ?solution.
+    ?solution operator:solutionId ?id;
+              operator:tried "no";
+              operator:triedAndReported "no".
+    ?solution operator:reqMachineSkills ?ms;
+        operator:reqToolSkills ?t;
+        operator:reqComputerSkills ?c.
+    ?solution operator:name ?s_name;
+              operator:desc ?s_desc;
+              operator:comment ?s_comment.
 
     (?wm ?wt ?wc ?ms ?t ?c) e:whenGround {(?wm ?wt ?wc) util:match (?ms ?t ?c)}.
 }
@@ -389,8 +388,8 @@
         json:success _:yn;
         json:comment _:comment
     }.
-    ?solution :worked _:yn;
-              :report_comment _:comment.
+    ?solution operator:worked _:yn;
+              operator:report_comment _:comment.
 }.
 
 
@@ -402,15 +401,15 @@
     ?token2 auth:valid true.
     ?user auth:access_token ?token.
     ?user auth:refresh_token ?token2.
-    ?operator :foundProblem ?problem;
-              :operatorId ?wid.
-    ?problem :trySolution ?solution.
-    ?problem :occurredOnMachine ?machine.
-    ?solution :solutionId ?sid;
+    ?operator operator:foundProblem ?problem;
+              operator:operatorId ?wid.
+    ?problem operator:trySolution ?solution.
+    ?problem operator:occurredOnMachine ?machine.
+    ?solution operator:solutionId ?sid;
 
-              :worked ?tf;
-              :report_comment ?comment.
-    {?machine :state ?stopped.} :eventId ?eid.
+              operator:worked ?tf;
+              operator:report_comment ?comment.
+    {?machine operator:state ?stopped.} operator:eventId ?eid.
 
 }
 =>
@@ -425,47 +424,47 @@
                     json:success ?tf;
                     json:comment ?comment
               }.
-    ?solution :triedAndReported _:yes. #put "yes"
+    ?solution operator:triedAndReported _:yes. #put "yes"
     #this triple is to make the rule get fired when using existing path
-    ?solution :new :triple.
+    ?solution operator:new operator:triple.
 }.
 
 
 
 
 {
-?solution :new :triple.
-?problem :trySolution ?solution.
- ?solution :solutionId ?sid;
-           :worked false.
+?solution operator:new operator:triple.
+?problem operator:trySolution ?solution.
+ ?solution operator:solutionId ?sid;
+           operator:worked false.
 
 }=>{
-    ?solution :tryNewSolution true.
+    ?solution operator:tryNewSolution true.
 }.
 
 
 
 
 {
-    ?problem :trySolution ?solution.
-    ?solution :tryNewSolution true.
-    _:l e:findall (?s {?solution :nextTry ?s.} ()).
-    ?solution :solutionNo ?n.
+    ?problem operator:trySolution ?solution.
+    ?solution operator:tryNewSolution true.
+    _:l e:findall (?s {?solution operator:nextTry ?s.} ()).
+    ?solution operator:solutionNo ?n.
     (1 ?n) math:sum ?m.
     ("solution" ?m) string:concatenation ?w.
 
-    ?solution :name ?s_name;
-              :desc ?s_desc;
-              :comment ?s_comment.
+    ?solution operator:name ?s_name;
+              operator:desc ?s_desc;
+              operator:comment ?s_comment.
 }
 =>
 {
-    ?solution :nextTry ?w.
-    ?problem :trySolution ?w.
-    ?w :solutionNo ?m.
-    ?w :name ?s_name;
-       :desc ?s_desc;
-       :comment ?s_comment.
+    ?solution operator:nextTry ?w.
+    ?problem operator:trySolution ?w.
+    ?w operator:solutionNo ?m.
+    ?w operator:name ?s_name;
+       operator:desc ?s_desc;
+       operator:comment ?s_comment.
 }.
 
 
@@ -475,15 +474,15 @@
     ?token2 auth:valid true.
     ?user auth:access_token ?token.
     ?user auth:refresh_token ?token2.
-?solution :triedAndReported ?yes;
-              :worked ?tf.
+?solution operator:triedAndReported ?yes;
+              operator:worked ?tf.
     ?yes e:whenGround "yes".
     ?tf e:whenGround {?tf log:equalTo true}.
-    ?problem :occurredOnMachine ?machine.
-    ?machine :machineID ?mid.
-     ?problem        :trySolution ?solution.
-   ?operator :foundProblem ?problem;
-              :operatorId ?wid.
+    ?problem operator:occurredOnMachine ?machine.
+    ?machine operator:machineID ?mid.
+     ?problem        operator:trySolution ?solution.
+   ?operator operator:foundProblem ?problem;
+              operator:operatorId ?wid.
 }
 =>
 {
@@ -497,8 +496,8 @@
                     json:operator_id ?wid;
                     json:machine_state "fb71a95f-8068-4b92-964c-9b5720efda54"
               }.
-     ?machine :newState _:state.
-    ?problem :finalState :solved.
+     ?machine operator:newState _:state.
+    ?problem operator:finalState operator:solved.
 }.
 
 
@@ -506,24 +505,24 @@
       ?token2 auth:valid true.
     ?user auth:access_token ?token.
     ?user auth:refresh_token ?token2.
-    ?problem :occurredOnMachine ?machine.
-    ?problem :defect ?defect.
-    {?machine :state ?state2.} :eventId ?eid.
+    ?problem operator:occurredOnMachine ?machine.
+    ?problem operator:defect ?defect.
+    {?machine operator:state ?state2.} operator:eventId ?eid.
     ?state2 e:whenGround "stopped1".
     ?machine #:state "notstopped2";
-             :machineID ?mid.
-    ?operator :foundProblem ?problem;
-         :operatorId ?wid;
-         :machineSkills ?wm;
-         :toolSkills ?wt;
-         :computerSkills ?wc.
+             operator:machineID ?mid.
+    ?operator operator:foundProblem ?problem;
+         operator:operatorId ?wid;
+         operator:machineSkills ?wm;
+         operator:toolSkills ?wt;
+         operator:computerSkills ?wc.
 
-    ?problem :trySolution ?solution.
-    ?solution :solutionId ?id;
-              :triedAndReported "no".
-    ?solution :reqMachineSkills ?m;
-        :reqToolSkills ?t;
-        :reqComputerSkills ?c.
+    ?problem operator:trySolution ?solution.
+    ?solution operator:solutionId ?id;
+              operator:triedAndReported "no".
+    ?solution operator:reqMachineSkills ?m;
+        operator:reqToolSkills ?t;
+        operator:reqComputerSkills ?c.
 
     (?wm ?wt ?wc ?m ?t ?c) e:whenGround {(?wm ?wt ?wc) util:noMatch (?m ?t ?c)}.
 }
@@ -547,17 +546,17 @@
         json:id _:e
     }.
 
-    {?machine :state _:stopped2.} :eventId _:e.
-    ?machine :state _:stopped2. #please put "stopped2" here when grounding.
-    ?problem :finalState :sentToTeamleader.
-     ?machine :stateTL _:tl.
+    {?machine operator:state _:stopped2.} operator:eventId _:e.
+    ?machine operator:state _:stopped2. #please put "stopped2" here when grounding.
+    ?problem operator:finalState operator:sentToTeamleader.
+     ?machine operator:stateTL _:tl.
 }.
 
 {
- ?problem :finalState :solved.
-?problem :occurredOnMachine ?m.
-?m :machineID ?mid.
-?m :newState ?state.
+ ?problem operator:finalState operator:solved.
+?problem operator:occurredOnMachine ?m.
+?m operator:machineID ?mid.
+?m operator:newState ?state.
 }=>{
 _:request http:methodName "GET";
 tmpl:requestURI ("http://askTheWorker/YouAreDone");
@@ -566,14 +565,14 @@ tmpl:requestURI ("http://askTheWorker/YouAreDone");
                   json:message "Problem Solved."
               }.
 
-?problem :tellTheWorker "solved".
+?problem operator:tellTheWorker "solved".
 }.
 
 
 {
-?problem :finalState :sentToTeamleader.
-?problem :occurredOnMachine ?m.
-?m :stateTL ?tl.
+?problem operator:finalState operator:sentToTeamleader.
+?problem operator:occurredOnMachine ?m.
+?m operator:stateTL ?tl.
 }=>{
 _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/SentToTeamLeader");
@@ -582,7 +581,7 @@ _:request http:methodName "GET";
                   json:message "Teamleader was notified."
               }.
 
-?problem :tellTheWorker ?stopped2.
+?problem operator:tellTheWorker ?stopped2.
 }.
 
 
