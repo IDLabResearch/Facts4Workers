@@ -62,12 +62,18 @@
         json:created_at    _:created_at
     }.
     ?user auth:access_token  _:access_token;
-          auth:refresh_token [ auth:token _:refresh_token; prov:generatedAtTime _:created_at ].
-          
-          
-          
+          auth:refresh_token [ auth:token _:refresh_token; auth:created_at _:created_at ].
 }.
 
+
+{
+    ?x prov:generatedAtTime ?dateTime.
+}
+<=
+{
+    ?x auth:created_at ?unix_time.
+    ?unix_time e:whenGround { (?LV <http://www.w3.org/2001/XMLSchema#dateTime>) log:dtlit ?unix_time, ?dateTime. }.
+}.
 
 {
     ?user a auth:user;
