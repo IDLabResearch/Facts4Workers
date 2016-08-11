@@ -1,5 +1,7 @@
 
+@prefix : <http://f4w.restdesc.org/demo#>.
 @prefix tho: <http://f4w.restdesc.org/demo/thermolympic#>.
+@prefix rest: <http://f4w.restdesc.org/demo#>.
 @prefix http: <http://www.w3.org/2011/http#>.
 @prefix tmpl: <http://purl.org/restdesc/http-template#>.
 @prefix log: <http://www.w3.org/2000/10/swap/log#>.

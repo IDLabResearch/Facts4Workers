@@ -1,9 +1,9 @@
-# http://docs.facts4.work
+# https://thermolympic-demo.herokuapp.com/api_doc/
 
+@prefix : <http://f4w.restdesc.org/demo#>.
 @prefix operator: <http://f4w.restdesc.org/demo/operator#>.
 @prefix tho: <http://f4w.restdesc.org/demo/thermolympic#>.
-@prefix rest: <http://restdesc.org/rest#>.
-@prefix json: <http://restdesc.org/json#>.
+@prefix rest: <http://f4w.restdesc.org/demo#>.  # <http://f4w.restdesc.org/restdesc#>.
 @prefix http: <http://www.w3.org/2011/http#>.
 @prefix tmpl: <http://purl.org/restdesc/http-template#>.
 @prefix log: <http://www.w3.org/2000/10/swap/log#>.
@@ -14,9 +14,9 @@
 @prefix util: <http://f4w.restdesc.org/util#>.
 @prefix auth: <http://f4w.restdesc.org/demo/authorization#>.
 
-operator:thereIsADefect a operator:problem.
-operator:thereIsADefect operator:trySolution operator:firstTry.
-operator:firstTry operator:solutionNo 1.
+:thereIsADefect a operator:problem.
+:thereIsADefect :trySolution :firstTry.
+:firstTry :solutionNo 1.
 
 {
     ?list a tho:operatorList.
@@ -28,24 +28,24 @@ operator:firstTry operator:solutionNo 1.
               tmpl:requestURI ("http://askTheWorker/getOperatorID");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body { rest:json
-                  json:message "Who are you? Please send your id from the list.";
-                  json:sendList ?list
+                  :message "Who are you? Please send your id from the list.";
+                  :sendList ?list
               };
               http:resp [
                   http:body _:body
               ].
     _:body rest:contains { rest:json
-        json:id _:n
+        :id _:n
     }.
-    _:newOperatorURI a operator:operator;
-        operator:operatorId _:n;
-        operator:foundProblem ?problem.
+    _:newOperatorURI a :operator;
+        :operatorId _:n;
+        :foundProblem ?problem.
 }.
 
 #get machine id
 {
     ?list a tho:machineList.
-    ?operator operator:foundProblem ?problem.
+    ?operator :foundProblem ?problem.
 }
 =>
 {
@@ -54,40 +54,26 @@ operator:firstTry operator:solutionNo 1.
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               rest:check ?operator;
               http:body { rest:json
-                  json:message "On wich machine are you working?";
-                  json:sendList ?list
+                  :message "On wich machine are you working?";
+                  :sendList ?list
               };
               http:resp [
                   http:body _:body
               ].
-    _:body rest:contains { rest:json
-        json:id _:n
+    _:body rest:contains {
+        _:operator  :id _:n
     }.
-    _:newMachineURI a operator:machine;
-                    operator:machineID _:n.
-    ?problem operator:occurredOnMachine _:newMachineURI.
+    _:newMachineURI a :machine;
+                    :machineID _:n.
+    ?problem :occurredOnMachine _:newMachineURI.
 }.
 
-
-#get parts
-{
-    ?problem operator:occurredOnMachine ?machine. ?machine operator:machineID ?n.
-}
-=>
-{
-    _:request http:methodName "GET";
-              tmpl:requestURI ("https://machinesandparts.surge.sh/api/parts.json");
-              http:resp [
-                  http:body _:list
-              ].
-    _:list a operator:partList.
-}.
 
 
 # API USER 1 (ask for a part ID, might want to send all available part IDs but no API for this atm)
 {
-    ?problem operator:occurredOnMachine ?machine. ?machine operator:machineID ?n.
-    ?list a operator:partList.
+    ?problem :occurredOnMachine ?machine. ?machine :machineID ?n.
+    ?list a :partList.
 }
 =>
 {
@@ -95,23 +81,23 @@ operator:firstTry operator:solutionNo 1.
               tmpl:requestURI ("http://askTheWorker/getPartID");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body { rest:json
-                  json:message "Please provide the ID of the part on which the problem occurred.";
-                  json:machine ?n;
-                  json:parts ?list
+                  :message "Please provide the ID of the part on which the problem occurred.";
+                  :machine ?n;
+                  :parts ?list
               };
               http:resp [
                   http:body _:body
               ].
     _:body rest:contains { rest:json
-        json:id _:n
+        :id _:n
     }.
-    ?problem operator:occurredOnPartWithID _:n.
+    ?problem :occurredOnPartWithID _:n.
 }.
 
 #Problem is HERE
 #get defect id list
 {
-    ?problem operator:occurredOnPartWithID ?p.
+    ?problem :occurredOnPartWithID ?p.
     ?token2 auth:valid true.
     ?user auth:access_token ?token.
     ?user auth:refresh_token ?token2.
@@ -123,13 +109,13 @@ operator:firstTry operator:solutionNo 1.
               http:resp [
                   http:body _:list2
               ].
-    _:list2 a operator:defectList.
+    _:list2 a :defectList.
 }.
 
 # API USER 2 (ask the user for a defect id)
 {
-    ?list a operator:defectList.
-    ?operator operator:foundProblem ?problem.
+    ?list a :defectList.
+    ?operator :foundProblem ?problem.
 }
 =>
 {
@@ -137,22 +123,22 @@ operator:firstTry operator:solutionNo 1.
               tmpl:requestURI ("http://askTheWorker/getDefectID");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body { rest:json
-                  json:message "Please report the defect.";
-                  json:sendList ?list
+                  :message "Please report the defect.";
+                  :sendList ?list
               };
               http:resp [
                   http:body _:body
               ].
     _:body rest:contains { rest:json
-        json:id _:d;
+        :id _:d;
     }.
-    ?problem operator:defect _:d.
+    ?problem :defect _:d.
 }.
 
 
 #get solution id list
 {
-    ?problem operator:defect ?id.
+    ?problem :defect ?id.
      ?token2 auth:valid true.
     ?user auth:access_token ?token.
     ?user auth:refresh_token ?token2.
@@ -164,46 +150,46 @@ operator:firstTry operator:solutionNo 1.
               http:resp [
                   http:body _:list
               ].
-    _:list a operator:solutionList.
+    _:list a :solutionList.
 }.
 
 #choose a solution
 {
-    ?list a operator:solutionList.
-    ?problem operator:trySolution ?sol.
+    ?list a :solutionList.
+    ?problem :trySolution ?sol.
 }=>{
     _:request http:methodName "GET";
               rest:check ?sol;
               tmpl:requestURI ("http://askTheWorker/getSolutionID");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body { rest:json
-                  json:message "Choose one of the following solutions.";
-                  json:sendList ?list
+                  :message "Choose one of the following solutions.";
+                  :sendList ?list
               };
               http:resp [
                   http:body _:body
               ].
     _:body rest:contains { rest:json
-        json:id _:d;
+        :id _:d;
     }.
-    ?sol operator:solutionId _:d.
+    ?sol :solutionId _:d.
 }.
 
 #solution has no result yet?
 {
-    ?solution operator:solutionId ?id.
-    _:x e:findall (?solution {?solution operator:triedAndReported "yes"} ()).
+    ?solution :solutionId ?id.
+    _:x e:findall (?solution {?solution :triedAndReported "yes"} ()).
 }
 =>
 {
-    ?solution operator:triedAndReported "no"
+    ?solution :triedAndReported "no"
 }.
 
 
 #get operator skills
 {
-    ?operator operator:foundProblem ?problem;
-              operator:operatorId ?id.
+    ?operator :foundProblem ?problem;
+:operatorId ?id.
 
     ?token2 auth:valid true.
     ?user auth:access_token ?token.
@@ -217,25 +203,25 @@ operator:firstTry operator:solutionNo 1.
                   http:body _:body
               ].
     _:body rest:contains { rest:json
-        json:name _:name;
-        json:desc _:desc;
-        json:role _:role;
-        json:skills { rest:json json:machine _:m; json:tool _:t; json:computer _:c }
+        :name _:name;
+        :desc _:desc;
+        :role _:role;
+        :skills { rest:json :machine _:m; :tool _:t; :computer _:c }
     }.
-    ?operator operator:machineSkills _:m;
-        operator:toolSkills _:t;
-        operator:computerSkills _:c.
-    ?operator operator:name _:name;
-              operator:desc _:desc;
-              operator:role _:role.
+    ?operator :machineSkills _:m;
+        :toolSkills _:t;
+        :computerSkills _:c.
+    ?operator :name _:name;
+              :desc _:desc;
+              :role _:role.
 }.
 
 #get skills required for solution
 {
-    ?problem operator:defect ?id;
-             operator:trySolution ?solution.
-    ?solution operator:solutionId ?sid.
-    ?solution operator:requiredSkillsKnown "no".
+    ?problem :defect ?id;
+             :trySolution ?solution.
+    ?solution :solutionId ?sid.
+    ?solution :requiredSkillsKnown "no".
     ?token2 auth:valid true.
     ?user auth:access_token ?token.
     ?user auth:refresh_token ?token2.
@@ -246,56 +232,56 @@ operator:firstTry operator:solutionNo 1.
                   http:body _:body
               ].
     _:body rest:contains { rest:json
-        json:name _:name;
-        json:desc _:desc;
-        json:comment _:comment;
-        json:skill { rest:json json:machine _:m; json:tool _:t; json:computer _:c }
+        :name _:name;
+        :desc _:desc;
+        :comment _:comment;
+        :skill { rest:json :machine _:m; :tool _:t; :computer _:c }
     }.
-    ?solution operator:reqMachineSkills _:m;
-         operator:reqToolSkills _:t;
-         operator:reqComputerSkills _:c. #problem: sometimes no computer value
-    ?solution operator:requiredSkillsKnown ?yes. #please ground with "yes"
-    ?solution operator:name _:name;
-              operator:desc _:desc;
-              operator:comment _:comment.
+    ?solution :reqMachineSkills _:m;
+         :reqToolSkills _:t;
+         :reqComputerSkills _:c. #problem: sometimes no computer value
+    ?solution :requiredSkillsKnown ?yes. #please ground with "yes"
+    ?solution :name _:name;
+              :desc _:desc;
+              :comment _:comment.
 }.
 
 
 {
-    ?problem operator:defect ?id;
-             operator:trySolution ?solution.
-    ?solution operator:solutionId ?sid.
-    _:e e:findall(?s {?solution operator:requiredSkillsKnown "yes"} ()).
+    ?problem :defect ?id;
+             :trySolution ?solution.
+    ?solution :solutionId ?sid.
+    _:e e:findall(?s {?solution :requiredSkillsKnown "yes"} ()).
 }
 =>
 {
-    ?solution operator:requiredSkillsKnown "no".
+    ?solution :requiredSkillsKnown "no".
 }.
 
 
-{?solution operator:solutionId ?sid. ?solution2 operator:solutionId ?sid.
- ?solution operator:reqMachineSkills ?ms; operator:reqToolSkills ?t; operator:reqComputerSkills ?c. ?solution operator:requiredSkillsKnown "yes"
-}=>{?solution2 operator:reqMachineSkills ?ms; operator:reqToolSkills ?t; operator:reqComputerSkills ?c. ?solution2 operator:requiredSkillsKnown "yes"}.
+{?solution :solutionId ?sid. ?solution2 :solutionId ?sid.
+ ?solution :reqMachineSkills ?ms; :reqToolSkills ?t; :reqComputerSkills ?c. ?solution :requiredSkillsKnown "yes"
+}=>{?solution2 :reqMachineSkills ?ms; :reqToolSkills ?t; :reqComputerSkills ?c. ?solution2 :requiredSkillsKnown "yes"}.
 
 
 
 
 #has the machine been stopped?
-{?problem operator:occurredOnMachine ?m. _:l e:findall (?x {?m operator:state "stopped1"} ()) }=>{ ?m operator:state "notstopped1" }.
+{?problem :occurredOnMachine ?m. _:l e:findall (?x {?m :state "stopped1"} ()) }=>{ ?m :state "notstopped1" }.
 
 
-{?problem operator:occurredOnMachine ?m. _:l e:findall (?x {?m operator:state "stopped2"} ()) }=>{ ?m operator:state "notstopped2" }.
+{?problem :occurredOnMachine ?m. _:l e:findall (?x {?m :state "stopped2"} ()) }=>{ ?m :state "notstopped2" }.
 
 
 
 #stop the machine and get id
 {
-    ?problem operator:occurredOnMachine ?m;
-             operator:defect ?defectID.
-    ?m operator:machineID ?machineID.
-    ?m operator:state "notstopped1".
-    ?operator operator:foundProblem ?problem;
-              operator:operatorId ?wid.
+    ?problem :occurredOnMachine ?m;
+             :defect ?defectID.
+    ?m :machineID ?machineID.
+    ?m :state "notstopped1".
+    ?operator :foundProblem ?problem;
+              :operatorId ?wid.
     ?token2 auth:valid true.
     ?user auth:access_token ?token.
     ?user auth:refresh_token ?token2.
@@ -305,59 +291,59 @@ operator:firstTry operator:solutionNo 1.
     _:request http:methodName "POST";
               tmpl:requestURI ("https://mstate.tho.facts4.work/api/machines/" ?machineID "/events?access_token=" ?token);
               http:body { rest:json
-                  json:name "Stop the machine";
-                  json:desc "Stoping the machine after a defect was spotted!";
-                  json:machine_state "5e41b90e-77b6-4810-99ff-9df87d709801";
-                  json:operator_id ?wid;
-                  json:optional { rest:json json:defect_id ?defectID }
+                  :name "Stop the machine";
+                  :desc "Stoping the machine after a defect was spotted!";
+                  :machine_state "5e41b90e-77b6-4810-99ff-9df87d709801";
+                  :operator_id ?wid;
+                  :optional { rest:json :defect_id ?defectID }
               };
               http:resp [
                   http:body _:body
               ].
     _:body rest:contains { rest:json
-        json:id _:e
+        :id _:e
     }.
-    {?m operator:state "stopped1".} operator:eventId _:e.
-    ?m operator:state _:stopped1. #please put "stopped1" here when grounding.
+    {?m :state "stopped1".} :eventId _:e.
+    ?m :state _:stopped1. #please put "stopped1" here when grounding.
 }.
 
 {
-    ?problem operator:trySolution ?solution.
-    ?solution operator:solutionId ?id.
-    _:e e:findall (?solution {?solution operator:tried "yes"} ()).
+    ?problem :trySolution ?solution.
+    ?solution :solutionId ?id.
+    _:e e:findall (?solution {?solution :tried "yes"} ()).
 }
 =>
 {
-    ?solution operator:tried "no"
+    ?solution :tried "no"
 }.
 
-{?solution operator:worked true.}=>{?solution operator:tried "yes"}.
-{?solution operator:worked false.}=>{?solution operator:tried "yes"}.
+{?solution :worked true.}=>{?solution :tried "yes"}.
+{?solution :worked false.}=>{?solution :tried "yes"}.
 
 # report the result
 {
-    ?operator operator:foundProblem ?problem;
-         operator:operatorId ?wid;
-         operator:machineSkills ?wm;
-         operator:toolSkills ?wt;
-         operator:computerSkills ?wc.
-    ?operator operator:name ?w_name;
-              operator:desc ?w_desc;
-              operator:role ?w_role.
+    ?operator :foundProblem ?problem;
+         :operatorId ?wid;
+         :machineSkills ?wm;
+         :toolSkills ?wt;
+         :computerSkills ?wc.
+    ?operator :name ?w_name;
+              :desc ?w_desc;
+              :role ?w_role.
 
-    ?problem operator:occurredOnMachine ?m.
-    ?m operator:machineID ?machineID.
-    {?m operator:state ?stopped1.} operator:eventId ?e.
-    ?problem operator:trySolution ?solution.
-    ?solution operator:solutionId ?id;
-              operator:tried "no";
-              operator:triedAndReported "no".
-    ?solution operator:reqMachineSkills ?ms;
-        operator:reqToolSkills ?t;
-        operator:reqComputerSkills ?c.
-    ?solution operator:name ?s_name;
-              operator:desc ?s_desc;
-              operator:comment ?s_comment.
+    ?problem :occurredOnMachine ?m.
+    ?m :machineID ?machineID.
+    {?m :state ?stopped1.} :eventId ?e.
+    ?problem :trySolution ?solution.
+    ?solution :solutionId ?id;
+              :tried "no";
+              :triedAndReported "no".
+    ?solution :reqMachineSkills ?ms;
+        :reqToolSkills ?t;
+        :reqComputerSkills ?c.
+    ?solution :name ?s_name;
+              :desc ?s_desc;
+              :comment ?s_comment.
 
     (?wm ?wt ?wc ?ms ?t ?c) e:whenGround {(?wm ?wt ?wc) util:match (?ms ?t ?c)}.
 }
@@ -367,31 +353,31 @@ operator:firstTry operator:solutionNo 1.
               tmpl:requestURI ("http://askTheWorker/getReport");
               rest:check (?wm ?ms);
               http:body { rest:json
-                  json:message "Report the outcome.";
-                  json:solution { rest:json
-                      json:id ?id;
-                      json:name ?s_name;
-                      json:desc ?s_desc;
-                      json:comment ?s_comment
+                  :message "Report the outcome.";
+                  :solution { rest:json
+                      :id ?id;
+                      :name ?s_name;
+                      :desc ?s_desc;
+                      :comment ?s_comment
                   };
-                  json:operator { rest:json
-                      json:id ?wid;
-                      json:name ?w_name;
-                      json:desc ?w_desc;
-                      json:role ?w_role
+                  :operator { rest:json
+                      :id ?wid;
+                      :name ?w_name;
+                      :desc ?w_desc;
+                      :role ?w_role
                   };
-                  json:machineId ?machineID;
-                  json:eventId ?e
+                  :machineId ?machineID;
+                  :eventId ?e
               };
               http:resp [
                   http:body _:body
               ].
     _:body rest:contains { rest:json
-        json:success _:yn;
-        json:comment _:comment
+        :success _:yn;
+        :comment _:comment
     }.
-    ?solution operator:worked _:yn;
-              operator:report_comment _:comment.
+    ?solution :worked _:yn;
+              :report_comment _:comment.
 }.
 
 
@@ -403,15 +389,15 @@ operator:firstTry operator:solutionNo 1.
     ?token2 auth:valid true.
     ?user auth:access_token ?token.
     ?user auth:refresh_token ?token2.
-    ?operator operator:foundProblem ?problem;
-              operator:operatorId ?wid.
-    ?problem operator:trySolution ?solution.
-    ?problem operator:occurredOnMachine ?machine.
-    ?solution operator:solutionId ?sid;
+    ?operator :foundProblem ?problem;
+              :operatorId ?wid.
+    ?problem :trySolution ?solution.
+    ?problem :occurredOnMachine ?machine.
+    ?solution :solutionId ?sid;
 
-              operator:worked ?tf;
-              operator:report_comment ?comment.
-    {?machine operator:state ?stopped.} operator:eventId ?eid.
+              :worked ?tf;
+              :report_comment ?comment.
+    {?machine :state ?stopped.} :eventId ?eid.
 
 }
 =>
@@ -420,53 +406,53 @@ operator:firstTry operator:solutionNo 1.
               tmpl:requestURI ("https://defects.tho.facts4.work/api/reports?access_token=" ?token);
               http:body { rest:json
                      #I am not sure, but maybe this answers to the machine stopped event?
-                    json:event_id ?eid;
-                    json:operator_id ?wid;
-                    json:solution_id ?sid;
-                    json:success ?tf;
-                    json:comment ?comment
+                    :event_id ?eid;
+                    :operator_id ?wid;
+                    :solution_id ?sid;
+                    :success ?tf;
+                    :comment ?comment
               }.
-    ?solution operator:triedAndReported _:yes. #put "yes"
+    ?solution :triedAndReported _:yes. #put "yes"
     #this triple is to make the rule get fired when using existing path
-    ?solution operator:new operator:triple.
+    ?solution :new :triple.
 }.
 
 
 
 
 {
-?solution operator:new operator:triple.
-?problem operator:trySolution ?solution.
- ?solution operator:solutionId ?sid;
-           operator:worked false.
+?solution :new :triple.
+?problem :trySolution ?solution.
+ ?solution :solutionId ?sid;
+           :worked false.
 
 }=>{
-    ?solution operator:tryNewSolution true.
+    ?solution :tryNewSolution true.
 }.
 
 
 
 
 {
-    ?problem operator:trySolution ?solution.
-    ?solution operator:tryNewSolution true.
-    _:l e:findall (?s {?solution operator:nextTry ?s.} ()).
-    ?solution operator:solutionNo ?n.
+    ?problem :trySolution ?solution.
+    ?solution :tryNewSolution true.
+    _:l e:findall (?s {?solution :nextTry ?s.} ()).
+    ?solution :solutionNo ?n.
     (1 ?n) math:sum ?m.
     ("solution" ?m) string:concatenation ?w.
 
-    ?solution operator:name ?s_name;
-              operator:desc ?s_desc;
-              operator:comment ?s_comment.
+    ?solution :name ?s_name;
+              :desc ?s_desc;
+              :comment ?s_comment.
 }
 =>
 {
-    ?solution operator:nextTry ?w.
-    ?problem operator:trySolution ?w.
-    ?w operator:solutionNo ?m.
-    ?w operator:name ?s_name;
-       operator:desc ?s_desc;
-       operator:comment ?s_comment.
+    ?solution :nextTry ?w.
+    ?problem :trySolution ?w.
+    ?w :solutionNo ?m.
+    ?w :name ?s_name;
+       :desc ?s_desc;
+       :comment ?s_comment.
 }.
 
 
@@ -476,15 +462,15 @@ operator:firstTry operator:solutionNo 1.
     ?token2 auth:valid true.
     ?user auth:access_token ?token.
     ?user auth:refresh_token ?token2.
-?solution operator:triedAndReported ?yes;
-              operator:worked ?tf.
+?solution :triedAndReported ?yes;
+              :worked ?tf.
     ?yes e:whenGround "yes".
     ?tf e:whenGround {?tf log:equalTo true}.
-    ?problem operator:occurredOnMachine ?machine.
-    ?machine operator:machineID ?mid.
-     ?problem        operator:trySolution ?solution.
-   ?operator operator:foundProblem ?problem;
-              operator:operatorId ?wid.
+    ?problem :occurredOnMachine ?machine.
+    ?machine :machineID ?mid.
+     ?problem        :trySolution ?solution.
+   ?operator :foundProblem ?problem;
+              :operatorId ?wid.
 }
 =>
 {
@@ -493,13 +479,13 @@ operator:firstTry operator:solutionNo 1.
               tmpl:requestURI ("https://mstate.tho.facts4.work/api/machines/" ?mid "/events?access_token=" ?token);
               http:body { rest:json
                      #I am not sure, but maybe this answers to the machine stopped event?
-                    json:name "Starting the machine";
-                    json:desc "Starting the machine after a solution was successfully applied!";
-                    json:operator_id ?wid;
-                    json:machine_state "fb71a95f-8068-4b92-964c-9b5720efda54"
+                    :name "Starting the machine";
+                    :desc "Starting the machine after a solution was successfully applied!";
+                    :operator_id ?wid;
+                    :machine_state "fb71a95f-8068-4b92-964c-9b5720efda54"
               }.
-     ?machine operator:newState _:state.
-    ?problem operator:finalState operator:solved.
+     ?machine :newState _:state.
+    ?problem :finalState :solved.
 }.
 
 
@@ -507,24 +493,24 @@ operator:firstTry operator:solutionNo 1.
       ?token2 auth:valid true.
     ?user auth:access_token ?token.
     ?user auth:refresh_token ?token2.
-    ?problem operator:occurredOnMachine ?machine.
-    ?problem operator:defect ?defect.
-    {?machine operator:state ?state2.} operator:eventId ?eid.
+    ?problem :occurredOnMachine ?machine.
+    ?problem :defect ?defect.
+    {?machine :state ?state2.} :eventId ?eid.
     ?state2 e:whenGround "stopped1".
     ?machine #:state "notstopped2";
-             operator:machineID ?mid.
-    ?operator operator:foundProblem ?problem;
-         operator:operatorId ?wid;
-         operator:machineSkills ?wm;
-         operator:toolSkills ?wt;
-         operator:computerSkills ?wc.
+             :machineID ?mid.
+    ?operator :foundProblem ?problem;
+         :operatorId ?wid;
+         :machineSkills ?wm;
+         :toolSkills ?wt;
+         :computerSkills ?wc.
 
-    ?problem operator:trySolution ?solution.
-    ?solution operator:solutionId ?id;
-              operator:triedAndReported "no".
-    ?solution operator:reqMachineSkills ?m;
-        operator:reqToolSkills ?t;
-        operator:reqComputerSkills ?c.
+    ?problem :trySolution ?solution.
+    ?solution :solutionId ?id;
+              :triedAndReported "no".
+    ?solution :reqMachineSkills ?m;
+        :reqToolSkills ?t;
+        :reqComputerSkills ?c.
 
     (?wm ?wt ?wc ?m ?t ?c) e:whenGround {(?wm ?wt ?wc) util:noMatch (?m ?t ?c)}.
 }
@@ -534,56 +520,56 @@ operator:firstTry operator:solutionNo 1.
               rest:check (?wm ?m);
               tmpl:requestURI ("https://mstate.tho.facts4.work/api/machines/" ?mid "/events?access_token=" ?token);
               http:body { rest:json
-                  json:name "waiting_for_teamleader";
-                  json:desc "Stoping the machine. Problem has to be fixed by the team leader.";
+                  :name "waiting_for_teamleader";
+                  :desc "Stoping the machine. Problem has to be fixed by the team leader.";
                   #TODO: put the right machine state
-                  json:machine_state "3abbbd8c-bf6a-42c0-a096-2087d4b8e4a8";
-                  json:operator_id ?wid;
-                  json:optional { rest:json json:defect_id ?defect; json:stopped_for_defect_event_id ?eid }
+                  :machine_state "3abbbd8c-bf6a-42c0-a096-2087d4b8e4a8";
+                  :operator_id ?wid;
+                  :optional { rest:json :defect_id ?defect; :stopped_for_defect_event_id ?eid }
               };
               http:resp [
                   http:body _:body
               ].
     _:body rest:contains { rest:json
-        json:id _:e
+        :id _:e
     }.
 
-    {?machine operator:state _:stopped2.} operator:eventId _:e.
-    ?machine operator:state _:stopped2. #please put "stopped2" here when grounding.
-    ?problem operator:finalState operator:sentToTeamleader.
-     ?machine operator:stateTL _:tl.
+    {?machine :state _:stopped2.} :eventId _:e.
+    ?machine :state _:stopped2. #please put "stopped2" here when grounding.
+    ?problem :finalState :sentToTeamleader.
+     ?machine :stateTL _:tl.
 }.
 
 {
- ?problem operator:finalState operator:solved.
-?problem operator:occurredOnMachine ?m.
-?m operator:machineID ?mid.
-?m operator:newState ?state.
+ ?problem :finalState :solved.
+?problem :occurredOnMachine ?m.
+?m :machineID ?mid.
+?m :newState ?state.
 }=>{
 _:request http:methodName "GET";
 tmpl:requestURI ("http://askTheWorker/YouAreDone");
               rest:check ?state;
               http:body { rest:json
-                  json:message "Problem Solved."
+                  :message "Problem Solved."
               }.
 
-?problem operator:tellTheWorker "solved".
+?problem :tellTheWorker "solved".
 }.
 
 
 {
-?problem operator:finalState operator:sentToTeamleader.
-?problem operator:occurredOnMachine ?m.
-?m operator:stateTL ?tl.
+?problem :finalState :sentToTeamleader.
+?problem :occurredOnMachine ?m.
+?m :stateTL ?tl.
 }=>{
 _:request http:methodName "GET";
               tmpl:requestURI ("http://askTheWorker/SentToTeamLeader");
               rest:check ?tl;
               http:body { rest:json
-                  json:message "Teamleader was notified."
+                  :message "Teamleader was notified."
               }.
 
-?problem operator:tellTheWorker ?stopped2.
+?problem :tellTheWorker ?stopped2.
 }.
 
 

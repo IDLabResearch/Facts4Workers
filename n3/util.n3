@@ -6,26 +6,6 @@
 @prefix prolog: <http://eulersharp.sourceforge.net/2003/03swap/prolog#>.
 @prefix math: <http://www.w3.org/2000/10/swap/math#>.
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
-@prefix prov: <http://www.w3.org/ns/prov#>.
-@prefix pred: <http://www.w3.org/2007/rif-builtin-predicate#>.
-@prefix http: <http://www.w3.org/2011/http#>.
-
-# LAST REQUEST
-{
-    ?request a :LastRequest
-}
-<=
-{
-    ?request http:resp ?resp.
-    ?resp prov:generatedAtTime ?time.
-    _:x e:findall (1
-                   {
-                     ?request2 http:resp ?resp2.
-                     ?resp2 prov:generatedAtTime ?time2.
-                     (?time2 ?time) pred:dateTime-greater-than true.
-                   }
-                   ()).
-}.
 
 # LOOPING
 {

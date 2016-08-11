@@ -1,9 +1,9 @@
-# http://docs.facts4.work/
+# http://facts4workers.surge.sh/
 
-@prefix json: <http://restdesc.org/json#>.
+@prefix : <http://f4w.restdesc.org/demo#>.
 @prefix teamleader: <http://f4w.restdesc.org/demo/teamleader#>.
 @prefix tho: <http://f4w.restdesc.org/demo/thermolympic#>.
-@prefix rest: <http://restdesc.org/rest#>.
+@prefix rest: <http://f4w.restdesc.org/demo#>.
 @prefix http: <http://www.w3.org/2011/http#>.
 @prefix tmpl: <http://purl.org/restdesc/http-template#>.
 @prefix log: <http://www.w3.org/2000/10/swap/log#>.
@@ -21,13 +21,13 @@
               tmpl:requestURI ("http://askTheWorker/getOperatorID");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body { rest:json
-                  json:sendList ?list
+                  :sendList ?list
               };
               http:resp [
                   http:body _:body
               ].
     _:body rest:contains { rest:json
-        json:id _:id
+        :id _:id
     }.
     _:problem a teamleader:problem;
               teamleader:operator [ teamleader:id _:id ]
@@ -46,13 +46,13 @@
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               rest:check ?problem;
               http:body { rest:json
-                  json:sendList ?list
+                  :sendList ?list
               };
               http:resp [
                   http:body _:body
               ].
     _:body rest:contains { rest:json
-        json:id _:id
+        :id _:id
     }.
     ?problem teamleader:machine [ teamleader:id _:id ].
 }.
@@ -74,9 +74,9 @@
                   http:body _:body
               ].
     _:body rest:contains { rest:json
-        json:id _:id;
+        :id _:id;
         # TODO: same problem as other APIs with multiple options: optional could be empty (if machine is not stopped for example)
-        json:optional _:optional
+        :optional _:optional
     }.
     ?problem teamleader:event [ teamleader:id _:id;
                                 teamleader:optional _:optional ].
@@ -95,7 +95,7 @@
 {
     ?problem teamleader:event ?event.
     ?event teamleader:optional ?optional.
-    ?optional log:includes { ?x json:defect_id ?did; json:stopped_for_defect_event_id ?oid }. # TODO: can't use teamleader prefix here since it's coming from JSON...
+    ?optional log:includes { ?x :defect_id ?did; :stopped_for_defect_event_id ?oid }. # TODO: can't use teamleader prefix here since it's coming from JSON...
 }
 =>
 {
@@ -109,7 +109,7 @@
     ?problem teamleader:event ?event.
     ?event teamleader:optional ?optional.
     ?optional e:notLabel ?label. # important so it doesn't match when it's still a blank node
-    ?optional log:notIncludes { ?x json:defect_id ?did; json:stopped_for_defect_event_id ?oid }. # TODO: can't use teamleader prefix here since it's coming from JSON...
+    ?optional log:notIncludes { ?x :defect_id ?did; :stopped_for_defect_event_id ?oid }. # TODO: can't use teamleader prefix here since it's coming from JSON...
 }
 =>
 {
@@ -148,7 +148,7 @@
               tmpl:requestURI ("http://askTheWorker/events");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body { rest:json
-                  json:events ?events
+                  :events ?events
               }.
     ?problem teamleader:state teamleader:sentEvents.
 }.
@@ -223,11 +223,11 @@
               ].
 
     _:body rest:contains { rest:json
-        json:name _:name;
-        json:desc _:desc;
-        json:part_id _:part_id;
-        json:media_url _:media_url;
-        json:comment _:comment
+        :name _:name;
+        :desc _:desc;
+        :part_id _:part_id;
+        :media_url _:media_url;
+        :comment _:comment
     }.
     # TODO: @doerthe: an easier way to copy like this?
     ?defect  teamleader:name _:name;
@@ -246,7 +246,7 @@
 
     ?list a teamleader:partList.
 
-    (?list {?s json:id ?part_id}) util:filter ?parts.
+    (?list {?s :id ?part_id}) util:filter ?parts.
 
     (?parts 0) util:select ?part.
 }
@@ -262,9 +262,9 @@
 }
 =>
 {
-    teamleader:dummy_report a teamleader:report;
-                            teamleader:success false;
-                            teamleader:state teamleader:posted.
+    :dummy_report a teamleader:report;
+                  teamleader:success false;
+                  teamleader:state teamleader:posted.
 }.
 
 
@@ -294,15 +294,15 @@
               tmpl:requestURI ("http://askTheWorker/events");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body { rest:json
-                  json:part ?part;
-                  json:defect { rest:json
-                      json:name ?name;
-                      json:desc ?desc;
-                      json:media_url ?media_url;
-                      json:comment ?comment
+                  :part ?part;
+                  :defect { rest:json
+                      :name ?name;
+                      :desc ?desc;
+                      :media_url ?media_url;
+                      :comment ?comment
                   };
-                  json:reports ?reports;
-                  json:events ?events
+                  :reports ?reports;
+                  :events ?events
               }.
     ?problem teamleader:state teamleader:sentEvents;
              teamleader:hack _:hack. # TODO: ...
@@ -331,14 +331,14 @@
               rest:check ?hack;
               rest:check ?report;
               http:body { rest:json
-                  json:message "Choose one of the following solutions.";
-                  json:solutions ?solutions
+                  :message "Choose one of the following solutions.";
+                  :solutions ?solutions
               };
               http:resp [
                   http:body _:body
               ].
     _:body rest:contains { rest:json
-        json:id _:id;
+        :id _:id;
     }.
 
     _:report a teamleader:report;
@@ -365,8 +365,8 @@
                   http:body _:body
               ].
     _:body rest:contains { rest:json
-        json:success _:success;
-        json:comment _:comment
+        :success _:success;
+        :comment _:comment
     }.
     ?report teamleader:success _:success;
             teamleader:comment _:comment.
@@ -393,17 +393,17 @@
               tmpl:requestURI ("https://defects.tho.facts4.work/api/reports?access_token=" ?token);
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body { rest:json
-                  json:event_id ?event_id;
-                  json:operator_id ?operator_id;
-                  json:solution_id ?solution_id;
-                  json:success ?success;
-                  json:comment ?comment
+                  :event_id ?event_id;
+                  :operator_id ?operator_id;
+                  :solution_id ?solution_id;
+                  :success ?success;
+                  :comment ?comment
               };
               http:resp [
                   http:body _:body
               ].
     _:body rest:contains { rest:json
-        json:id _:id
+        :id _:id
     }.
     ?report teamleader:id _:id;
             teamleader:state teamleader:posted.
@@ -436,10 +436,10 @@
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               rest:check ?success; # TODO: a bit annoying
               http:body { rest:json
-                  json:name "Teamleader maintenance finished.";
-                  json:desc "Machine fixed.";
-                  json:machine_state "fb71a95f-8068-4b92-964c-9b5720efda54";
-                  json:operator_id ?operator_id
+                  :name "Teamleader maintenance finished.";
+                  :desc "Machine fixed.";
+                  :machine_state 1;
+                  :operator_id ?operator_id
               }.
     ?problem teamleader:state teamleader:resolved.
 }.

@@ -3,4 +3,4 @@ node_modules
 *.tmp
 ~*
 *.n3~
-*.log*
+*.log
