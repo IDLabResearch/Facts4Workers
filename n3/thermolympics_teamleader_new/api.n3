@@ -237,21 +237,7 @@
              teamleader:comment _:comment.
 }.
 
-# TODO: copied from operator, need 1 building block, also, no way currently to get info for 1 part
-{
-    ?problem a teamleader:problem;
-             teamleader:machine ?machine.
-    ?machine teamleader:id ?machine_id.
-}
-=>
-{
-    _:request http:methodName "GET";
-              tmpl:requestURI ("https://machinesandparts.surge.sh/api/parts.json");
-              http:resp [
-                  http:body _:list
-              ].
-    _:list a teamleader:partList.
-}.
+
 
 {
     ?problem a teamleader:problem.

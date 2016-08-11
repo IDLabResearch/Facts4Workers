@@ -68,19 +68,7 @@
     ?problem :occurredOnMachine _:newMachineURI.
 }.
 
-#get parts
-{
-    ?problem :occurredOnMachine ?machine. ?machine :machineID ?n.
-}
-=>
-{
-    _:request http:methodName "GET";
-              tmpl:requestURI ("https://machinesandparts.surge.sh/api/parts.json");
-              http:resp [
-                  http:body _:list
-              ].
-    _:list a :partList.
-}.
+
 
 # API USER 1 (ask for a part ID, might want to send all available part IDs but no API for this atm)
 {

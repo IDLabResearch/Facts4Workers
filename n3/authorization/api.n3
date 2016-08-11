@@ -40,11 +40,11 @@
     ?user a auth:user;
           auth:username ?name;
           auth:password ?password.
-    ?user util:onlyOnce auth:id. 
+    #?user util:onlyOnce auth:id. 
 }
 =>
 {
-    ?user util:onlyOnceTest auth:id.
+    #?user util:onlyOnceTest auth:id.
     _:request http:methodName "POST";
               tmpl:requestURI ("https://auth.facts4.work/oauth/token");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
@@ -75,12 +75,12 @@
           auth:refresh_token ?refresh_token.
     ?refresh_token auth:token ?token.
     ?token e:notLabel ?label.
-    ?token util:onlyOnce auth:re.
+    #?token util:onlyOnce auth:re.
     _:x e:findall (?at {?at auth:valid true. } ()) 
 }
 =>
 {
-    ?token util:onlyOnceTest auth:re.
+    #?token util:onlyOnceTest auth:re.
     _:request http:methodName "POST";
               tmpl:requestURI ("https://auth.facts4.work/oauth/token");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
