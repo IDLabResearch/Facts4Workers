@@ -17,7 +17,7 @@ describe('THO teamleader use case', function ()
 
     it ('requires authorization', function (done)
     {
-        var rest = new RESTdesc('redis://localhost:6379',TEST.files, TEST.goals.operator, key);
+        var rest = new RESTdesc('redis://localhost:6379',TEST.files, TEST.goals.teamleader, key);
         rest.next(function (error, result)
         {
             if (error)

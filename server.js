@@ -67,6 +67,7 @@ app.use(function (req, res, next) {
     res.send = function (string) {
         var body = string instanceof Buffer ? string.toString() : string;
         res.rawBody = body;
+        app.DEBUG_DATA = body;
         send.call(this, body);
         logResponse(req, res);
     };
@@ -186,6 +187,24 @@ app.post('/eye', function (req, res)
     handleNext(rest, req, res);
 });
 
+app.post('/debug', function (req, res)
+{
+    if (_.isString(app.DEBUG_DATA))
+        app.DEBUG_DATA = JSON.parse(app.DEBUG_DATA);
+
+    var body = req.body;
+    if (body.reset)
+    {
+        if (app.DEBUG_DATA)
+            new RESTdesc(null, null, null, app.DEBUG_DATA.data).clear();
+        app.DEBUG_DATA = undefined;
+    }
+
+    req.body.eye = app.DEBUG_DATA;
+
+    next(req, res);
+});
+
 function errorToJSON (error)
 {
     //return _.pick(error, Object.getOwnPropertyNames(error));
@@ -206,18 +225,26 @@ function next (req, res)
     if (req.body.eye)
         cacheKey = req.body.eye.data;
 
-    var rest = new RESTdesc(cacheURL, input, goal, cacheKey);
-    rest.handleUserResponse(
-        req.body.json,
-        req.body.eye,
-        function (error)
-        {
-            if (error)
-                res.status(400).json({ error: errorToJSON(error) });
-            else
-                handleNext(rest, req, res);
-        }
-    );
+    try
+    {
+        var rest = new RESTdesc(cacheURL, input, goal, cacheKey);
+        rest.handleUserResponse(
+            req.body.json,
+            req.body.eye,
+            function (error)
+            {
+                if (error)
+                    res.status(400).json({ error: errorToJSON(error) });
+                else
+                    handleNext(rest, req, res);
+            }
+        );
+    }
+    catch (e)
+    {
+        // shit happens
+        return res.status(500).json({ error: errorToJSON(e) });
+    }
 }
 
 function handleNext (rest, req, res)
@@ -264,7 +291,8 @@ try
         // need empty function to prevent error when connection is refused
     });
 }
-catch (e) {
+catch (e)
+{
     // if elasticsearch isn't running
     console.error(e);
 }
