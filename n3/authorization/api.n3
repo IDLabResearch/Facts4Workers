@@ -1,13 +1,13 @@
 
 # http://docs.facts4.work/oauth_building_block.html
 
-@prefix : <http://f4w.restdesc.org/demo#>.
 @prefix auth: <http://f4w.restdesc.org/demo/authorization#>.
+@prefix json: <http://restdesc.org/json#>.
 @prefix http: <http://www.w3.org/2011/http#>.
 @prefix tmpl: <http://purl.org/restdesc/http-template#>.
 @prefix log: <http://www.w3.org/2000/10/swap/log#>.
 @prefix util: <http://f4w.restdesc.org/util#>.
-@prefix rest: <http://f4w.restdesc.org/demo#>.
+@prefix rest: <http://restdesc.org/rest#>.
 @prefix prov: <http://www.w3.org/ns/prov#>.
 @prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
 @prefix math: <http://www.w3.org/2000/10/swap/math#>.
@@ -26,8 +26,8 @@
                   http:body _:body
               ].
     _:body rest:contains { rest:json
-        :username _:username;
-        :password _:password
+        json:username _:username;
+        json:password _:password
     }.
     _:user a auth:user;
            auth:username _:username;
@@ -49,25 +49,31 @@
               tmpl:requestURI ("https://auth.facts4.work/oauth/token");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body { rest:json
-                  :username ?name;
-                  :password ?password;
-                  :grant_type "password"
+                  json:username ?name;
+                  json:password ?password;
+                  json:grant_type "password"
               };
               http:resp [
                   http:body _:body
               ].
     _:body rest:contains { rest:json
-        :access_token  _:access_token;
-        :refresh_token _:refresh_token;
-        :created_at    _:created_at
+        json:access_token  _:access_token;
+        json:refresh_token _:refresh_token;
+        json:created_at    _:created_at
     }.
     ?user auth:access_token  _:access_token;
-          auth:refresh_token [ auth:token _:refresh_token; prov:generatedAtTime _:created_at ].
-          
-          
-          
+          auth:refresh_token [ auth:token _:refresh_token; auth:created_at _:created_at ].
 }.
 
+
+{
+    ?x prov:generatedAtTime ?dateTime.
+}
+<=
+{
+    ?x auth:created_at ?unix_time.
+    ?unix_time e:whenGround { (?LV <http://www.w3.org/2001/XMLSchema#dateTime>) log:dtlit ?unix_time, ?dateTime. }.
+}.
 
 {
     ?user a auth:user;
@@ -85,15 +91,15 @@
               tmpl:requestURI ("https://auth.facts4.work/oauth/token");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body { rest:json
-                  :refresh_token ?token;
-                  :grant_type "refresh_token"
+                  json:refresh_token ?token;
+                  json:grant_type "refresh_token"
               };
               http:resp [
                   http:body _:body
               ].
     _:body rest:contains { rest:json
-        :refresh_token _:refresh_token;
-        :created_at    _:created_at
+        json:refresh_token _:refresh_token;
+        json:created_at    _:created_at
     }.
     ?user auth:refresh_token [ auth:token _:refresh_token; prov:generatedAtTime  _:created_at ].
 }.
@@ -103,23 +109,15 @@
     ?user a auth:user;
           auth:refresh_token ?token.
     ?token prov:generatedAtTime ?refresh_time.
-    ?error a rest:error;
-           http:statusCodeNumber 401;
-           prov:generatedAtTime ?error_time.
-    ?refresh_time e:whenGround {(?refresh_time ?error_time) pred:dateTime-greater-than true. }.
-    _:x e:findall (?error2 {    ?error2 a rest:error;
-           http:statusCodeNumber 401;
-           prov:generatedAtTime ?error_time2. ( ?error_time2 ?refresh_time) pred:dateTime-greater-than true.     
-    }   ())
-}
-=>
-{
-   ?token auth:valid true.
-}.
 
-{
-    ?user auth:refresh_token ?token.
-    _:x e:findall(?x { ?error a rest:error; http:statusCodeNumber 401} ()).
+    _:x e:findall (1
+                   {
+                     ?request http:resp ?resp.
+                     ?resp prov:generatedAtTime ?time;
+                           http:statusCodeValue 401.
+                     (?time ?refresh_time) pred:dateTime-greater-than true.
+                   }
+                   ()).
 }
 =>
 {

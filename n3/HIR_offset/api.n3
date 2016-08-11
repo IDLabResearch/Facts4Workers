@@ -1,16 +1,16 @@
-@prefix : <http://f4w.restdesc.org/demo#>.
 @prefix ofs: <http://f4w.restdesc.org/demo/offset#>.
 @prefix http: <http://www.w3.org/2011/http#>.
 @prefix tmpl: <http://purl.org/restdesc/http-template#>.
 @prefix log: <http://www.w3.org/2000/10/swap/log#>.
 @prefix util: <http://f4w.restdesc.org/util#>.
-@prefix rest: <http://f4w.restdesc.org/demo#>.
+@prefix rest: <http://restdesc.org/rest#>.
 @prefix prov: <http://www.w3.org/ns/prov#>.
 @prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
 @prefix math: <http://www.w3.org/2000/10/swap/math#>.
 @prefix auth: <http://f4w.restdesc.org/demo/authorization#>.
 @prefix prolog: <http://eulersharp.sourceforge.net/2003/03swap/prolog#>.
 @prefix list: <http://www.w3.org/2000/10/swap/list#>.
+@prefix json: <http://restdesc.org/json#>.
 
 
 #get parts
@@ -47,14 +47,14 @@
               tmpl:requestURI ("http://askTheWorker/getPartID");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {rest:json
-                  :message "Please provide the ID of the part you are working with.";
-                  :parts ?list
+                  json:message "Please provide the ID of the part you are working with.";
+                  json:parts ?list
               };
               http:resp [
                   http:body _:body
               ].
-    _:body :contains  { rest:json
-        :id _:n
+    _:body rest:contains  { rest:json
+        json:id _:n
     }.
     _:part a ofs:Part.
     _:part ofs:partId _:n.
@@ -99,8 +99,8 @@
               tmpl:requestURI ("http://askTheWorker/getMeasurements");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body {rest:json
-                  :message "Please provide your measurements in a list. I.e.: [{'id': 1, 'measurement': 5.1}, {'id': 2, 'measurement': 2.8}]";
-                  :partdetails ?list
+                  json:message "Please provide your measurements in a list. I.e.: [{'id': 1, 'measurement': 5.1}, {'id': 2, 'measurement': 2.8}]";
+                  json:partdetails ?list
               };
               http:resp [
                   http:body _:body
@@ -124,7 +124,7 @@
           ofs:measurements ?list.
     ?list e:notLabel ?label.
     ?measurementGraph list:in ?list.
-    ?measurementGraph log:includes { ?measurement :id ?n; :measurement ?m }.
+    ?measurementGraph log:includes { ?measurement json:id ?n; json:measurement ?m }.
 }
 =>
 {
@@ -164,10 +164,10 @@
               http:resp [
                   http:body _:body
               ].
-    _:body :contains { rest:json
-        :type _:type;
-        :suggestion _:sug;
-        :value _:value
+    _:body rest:contains { rest:json
+        json:type _:type;
+        json:suggestion _:sug;
+        json:value _:value
     }.
     ?measurement ofs:offsetType _:type;
                  ofs:offsetSuggestion _:sug;
@@ -186,10 +186,10 @@
     ?part ofs:measured ?measurement.
 
 
-    _:x e:findall ({rest:json :id ?d;
-                              :type ?type;
-                              :value ?value;
-                              :suggestion ?sug
+    _:x e:findall ({rest:json json:id ?d;
+                              json:type ?type;
+                              json:value ?value;
+                              json:suggestion ?sug
                    }
                    {?part2 ofs:partId ?pid.
                     ?part2 ofs:measured ?meas2.
@@ -213,27 +213,27 @@
 ?measurement ofs:offsetSuggestion ?sug.
 ?sug e:label ?ll.
 ?part ofs:measurements ?lis.
-?lis :alloffsets ().
-?list e:tuple :dummy.
+?lis ofs:alloffsets ().
+?list e:tuple ofs:dummy.
 }.
 
 
-{() :alloffsets ().}
+{() ofs:alloffsets ().}
 <=
 {
 }.
 
-{?list :alloffsets ().}
+{?list ofs:alloffsets ().}
 <=
 {
 ?list list:first ?fst.
-?fst log:includes {?m :measurement ?ms}.
+?fst log:includes {?m json:measurement ?ms}.
 ?m ofs:dimension ?d;
    ofs:offsetType ?type;
    ofs:offsetSuggestion ?sug;
    ofs:offsetValue ?value.
 ?list list:rest ?rest.
-?rest :alloffsets ().
+?rest ofs:alloffsets ().
 }.
 
 
@@ -250,7 +250,7 @@
     ?part ofs:measured ?measurement.
     ?measurement e:label ?l.
    ?measurement ofs:offsetSuggestion ?sug.
-    ?list e:tuple :dummy.
+    ?list e:tuple ofs:dummy.
 }.
 
 
@@ -264,8 +264,8 @@
               tmpl:requestURI ("http://askTheWorker/showCheckResult");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body { rest:json
-                  :message "Here the results of the offset check.";
-                  :results ?list
+                  json:message "Here the results of the offset check.";
+                  json:results ?list
               }.
     ?list ofs:displayedTo ?user.
 }.
