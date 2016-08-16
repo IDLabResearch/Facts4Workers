@@ -229,13 +229,13 @@ operator:firstTry operator:solutionNo 1.
 }.
 
 # handle the fact that missing skills indicate 0
-{ ?operator operator:jsonSkills ?skills. ?skills e:label ?label. } => { ?operator operator:machineSkills _:m; operator:toolSkills _:t; operator:computerSkills _:c. }.
 { ?operator operator:jsonSkills ?skills. ?skills e:notLabel ?label. ?skills log:includes    { ?x json:machine ?m }  } => { ?operator operator:machineSkills ?m.  }.
 { ?operator operator:jsonSkills ?skills. ?skills e:notLabel ?label. ?skills log:notIncludes { ?x json:machine ?m }  } => { ?operator operator:machineSkills 0.   }.
 { ?operator operator:jsonSkills ?skills. ?skills e:notLabel ?label. ?skills log:includes    { ?x json:tool ?t }     } => { ?operator operator:toolSkills ?t.     }.
 { ?operator operator:jsonSkills ?skills. ?skills e:notLabel ?label. ?skills log:notIncludes { ?x json:tool ?t }     } => { ?operator operator:toolSkills 0.      }.
 { ?operator operator:jsonSkills ?skills. ?skills e:notLabel ?label. ?skills log:includes    { ?x json:computer ?c } } => { ?operator operator:computerSkills ?c. }.
 { ?operator operator:jsonSkills ?skills. ?skills e:notLabel ?label. ?skills log:notIncludes { ?x json:computer ?c } } => { ?operator operator:computerSkills 0.  }.
+{ ?operator operator:jsonSkills ?skills. ?skills e:label ?label. } => { ?operator operator:machineSkills _:m; operator:toolSkills _:t; operator:computerSkills _:c. }.
 
 #get skills required for solution
 {
@@ -266,13 +266,13 @@ operator:firstTry operator:solutionNo 1.
 }.
 
 # handle the fact that missing skills indicate 0
-{ ?solution operator:reqJsonSkills ?skills. ?skills e:label ?label. } => { ?solution operator:reqMachineSkills _:m; operator:reqToolSkills _:t; operator:reqComputerSkills _:c. }.
 { ?solution operator:reqJsonSkills ?skills. ?skills e:notLabel ?label. ?skills log:includes    { ?x json:machine ?m }  } => { ?solution operator:reqMachineSkills ?m.  }.
 { ?solution operator:reqJsonSkills ?skills. ?skills e:notLabel ?label. ?skills log:notIncludes { ?x json:machine ?m }  } => { ?solution operator:reqMachineSkills 0.   }.
 { ?solution operator:reqJsonSkills ?skills. ?skills e:notLabel ?label. ?skills log:includes    { ?x json:tool ?t }     } => { ?solution operator:reqToolSkills ?t.     }.
 { ?solution operator:reqJsonSkills ?skills. ?skills e:notLabel ?label. ?skills log:notIncludes { ?x json:tool ?t }     } => { ?solution operator:reqToolSkills 0.      }.
 { ?solution operator:reqJsonSkills ?skills. ?skills e:notLabel ?label. ?skills log:includes    { ?x json:computer ?c } } => { ?solution operator:reqComputerSkills ?c. }.
 { ?solution operator:reqJsonSkills ?skills. ?skills e:notLabel ?label. ?skills log:notIncludes { ?x json:computer ?c } } => { ?solution operator:reqComputerSkills 0.  }.
+{ ?solution operator:reqJsonSkills ?skills. ?skills e:label ?label. } => { ?solution operator:reqMachineSkills _:m; operator:reqToolSkills _:t; operator:reqComputerSkills _:c. }.
 
 {
     ?problem operator:defect ?id;
