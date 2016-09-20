@@ -7,7 +7,7 @@
     "url": "git@git.mmlab.be:facts4workers/api-interface.git"
   },
   "dependencies": {
-    "RESTdesc": "git+ssh://git@git.mmlab.be:4444/facts4workers/restdesc.git",
+    "RESTdesc": "git+ssh://git@git.datasciencelab.ugent.be:4444/facts4workers/restdesc.git",
     "body-parser": "^1.12.2",
     "express": "^4.12.3",
     "jade": "^1.9.2",
@@ -15,7 +15,7 @@
     "lodash": "^4.0.0",
     "logrotate-stream": "^0.2.5",
     "minimist": "^1.1.1",
-    "semantic-search": "git+ssh://git@git.mmlab.be:4444/facts4workers/semantic-search.git",
+    "semantic-search": "git+ssh://git@git.datasciencelab.ugent.be:4444/facts4workers/semantic-search.git",
     "serve-index": "^1.6.3"
   },
   "devDependencies": {
