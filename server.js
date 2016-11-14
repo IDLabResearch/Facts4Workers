@@ -102,7 +102,8 @@ var rulePaths = [
     'n3/thermolympic/api.n3',
     'n3/thermolympics_operator_new/api.n3',
     'n3/thermolympics_teamleader_new/api.n3',
-    'n3/HIR_offset/api.n3'
+    'n3/HIR_offset/api.n3',
+    'n3/HIR_offset_golden/api.n3'
 ];
 
 var input = rulePaths.map(relative);
@@ -113,7 +114,8 @@ var goals = {
     //'therolympics_teamleader': relative('n3/thermolympics_teamleader/goal.n3'),
     thermolympics_operator_new: relative('n3/thermolympics_operator_new/goal.n3'),
     thermolympics_teamleader_new: relative('n3/thermolympics_teamleader_new/goal.n3'),
-    hir_offset: relative('n3/HIR_offset/goal.n3')
+    hir_offset: relative('n3/HIR_offset/goal.n3'),
+    hir_offset_golden: relative('n3/HIR_offset_golden/goal.n3')
 };
 
 app.get('/', function (req, res)

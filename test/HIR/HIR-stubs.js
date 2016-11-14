@@ -5,10 +5,17 @@ var stubs = {
         'https://offsug.hir.facts4.work/api/v1/parts': parts,
         'https://offsug.hir.facts4.work/api/v1/parts/5b015ac5-fd14-488c-b387-2d8d7b5d4989': part,
         'https://offsug.hir.facts4.work/api/v1/offsets?part_id=5b015ac5-fd14-488c-b387-2d8d7b5d4989&dimension_id=1&value=6': offset,
-        'https://offsug.hir.facts4.work/api/v1/offsets?part_id=5b015ac5-fd14-488c-b387-2d8d7b5d4989&dimension_id=2&value=8.2': offset
+        'https://offsug.hir.facts4.work/api/v1/offsets?part_id=5b015ac5-fd14-488c-b387-2d8d7b5d4989&dimension_id=2&value=8.2': offset,
+        'https://offsug.staging.facts4.work/api/v1/parts': parts,
+        'https://offsug.staging.facts4.work/api/v1/parts/5b015ac5-fd14-488c-b387-2d8d7b5d4989': part,
+        'https://offsug.staging.facts4.work/api/v1/offsets?part_id=5b015ac5-fd14-488c-b387-2d8d7b5d4989&dimension_id=1&value=6': offset,
+        'https://offsug.staging.facts4.work/api/v1/offsets?part_id=5b015ac5-fd14-488c-b387-2d8d7b5d4989&dimension_id=2&value=8.2': offset,
     },
     POST: {
         'https://auth.facts4.work/oauth/token': oauth
+    },
+    PATCH: {
+        'https://offsug.staging.facts4.work/api/v1/parts/5b015ac5-fd14-488c-b387-2d8d7b5d4989': part,
     }
 };
 
@@ -35,7 +42,7 @@ function offset ()
     };
 }
 
-function part ()
+function part (input)
 {
     return parts()[0];
 }

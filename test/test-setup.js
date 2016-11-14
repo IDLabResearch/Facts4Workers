@@ -22,13 +22,15 @@ TEST.files = [
     relative('n3/thermolympic/api.n3'),
     relative('n3/thermolympics_teamleader_new/api.n3'),
     relative('n3/thermolympics_operator_new/api.n3'),
-    relative('n3/HIR_offset/api.n3')
+    relative('n3/HIR_offset/api.n3'),
+    relative('n3/HIR_offset_golden/api.n3'),
 ];
 
 TEST.goals = {
-    operator: TEST.relative('n3/thermolympics_operator_new/goal.n3'),
-    teamleader: TEST.relative('n3/thermolympics_teamleader_new/goal.n3'),
-    offset: TEST.relative('n3/HIR_offset/goal.n3'),
+    operator:       TEST.relative('n3/thermolympics_operator_new/goal.n3'),
+    teamleader:     TEST.relative('n3/thermolympics_teamleader_new/goal.n3'),
+    offset:         TEST.relative('n3/HIR_offset/goal.n3'),
+    offset_golden:  TEST.relative('n3/HIR_offset_golden/goal.n3'),
 };
 
 TEST.createStubFunction = function (stubs)
@@ -81,6 +83,7 @@ TEST.disableHTTP = function (stubs)
 {
     startNock('GET', stubs);
     startNock('POST', stubs);
+    startNock('PATCH', stubs);
 };
 TEST.enableHTTP = function ()
 {

@@ -1,0 +1,328 @@
+@prefix hir: <http://f4w.restdesc.org/demo/hir_offset_golden#>.
+@prefix http: <http://www.w3.org/2011/http#>.
+@prefix tmpl: <http://purl.org/restdesc/http-template#>.
+@prefix log: <http://www.w3.org/2000/10/swap/log#>.
+@prefix util: <http://f4w.restdesc.org/util#>.
+@prefix rest: <http://restdesc.org/rest#>.
+@prefix prov: <http://www.w3.org/ns/prov#>.
+@prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
+@prefix math: <http://www.w3.org/2000/10/swap/math#>.
+@prefix auth: <http://f4w.restdesc.org/demo/authorization#>.
+@prefix prolog: <http://eulersharp.sourceforge.net/2003/03swap/prolog#>.
+@prefix list: <http://www.w3.org/2000/10/swap/list#>.
+@prefix json: <http://restdesc.org/json#>.
+
+
+#get parts
+{
+    ?token2 auth:valid true.
+    ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
+#this is to make sure that the rule does not get fired again if I have a new access token. 
+#I think we could add that automatically to the rules so that the user does not need to do it
+    ?user util:onlyOnce hir:first. 
+}
+=>
+{
+    ?user util:onlyOnceTest hir:first.
+    _:request http:methodName "GET";
+              rest:check ?token2;
+              tmpl:requestURI ("https://offsug.staging.facts4.work/api/v1/parts?access_token=" ?token);
+              http:resp [
+                  http:body _:list
+              ].
+    _:list a hir:partList.
+}.
+
+#get part Id
+{
+    
+#Here we assume that there is only one active user in the system, maybe we should be more careful here. Should we start writing an ontology?     
+     ?user a auth:user.
+     ?list a hir:partList.
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://askTheWorker/getPartID");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              http:body {rest:json
+                  json:message "Please provide the ID of the part you are working with.";
+                  json:parts ?list
+              };
+              http:resp [
+                  http:body _:body
+              ].
+    _:body rest:contains  { rest:json
+        json:id _:n
+    }.
+    _:part a hir:Part.
+    _:part hir:partId _:n.
+#I know, we can discuss whether we can derive that triple, but I think the API cantains a user dialog which asks soemething to a user, therefore we can keep the information the user provided
+    ?user hir:worksWith _:part.
+}.
+
+
+#get details for a specific part
+{
+    ?token2 auth:valid true.
+    ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
+    ?user hir:worksWith ?part.
+    ?part hir:partId ?id.
+#this is to make sure that the rule does not get fired again if I have a new access token. 
+#I think we could add that automatically to the rules so that the user does not need to do it
+    (?user ?id) util:onlyOnce hir:rule2. 
+}
+=>
+{
+    (?user ?id) util:onlyOnceTest hir:rule2.
+    _:request http:methodName "GET";
+              rest:check ?token2;
+              tmpl:requestURI ("https://offsug.staging.facts4.work/api/v1/parts/" ?id "?access_token=" ?token);
+              http:resp [
+                  http:body _:list
+              ].
+    ?part hir:partData _:data
+}.
+
+
+
+{
+    ?part hir:partData ?data
+}
+=>
+{
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://askTheWorker/getMeasurements");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              http:body {rest:json
+                  json:message "Please provide the following JSON: { 'golden_sample': true/false, 'measurements': [{'id': 1, 'value': 5.1}, {'id': 2, 'value': 2.8}, ...] }";
+                  json:partdetails ?data
+              };
+              http:resp [
+                  http:body _:body
+              ].
+    _:body rest:contains  { rest:json
+        json:golden_sample _:golden_sample;
+        json:measurements  _:measurements
+    }.
+    ?part hir:golden_sample _:golden_sample.
+    ?part hir:measurements _:measurements.
+#question: do we also need a time or something? Would come in handy if we do looping
+}.
+
+# GOLDEN SAMPLE
+{
+    # need to use whenground at least once so EYE can find a path
+    ?part hir:golden_sample ?golden.
+    ?golden e:whenGround { ?part hir:golden_sample true. }.
+    ?part hir:partId ?pid.
+    ?part hir:measurements ?measurements.
+
+    ?token2 auth:valid true.
+    ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
+    (?pid ?n ?m) util:onlyOnce hir:rule_patch_golden.
+}
+=>
+{
+    (?pid ?n ?m) util:onlyOnceTest hir:rule_patch_golden.
+
+    _:request http:methodName "PATCH";
+              tmpl:requestURI ("https://offsug.staging.facts4.work/api/v1/parts/" ?pid "?access_token=" ?token);
+              http:body { rest:json
+                  json:golden_sample ?measurements
+              };
+              http:resp [
+                  http:body _:body
+              ].
+    ?part hir:updatedPartData _:body.
+}.
+
+{
+    ?user hir:worksWith ?part.
+    ?part hir:updatedPartData ?updated.
+}
+=>
+{
+
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://askTheWorker/showCheckResult");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              http:body { rest:json
+                  json:message "The updated part data.";
+                  json:part ?updated
+              }.
+    ?updated hir:displayedTo ?user.
+}.
+
+# NORMAL MEASUREMENT
+{
+    ?part hir:golden_sample false.
+    ?part hir:measurements ?body.
+    ?body e:label _:label
+}=>{
+    ?part hir:measured _:measurement.
+    _:measurement hir:dimension _:n.
+    _:measurement hir:value  _:m
+}.
+
+
+{
+    ?part hir:golden_sample false.
+    ?part hir:partId ?pid;
+          hir:measurements ?list.
+    ?list e:notLabel ?label.
+    ?measurementGraph list:in ?list.
+    ?measurementGraph log:includes { ?measurement json:id ?n; json:value ?m }.
+}
+=>
+{
+    ?part hir:measured ?measurement.
+    ?measurement hir:dimension ?n;
+                 hir:value  ?m.
+}.
+
+{
+    ?part hir:golden_sample false.
+    ?part hir:partId ?pid;
+          hir:measurements ?list.
+    ?list e:label ?label.
+}
+=>
+{
+    ?part hir:measured _:measurement.
+    _:measurement hir:dimension _:x;
+                  hir:value _:f;
+                  hir:offsetSuggestion _:sug
+}.
+
+{
+    ?part hir:golden_sample false.
+    ?part hir:partId ?pid.
+    ?part hir:measured ?measurement.
+    ?measurement hir:dimension ?n.
+    ?measurement hir:value  ?m.
+    ?token2 auth:valid true.
+    ?user auth:access_token ?token.
+    ?user auth:refresh_token ?token2.
+    (?pid ?n ?m) util:onlyOnce hir:rule3.
+}
+=>
+{
+    (?pid ?n ?m) util:onlyOnceTest hir:rule3.
+
+    _:request http:methodName "GET";
+              tmpl:requestURI ("https://offsug.staging.facts4.work/api/v1/offsets?part_id=" ?pid "&dimension_id=" ?n "&value=" ?m "&access_token=" ?token);
+              http:resp [
+                  http:body _:body
+              ].
+    _:body rest:contains { rest:json
+        json:type _:type;
+        json:suggestion _:sug;
+        json:value _:value
+    }.
+    ?measurement hir:offsetType _:type;
+                 hir:offsetSuggestion _:sug;
+                 hir:offsetValue _:value
+}.
+
+
+#TODO: find a better solution here
+#get a measurement list, maybe pass that to util?
+{
+    ?part hir:results ?list.
+}
+<=
+{
+    ?part hir:golden_sample false.
+    ?part hir:partId ?pid.
+    ?part hir:measured ?measurement.
+
+
+    _:x e:findall ({rest:json json:id ?d;
+                              json:type ?type;
+                              json:value ?value;
+                              json:suggestion ?sug
+                   }
+                   {?part2 hir:partId ?pid.
+                    ?part2 hir:measured ?meas2.
+                    ?meas2 hir:dimension ?d;
+                           hir:offsetType ?type;
+                           hir:offsetSuggestion ?sug;
+                           hir:offsetValue ?value
+                   }
+                   ?list
+    ).
+   ?list util:ground true.
+   ?list log:notEqualTo ().
+}.
+
+#what we do here is really based on the datastructure we get we need another solution here
+{   ?part hir:results ?list. }
+<=
+{
+    ?part hir:golden_sample false.
+    ?part hir:partId ?pid.
+    ?part hir:measured ?measurement.
+    ?measurement hir:offsetSuggestion ?sug.
+    ?sug e:label ?ll.
+    ?part hir:measurements ?lis.
+    ?lis hir:alloffsets ().
+    ?list e:tuple hir:dummy.
+}.
+
+
+{   () hir:alloffsets (). }
+<=
+{
+}.
+
+{   ?list hir:alloffsets (). }
+<=
+{
+    ?list list:first ?fst.
+    ?fst log:includes {?m json:value ?ms}.
+    ?m hir:dimension ?d;
+       hir:offsetType ?type;
+       hir:offsetSuggestion ?sug;
+       hir:offsetValue ?value.
+    ?list list:rest ?rest.
+    ?rest hir:alloffsets ().
+}.
+
+
+
+
+#TODO: find a better solution here
+
+{
+    ?part hir:results ?list.
+}
+<=
+{
+    ?part hir:partId ?pid.
+    ?part hir:measured ?measurement.
+    ?measurement e:label ?l.
+    ?measurement hir:offsetSuggestion ?sug.
+    ?list e:tuple hir:dummy.
+}.
+
+
+{
+    ?user hir:worksWith ?part.
+    ?part hir:results ?list.
+}
+=>
+{
+
+    _:request http:methodName "GET";
+              tmpl:requestURI ("http://askTheWorker/showCheckResult");
+              http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
+              http:body { rest:json
+                  json:message "Here are the results of the offset check.";
+                  json:results ?list
+              }.
+    ?list hir:displayedTo ?user.
+}.
