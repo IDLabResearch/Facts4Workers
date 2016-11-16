@@ -1,7 +1,7 @@
 
 var assert = require('assert');
 var _ = require('lodash');
-var RESTdesc = require('RESTdesc').RESTdesc;
+var RESTdesc = require('restdesc').RESTdesc;
 var stubs = require('./HIR-stubs');
 
 describe('HIR offset + golden use case', function ()
