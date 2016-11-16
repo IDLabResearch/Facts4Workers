@@ -168,6 +168,15 @@
     _:measurement hir:value  _:m
 }.
 
+{
+    ?part hir:golden_sample false.
+    ?part hir:partId ?pid;
+          hir:measurements ().
+}
+=>
+{
+    ?part hir:results ().
+}.
 
 {
     ?part hir:golden_sample false.

@@ -4,7 +4,7 @@ var _ = require('lodash');
 var RESTdesc = require('RESTdesc').RESTdesc;
 var stubs = require('./HIR-stubs');
 
-describe('HIR offset use case', function ()
+describe('HIR offset + golden use case', function ()
 {
     var key = 'TESTKEY';
     var oldCall = null;

@@ -118,6 +118,14 @@
     _:measurement ofs:value  _:m
 }.
 
+{
+    ?part ofs:partId ?pid;
+          ofs:measurements ().
+}
+=>
+{
+    ?part ofs:results ().
+}.
 
 {
     ?part ofs:partId ?pid;
