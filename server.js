@@ -324,12 +324,12 @@ app.post('/semantic-search', function (req, res)
 {
     var fields = req.body.fields || ['name', 'desc', 'comment'];
     var weights = req.body.weights || [1, 1, 1];
-    var id = req.body.id;
+    var doc = req.body.doc;
     var synonyms = req.body.synonyms;
-    if (!id)
-        res.status(400).json({ error: "Input ID required. (Format is { 'id': '9b79279f-419e-45e0-80df-46ac707ff84b', 'fields': ['name', 'desc'], 'weights': [2, 1], 'synonyms': false}) "});
+    if (!doc)
+        res.status(400).json({ error: "Input doc required. (Format is { 'doc': { 'name': ...}, 'fields': ['name', 'desc'], 'weights': [2, 1], 'synonyms': false}) "});
     var search = synonyms ? synonymSearch : normalSearch;
-    search.more_like_this_extended(id, fields, weights, function (error, response, body)
+    search.more_like_this_extended(doc, fields, weights, function (error, response, body)
     {
         if (error)
             res.status(500).json(error);

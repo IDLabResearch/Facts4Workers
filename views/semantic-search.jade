@@ -17,8 +17,9 @@ html
             function submit(useSynonyms)
             {
                 $('#buttons').find('button').prop('disabled', true);
-                var id = $('#select').children(':selected').val();
-                var data = {id: id, fields: [], weights:[], synonyms: useSynonyms};
+                //var id = $('#select').children(':selected').val();
+                var doc = JSON.parse($('#entry').val());
+                var data = {doc: doc, fields: [], weights:[], synonyms: useSynonyms};
                 for (var i = 0; i < fields.length; ++i)
                 {
                     var field = fields[i];
