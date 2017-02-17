@@ -282,13 +282,15 @@ function handleNext (rest, req, res)
 // TODO: semantic search stuff, totally should clean up
 try
 {
-    var semanticsearch = require('semantic-search');
+    var SemanticSearch = require('semantic-search');
+    var normalSearch = new SemanticSearch('http://localhost:9200', 'defect');
+    var synonymSearch = new SemanticSearch('http://localhost:9200', 'defect_synonyms');
     var entries = JSON.parse(fs.readFileSync('data.json', 'utf8'));
-    update_index(false, function ()
+    update_index(normalSearch, false, function ()
     {
         // need empty function to prevent error when connection is refused
     });
-    update_index(true, function ()
+    update_index(synonymSearch, true, function ()
     {
         // need empty function to prevent error when connection is refused
     });
@@ -299,22 +301,21 @@ catch (e)
     console.error(e);
 }
 
-function update_index (synonyms, callback)
+function update_index (search, synonyms, callback)
 {
-    var idx = semanticsearch.IDX_NAME + (synonyms ? '_synonyms' : '');
-    semanticsearch.clear_index(idx, function ()
+    search.clear_index(function ()
     {
         if (synonyms)
-            semanticsearch.setup_index_synonyms(idx, bulk_add);
+            search.setup_index_synonyms(bulk_add);
         else
-            semanticsearch.setup_index(idx, bulk_add);
+            search.setup_index(bulk_add);
     });
 
     function bulk_add()
     {
-        semanticsearch.bulk_add(idx, entries, function ()
+        search.bulk_add(entries, function ()
         {
-            semanticsearch.flush(idx, callback);
+            search.flush(callback);
         });
     }
 }
@@ -327,7 +328,8 @@ app.post('/semantic-search', function (req, res)
     var synonyms = req.body.synonyms;
     if (!id)
         res.status(400).json({ error: "Input ID required. (Format is { 'id': '9b79279f-419e-45e0-80df-46ac707ff84b', 'fields': ['name', 'desc'], 'weights': [2, 1], 'synonyms': false}) "});
-    semanticsearch.more_like_this_extended(semanticsearch.IDX_NAME + (synonyms ? '_synonyms' : ''), id, fields, weights, function (error, response, body)
+    var search = synonyms ? synonymSearch : normalSearch;
+    search.more_like_this_extended(id, fields, weights, function (error, response, body)
     {
         if (error)
             res.status(500).json(error);
