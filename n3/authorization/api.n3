@@ -12,6 +12,7 @@
 @prefix e: <http://eulersharp.sourceforge.net/2003/03swap/log-rules#>.
 @prefix math: <http://www.w3.org/2000/10/swap/math#>.
 @prefix pred: <http://www.w3.org/2007/rif-builtin-predicate#>.
+@prefix imp: <http://f4w.restdesc.org/imported#> .
 
 {
     log:Truth
@@ -40,13 +41,15 @@
     ?user a auth:user;
           auth:username ?name;
           auth:password ?password.
-    ?user util:onlyOnce auth:id. 
+    ?user util:onlyOnce auth:id.
+
+    imp:AUTH_BB_URL imp:url ?url.
 }
 =>
 {
     ?user util:onlyOnceTest auth:id.
     _:request http:methodName "POST";
-              tmpl:requestURI ("https://auth.facts4.work/oauth/token");
+              tmpl:requestURI (?url "/oauth/token");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body { rest:json
                   json:username ?name;
@@ -82,13 +85,15 @@
     ?refresh_token auth:token ?token.
     ?token e:notLabel ?label.
     ?token util:onlyOnce auth:re.
-    _:x e:findall (?at {?at auth:valid true. } ()) 
+    _:x e:findall (?at {?at auth:valid true. } ()).
+
+    imp:AUTH_BB_URL imp:url ?url.
 }
 =>
 {
     ?token util:onlyOnceTest auth:re.
     _:request http:methodName "POST";
-              tmpl:requestURI ("https://auth.facts4.work/oauth/token");
+              tmpl:requestURI (?url "/oauth/token");
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body { rest:json
                   json:refresh_token ?token;

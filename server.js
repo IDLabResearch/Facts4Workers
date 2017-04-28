@@ -26,6 +26,27 @@ function relative (relativePath)
     return path.join(__dirname, relativePath);
 }
 
+// parse JSON configs to N3
+try
+{
+    fs.writeFileSync(relative('n3/imported.n3'), '@prefix : <http://f4w.restdesc.org/imported#> .\n\n');
+    var files = fs.readdirSync(relative('n3'));
+    for (var i = 0; i < files.length; ++i)
+    {
+        var fileName = files[i];
+        if (fileName.endsWith('.json'))
+        {
+            var json = JSON.parse(fs.readFileSync(relative('n3/' + fileName)));
+            for (var key in json)
+            {
+                var subject = '<http://f4w.restdesc.org/imported#' + key.replace(/[>\\ ]/g, ' ') +'>';
+                fs.appendFileSync(relative('n3/imported.n3'), subject + ' :url ' + '"' + json[key] + '" .\n');
+            }
+        }
+    }
+}
+catch (e) { console.error(e); }
+
 // CORS
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -92,6 +113,7 @@ app.use('/demo/n3', serveIndex(relative('n3'), {icons: true, view: 'details'}));
 // TODO: more generic way to load all files?
 var rulePaths = [
     'n3/util.n3',
+    'n3/imported.n3',
     //'n3/calibration/api1.n3',
     //'n3/calibration/api2.n3',
     //'n3/calibration/extra-rules.n3',

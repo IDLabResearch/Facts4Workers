@@ -11,6 +11,7 @@
 @prefix prolog: <http://eulersharp.sourceforge.net/2003/03swap/prolog#>.
 @prefix list: <http://www.w3.org/2000/10/swap/list#>.
 @prefix json: <http://restdesc.org/json#>.
+@prefix imp: <http://f4w.restdesc.org/imported#> .
 
 
 #get parts
@@ -20,14 +21,16 @@
     ?user auth:refresh_token ?token2.
 #this is to make sure that the rule does not get fired again if I have a new access token. 
 #I think we could add that automatically to the rules so that the user does not need to do it
-    ?user util:onlyOnce hir:first. 
+    ?user util:onlyOnce hir:first.
+
+    imp:OFFSUG_BB_URL imp:url ?url.
 }
 =>
 {
     ?user util:onlyOnceTest hir:first.
     _:request http:methodName "GET";
               rest:check ?token2;
-              tmpl:requestURI ("https://staging.facts4.work/staging/offsug/api/v1/parts?access_token=" ?token);
+              tmpl:requestURI (?url "/api/v1/parts?access_token=" ?token);
               http:resp [
                   http:body _:list
               ].
@@ -72,14 +75,16 @@
     ?part hir:partId ?id.
 #this is to make sure that the rule does not get fired again if I have a new access token. 
 #I think we could add that automatically to the rules so that the user does not need to do it
-    (?user ?id) util:onlyOnce hir:rule2. 
+    (?user ?id) util:onlyOnce hir:rule2.
+
+    imp:OFFSUG_BB_URL imp:url ?url.
 }
 =>
 {
     (?user ?id) util:onlyOnceTest hir:rule2.
     _:request http:methodName "GET";
               rest:check ?token2;
-              tmpl:requestURI ("https://staging.facts4.work/staging/offsug/api/v1/parts/" ?id "?access_token=" ?token);
+              tmpl:requestURI (?url "/api/v1/parts/" ?id "?access_token=" ?token);
               http:resp [
                   http:body _:list
               ].
@@ -124,13 +129,15 @@
     ?user auth:access_token ?token.
     ?user auth:refresh_token ?token2.
     (?pid ?n ?m) util:onlyOnce hir:rule_patch_golden.
+
+    imp:OFFSUG_BB_URL imp:url ?url.
 }
 =>
 {
     (?pid ?n ?m) util:onlyOnceTest hir:rule_patch_golden.
 
     _:request http:methodName "PATCH";
-              tmpl:requestURI ("https://staging.facts4.work/staging/offsug/api/v1/parts/" ?pid "?access_token=" ?token);
+              tmpl:requestURI (?url "/api/v1/parts/" ?pid "?access_token=" ?token);
               http:headers ([ http:fieldName "Content-Type" ; http:fieldValue "application/json" ]);
               http:body { rest:json
                   json:golden_sample ?measurements
@@ -218,13 +225,15 @@
     ?user auth:access_token ?token.
     ?user auth:refresh_token ?token2.
     (?pid ?n ?m) util:onlyOnce hir:rule3.
+
+    imp:OFFSUG_BB_URL imp:url ?url.
 }
 =>
 {
     (?pid ?n ?m) util:onlyOnceTest hir:rule3.
 
     _:request http:methodName "GET";
-              tmpl:requestURI ("https://staging.facts4.work/staging/offsug/api/v1/offsets?part_id=" ?pid "&dimension_id=" ?n "&value=" ?m "&access_token=" ?token);
+              tmpl:requestURI (?url "/api/v1/offsets?part_id=" ?pid "&dimension_id=" ?n "&value=" ?m "&access_token=" ?token);
               http:resp [
                   http:body _:body
               ].
