@@ -9,12 +9,16 @@ var fs = require('fs');
 var stream = require('logrotate-stream');
 
 var args = require('minimist')(process.argv.slice(2));
-if (args.h || args.help || args._.length > 0 || !_.isEmpty(_.omit(args, ['_', 'p', 'r'])))
+if (args.h || args.help || args._.length > 0 || !_.isEmpty(_.omit(args, ['_', 'p', 'r', 'unsafe'])))
 {
-    console.error('usage: node demo.js [-p port] [-r redis_url] [--help]');
+    console.error('usage: node demo.js [-p port] [-r redis_url] [--unsafe] [--help]');
     return process.exit((args.h || args.help) ? 0 : 1);
 }
 var port = args.p || 3000;
+
+// this is obiously not a really good idea
+if (args.unsafe)
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 var cacheURL = args.r || 'redis://localhost:6379';
 
