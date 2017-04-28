@@ -27,7 +27,7 @@
     ?user util:onlyOnceTest ofs:first.
     _:request http:methodName "GET";
               rest:check ?token2;
-              tmpl:requestURI ("https://offsug.hir.facts4.work/api/v1/parts?access_token=" ?token);
+              tmpl:requestURI ("https://staging.facts4.work/staging/offsug/api/v1/parts?access_token=" ?token);
               http:resp [
                   http:body _:list
               ].
@@ -79,7 +79,7 @@
     (?user ?id) util:onlyOnceTest ofs:rule2.
     _:request http:methodName "GET";
               rest:check ?token2;
-              tmpl:requestURI ("https://offsug.hir.facts4.work/api/v1/parts/" ?id "?access_token=" ?token);
+              tmpl:requestURI ("https://staging.facts4.work/staging/offsug/api/v1/parts/" ?id "?access_token=" ?token);
               http:resp [
                   http:body _:list
               ].
@@ -168,7 +168,7 @@
     (?pid ?n ?m) util:onlyOnceTest ofs:rule3.
 
     _:request http:methodName "GET";
-              tmpl:requestURI ("https://offsug.hir.facts4.work/api/v1/offsets?part_id=" ?pid "&dimension_id=" ?n "&value=" ?m "&access_token=" ?token);
+              tmpl:requestURI ("https://staging.facts4.work/staging/offsug/api/v1/offsets?part_id=" ?pid "&dimension_id=" ?n "&value=" ?m "&access_token=" ?token);
               http:resp [
                   http:body _:body
               ].
