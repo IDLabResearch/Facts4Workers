@@ -16,7 +16,7 @@ if (args.h || args.help || args._.length > 0 || !_.isEmpty(_.omit(args, ['_', 'p
 }
 var port = args.p || 3000;
 
-// this is obiously not a really good idea
+// this is obviously not a really good idea
 if (args.unsafe)
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
