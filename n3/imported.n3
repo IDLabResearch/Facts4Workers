@@ -1,0 +1,4 @@
+@prefix : <http://f4w.restdesc.org/imported#> .
+
+<http://f4w.restdesc.org/imported#AUTH_BB_URL> :url "https://auth.facts4.work" .
+<http://f4w.restdesc.org/imported#OFFSUG_BB_URL> :url "https://staging.facts4.work/staging/offsug" .
